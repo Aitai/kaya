@@ -35,7 +35,7 @@ base64 = "0.22"
 # Enable LTO for smaller binary (thin is faster than full LTO)
 lto = "thin"
 # Strip debug info for smaller binary
-strip = true
+strip = false
 # Use multiple codegen units for faster parallel compilation
 # Trade-off: slightly larger binary but much faster builds
 codegen-units = 16
