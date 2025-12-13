@@ -6,9 +6,14 @@
 
 **A modern, elegant Go (Baduk/Weiqi) game application**
 
+[![GitHub Release](https://img.shields.io/github/v/release/kaya-go/kaya)](https://github.com/kaya-go/kaya/releases/latest)
 [![CI](https://github.com/kaya-go/kaya/workflows/CI/badge.svg)](https://github.com/kaya-go/kaya/actions)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Tauri](https://img.shields.io/badge/Tauri-v2-blue.svg)](https://tauri.app)
+
+[![React](https://img.shields.io/badge/React-18-61dafb.svg?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-24c8d8.svg?logo=tauri&logoColor=white)](https://tauri.app)
+[![Bun](https://img.shields.io/badge/Bun-1.x-f9f1e1.svg?logo=bun&logoColor=black)](https://bun.sh)
 
 [Download](https://github.com/kaya-go/kaya/releases) • [Web App (Stable)](https://kaya-go.github.io/kaya) • [Web App (Next)](https://kaya-go.github.io/kaya/next/) • [Documentation](docs/USER_GUIDE.md)
 
