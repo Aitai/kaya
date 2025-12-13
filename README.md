@@ -12,6 +12,8 @@
 
 [Download](https://github.com/kaya-go/kaya/releases) • [Web App (Stable)](https://kaya-go.github.io/kaya) • [Web App (Next)](https://kaya-go.github.io/kaya/next/) • [Documentation](docs/USER_GUIDE.md)
 
+<img src="docs/images/screenshot.jpg" alt="Kaya Screenshot" width="800">
+
 </div>
 
 ---
@@ -75,7 +77,6 @@ We welcome contributions! Whether it's bug reports, feature requests, or code co
 ### For Developers
 
 ````bash
-```bash
 git clone https://github.com/kaya-go/kaya.git
 cd kaya
 
