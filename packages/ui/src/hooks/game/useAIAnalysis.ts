@@ -263,8 +263,9 @@ export function useAIAnalysis({ currentBoard }: UseAIAnalysisProps) {
           setSelectedModelIdState(savedSelectedId);
         } else {
           // Default to strongest model if downloaded, otherwise first downloaded
-          const defaultModel = library.find(m => m.predefinedId === 'strongest' && m.isDownloaded)
-            || library.find(m => m.isDownloaded);
+          const defaultModel =
+            library.find(m => m.predefinedId === 'strongest' && m.isDownloaded) ||
+            library.find(m => m.isDownloaded);
           if (defaultModel) {
             setSelectedModelIdState(defaultModel.id);
             await saveSelectedModelId(defaultModel.id);

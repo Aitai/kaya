@@ -166,7 +166,9 @@ export const AIAnalysisConfig: React.FC = () => {
                       <div className="model-library-name">
                         {model.name}
                         {model.recommended && (
-                          <span className="model-recommended-badge">{t('aiConfig.recommended')}</span>
+                          <span className="model-recommended-badge">
+                            {t('aiConfig.recommended')}
+                          </span>
                         )}
                         {model.isDefault && (
                           <span className="model-default-badge">{t('aiConfig.default')}</span>
