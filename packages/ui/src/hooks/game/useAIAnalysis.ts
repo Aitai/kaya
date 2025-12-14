@@ -26,31 +26,39 @@ const PREDEFINED_MODELS: Array<{
   description: string;
   url: string;
   size: string;
-  predefinedId: 'best' | 'latest' | 'quantized';
+  predefinedId: string;
 }> = [
   {
-    id: 'katago-best',
-    name: 'Best Performance',
-    description: 'Strongest model, recommended for serious analysis',
+    id: 'katago-strongest',
+    name: 'kata1-b28c512nbt-s11165M',
+    description: 'Strongest network',
     url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.onnx',
     size: '~700 MB',
-    predefinedId: 'best',
+    predefinedId: 'strongest',
+  },
+  {
+    id: 'katago-strongest-quant',
+    name: 'kata1-b28c512nbt-s11165M (quantized)',
+    description: 'Strongest network, reduced memory footprint',
+    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.quant.onnx',
+    size: '~180 MB',
+    predefinedId: 'strongest-quant',
   },
   {
     id: 'katago-latest',
-    name: 'Latest',
-    description: 'Most recent KataGo network release',
+    name: 'kata1-b28c512nbt-s12043M',
+    description: 'Latest checkpoint (Dec 2025)',
     url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-s12043015936-d5616446734/kata1-b28c512nbt-s12043015936-d5616446734.onnx',
     size: '~700 MB',
     predefinedId: 'latest',
   },
   {
-    id: 'katago-quantized',
-    name: 'Quantized (Smaller)',
-    description: 'Reduced precision, less memory, faster but less accurate',
-    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.quant.onnx',
+    id: 'katago-latest-quant',
+    name: 'kata1-b28c512nbt-s12043M (quantized)',
+    description: 'Latest checkpoint (Dec 2025), reduced memory footprint',
+    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-s12043015936-d5616446734/kata1-b28c512nbt-s12043015936-d5616446734.quant.onnx',
     size: '~180 MB',
-    predefinedId: 'quantized',
+    predefinedId: 'latest-quant',
   },
 ];
 
@@ -248,11 +256,12 @@ export function useAIAnalysis({ currentBoard }: UseAIAnalysisProps) {
         if (savedSelectedId && library.some(m => m.id === savedSelectedId && m.isDownloaded)) {
           setSelectedModelIdState(savedSelectedId);
         } else {
-          // Default to best performance model if downloaded, otherwise null
-          const bestModel = library.find(m => m.predefinedId === 'best' && m.isDownloaded);
-          if (bestModel) {
-            setSelectedModelIdState(bestModel.id);
-            await saveSelectedModelId(bestModel.id);
+          // Default to strongest model if downloaded, otherwise first downloaded
+          const defaultModel = library.find(m => m.predefinedId === 'strongest' && m.isDownloaded)
+            || library.find(m => m.isDownloaded);
+          if (defaultModel) {
+            setSelectedModelIdState(defaultModel.id);
+            await saveSelectedModelId(defaultModel.id);
           }
         }
 
