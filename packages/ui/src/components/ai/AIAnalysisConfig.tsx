@@ -165,6 +165,12 @@ export const AIAnalysisConfig: React.FC = () => {
                     <div className="model-library-info">
                       <div className="model-library-name">
                         {model.name}
+                        {model.recommended && (
+                          <span className="model-recommended-badge">{t('aiConfig.recommended')}</span>
+                        )}
+                        {model.isDefault && (
+                          <span className="model-default-badge">{t('aiConfig.default')}</span>
+                        )}
                         {selectedModelId === model.id && (
                           <span className="model-active-badge">
                             <LuCheck size={12} /> {t('aiConfig.active')}

@@ -91,6 +91,8 @@
     "modelLibrary": "モデルライブラリ",
     "modelLibraryDescription": "AI分析に使用するモデルを選択。ダウンロードをクリックして開始。",
     "active": "有効",
+    "recommended": "推奨",
+    "default": "デフォルト",
     "downloadModel": "モデルをダウンロード",
     "deleteModel": "モデルを削除",
     "uploadCustomModel": "カスタムモデルをアップロード",

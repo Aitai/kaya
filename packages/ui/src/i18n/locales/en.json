@@ -91,6 +91,8 @@
     "modelLibrary": "Model Library",
     "modelLibraryDescription": "Select a model for AI analysis. Click download to get started.",
     "active": "Active",
+    "recommended": "Recommended",
+    "default": "Default",
     "downloadModel": "Download model",
     "deleteModel": "Delete model to free space",
     "uploadCustomModel": "Upload Custom Model",

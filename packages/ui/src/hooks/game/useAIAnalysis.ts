@@ -27,6 +27,8 @@ const PREDEFINED_MODELS: Array<{
   url: string;
   size: string;
   predefinedId: string;
+  recommended?: boolean;
+  isDefault?: boolean;
 }> = [
   {
     id: 'katago-strongest',
@@ -35,6 +37,8 @@ const PREDEFINED_MODELS: Array<{
     url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.onnx',
     size: '~700 MB',
     predefinedId: 'strongest',
+    recommended: true,
+    isDefault: true,
   },
   {
     id: 'katago-strongest-quant',
@@ -227,6 +231,8 @@ export function useAIAnalysis({ currentBoard }: UseAIAnalysisProps) {
             description: preset.description,
             url: preset.url,
             predefinedId: preset.predefinedId,
+            recommended: preset.recommended,
+            isDefault: preset.isDefault,
             isDownloaded,
             size: storedMeta?.size,
             date: storedMeta?.date,

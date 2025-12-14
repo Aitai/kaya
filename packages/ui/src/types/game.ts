@@ -69,6 +69,10 @@ export interface AIModelEntry {
   isUserModel?: boolean;
   /** Predefined model ID if applicable */
   predefinedId?: PredefinedModelId;
+  /** Whether this is the recommended model */
+  recommended?: boolean;
+  /** Whether this is the default model */
+  isDefault?: boolean;
 }
 
 export interface GameTreeContextValue {

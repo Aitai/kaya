@@ -91,6 +91,8 @@
     "modelLibrary": "Libreria modelli",
     "modelLibraryDescription": "Seleziona un modello per l'analisi IA. Clicca su scarica per iniziare.",
     "active": "Attivo",
+    "recommended": "Consigliato",
+    "default": "Predefinito",
     "downloadModel": "Scarica modello",
     "deleteModel": "Elimina modello",
     "uploadCustomModel": "Carica modello personalizzato",

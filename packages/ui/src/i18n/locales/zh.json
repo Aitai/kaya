@@ -91,6 +91,8 @@
     "modelLibrary": "模型库",
     "modelLibraryDescription": "选择用于 AI 分析的模型。点击下载开始使用。",
     "active": "已激活",
+    "recommended": "推荐",
+    "default": "默认",
     "downloadModel": "下载模型",
     "deleteModel": "删除模型以释放空间",
     "uploadCustomModel": "上传自定义模型",

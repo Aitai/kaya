@@ -195,6 +195,30 @@
   border-radius: 4px;
 }
 
+.model-recommended-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  background-color: #22c55e;
+  color: white;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.model-default-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  background-color: var(--text-secondary, #666);
+  color: white;
+  border-radius: 4px;
+}
+
 .model-library-meta {
   display: flex;
   flex-wrap: wrap;

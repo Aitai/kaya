@@ -91,6 +91,8 @@
     "modelLibrary": "Modellbibliothek",
     "modelLibraryDescription": "Wählen Sie ein Modell für die KI-Analyse. Klicken Sie auf Herunterladen, um zu beginnen.",
     "active": "Aktiv",
+    "recommended": "Empfohlen",
+    "default": "Standard",
     "downloadModel": "Modell herunterladen",
     "deleteModel": "Modell löschen",
     "uploadCustomModel": "Eigenes Modell hochladen",
