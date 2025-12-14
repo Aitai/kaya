@@ -43,7 +43,7 @@ export interface AIModel {
 }
 
 /** Predefined model identifiers */
-export type PredefinedModelId = 'standard' | 'quantized';
+export type PredefinedModelId = 'best' | 'latest' | 'quantized';
 
 /** An entry in the model library (either predefined or user-uploaded) */
 export interface AIModelEntry {

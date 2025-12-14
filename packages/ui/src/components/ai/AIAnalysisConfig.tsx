@@ -11,7 +11,6 @@ import {
   LuDownload,
   LuCheck,
   LuLoader,
-  LuExternalLink,
 } from 'react-icons/lu';
 import { useGameTree } from '../../contexts/GameTreeContext';
 import { useToast } from '../ui/Toast';
@@ -215,43 +214,6 @@ export const AIAnalysisConfig: React.FC = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Download Links Note */}
-              <div className="config-note" style={{ marginTop: '12px', fontSize: '0.75rem' }}>
-                <strong>{t('aiConfig.downloadNote')}</strong>
-                <div
-                  style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '4px' }}
-                >
-                  <a
-                    href="https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.onnx"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      color: 'var(--accent-color, #007bff)',
-                    }}
-                  >
-                    <LuExternalLink size={12} />
-                    {t('aiConfig.standardModel')}
-                  </a>
-                  <a
-                    href="https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.quant.onnx"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      color: 'var(--accent-color, #007bff)',
-                    }}
-                  >
-                    <LuExternalLink size={12} />
-                    {t('aiConfig.quantizedModel')}
-                  </a>
-                </div>
               </div>
 
               {/* Upload Button */}
