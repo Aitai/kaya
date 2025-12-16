@@ -1,5 +1,5 @@
 import { AnalysisResult, MoveSuggestion } from '@kaya/ai-engine';
-import { SGFNode, SGFNodeData, parseVertex, sgfToVertex } from '@kaya/sgf';
+import { SGFNode, SGFNodeData, sgfToVertex } from '@kaya/sgf';
 import { GameTreeNode } from '@kaya/gametree';
 import { GoBoard, Sign } from '@kaya/goboard';
 import { generateAnalysisCacheKey, AnalysisHistoryItem } from './aiAnalysis';
@@ -186,7 +186,7 @@ export function injectAnalysisToTree(
 
   // Handle moves (including pass moves)
   if (node.data.B) {
-    const vertex = parseVertex(node.data.B[0]);
+    const vertex = sgfToVertex(node.data.B[0]);
     if (vertex) {
       // Regular move - use consistent options with updateAnalysisState
       try {
@@ -196,12 +196,12 @@ export function injectAnalysisToTree(
         // Ignore invalid moves
       }
     } else if (node.data.B[0] !== undefined) {
-      // Pass move (empty string -> null from parseVertex)
+      // Pass move (empty string -> null from sgfToVertex)
       newHistory.push({ color: 1, x: -1, y: -1 });
     }
     color = 1;
   } else if (node.data.W) {
-    const vertex = parseVertex(node.data.W[0]);
+    const vertex = sgfToVertex(node.data.W[0]);
     if (vertex) {
       // Regular move - use consistent options with updateAnalysisState
       try {
@@ -211,7 +211,7 @@ export function injectAnalysisToTree(
         // Ignore invalid moves
       }
     } else if (node.data.W[0] !== undefined) {
-      // Pass move (empty string -> null from parseVertex)
+      // Pass move (empty string -> null from sgfToVertex)
       newHistory.push({ color: -1, x: -1, y: -1 });
     }
     color = -1;
@@ -313,7 +313,7 @@ export function extractAnalysisFromTree(
   }
 
   if (node.data.B) {
-    const vertex = parseVertex(node.data.B[0]);
+    const vertex = sgfToVertex(node.data.B[0]);
     if (vertex) {
       // Regular move - use consistent options with updateAnalysisState
       try {
@@ -323,12 +323,12 @@ export function extractAnalysisFromTree(
         // Ignore invalid moves
       }
     } else if (node.data.B[0] !== undefined) {
-      // Pass move (empty string -> null from parseVertex)
+      // Pass move (empty string -> null from sgfToVertex)
       newHistory.push({ color: 1, x: -1, y: -1 });
     }
     color = 1;
   } else if (node.data.W) {
-    const vertex = parseVertex(node.data.W[0]);
+    const vertex = sgfToVertex(node.data.W[0]);
     if (vertex) {
       // Regular move - use consistent options with updateAnalysisState
       try {
@@ -338,7 +338,7 @@ export function extractAnalysisFromTree(
         // Ignore invalid moves
       }
     } else if (node.data.W[0] !== undefined) {
-      // Pass move (empty string -> null from parseVertex)
+      // Pass move (empty string -> null from sgfToVertex)
       newHistory.push({ color: -1, x: -1, y: -1 });
     }
     color = -1;

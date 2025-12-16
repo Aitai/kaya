@@ -110,6 +110,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     showTopMoves,
     toggleTopMoves,
     setIsDirty,
+    isLoadingSGF,
   } = useGameTree();
 
   const [engine, setEngine] = useState<Engine | null>(null);
@@ -197,10 +198,15 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Track previous komi to detect changes
   const prevKomiRef = useRef<number | undefined>(undefined);
+  // Track previous loading state to detect when loading just finished
+  const prevLoadingRef = useRef<boolean>(false);
 
   // Clear cache when komi changes (analysis results depend on komi)
+  // Skip during SGF loading and right after loading finishes
   useEffect(() => {
     const currentKomi = gameInfo?.komi;
+    const wasLoading = prevLoadingRef.current;
+    prevLoadingRef.current = isLoadingSGF;
 
     // Skip on initial mount
     if (prevKomiRef.current === undefined) {
@@ -208,14 +214,27 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       return;
     }
 
-    // Only clear if komi actually changed
+    // Skip during SGF loading - analysis was just extracted from the file
+    if (isLoadingSGF) {
+      prevKomiRef.current = currentKomi;
+      return;
+    }
+
+    // Skip if we just finished loading (wasLoading was true, now false)
+    // This prevents clearing the cache when the new game's komi differs from the old game's
+    if (wasLoading && !isLoadingSGF) {
+      prevKomiRef.current = currentKomi;
+      return;
+    }
+
+    // Only clear if komi actually changed (user edited komi within the same game)
     if (prevKomiRef.current !== currentKomi) {
       analysisCache.current.clear();
       updateAnalysisCacheSize();
       setAnalysisResult(null);
       prevKomiRef.current = currentKomi;
     }
-  }, [gameInfo?.komi, analysisCache, updateAnalysisCacheSize, setAnalysisResult]);
+  }, [gameInfo?.komi, analysisCache, updateAnalysisCacheSize, setAnalysisResult, isLoadingSGF]);
 
   // Manage engine lifecycle
   useEffect(() => {
