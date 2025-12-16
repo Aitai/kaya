@@ -29,9 +29,11 @@ export function extractGameNameFromSGF(sgfContent: string): string {
  * - For OGS URLs: uses ogs-{gameId}.sgf
  * - For SGF content: extracts game name, or falls back to 'untitled.sgf'
  */
-export function getFilenameForSGF(
-  result: { sgf: string; source: 'direct' | 'ogs'; gameId?: string }
-): string {
+export function getFilenameForSGF(result: {
+  sgf: string;
+  source: 'direct' | 'ogs';
+  gameId?: string;
+}): string {
   if (result.source === 'ogs' && result.gameId) {
     return `ogs-${result.gameId}.sgf`;
   }

@@ -89,6 +89,7 @@ export type { VersionData } from './components/layout/StatusBar';
 // File utilities
 export { saveFile, isTauriApp, setTauriSaveAPI } from './services/fileSave';
 export type { TauriSaveAPI } from './services/fileSave';
+export { readClipboardText, writeClipboardText } from './services/clipboard';
 
 // Hooks
 export { useGameSounds } from './useGameSounds';

@@ -36,6 +36,7 @@ import { SaveToLibraryDialog } from '../dialogs/SaveToLibraryDialog';
 import { ToastContainer, useToast } from '../ui/Toast';
 import { saveFile, isTauriApp } from '../../services/fileSave';
 import { loadContentOrOGSUrl, getFilenameForSGF } from '../../services/ogsLoader';
+import { readClipboardText, writeClipboardText } from '../../services/clipboard';
 import { AIAnalysisConfig } from '../ai/AIAnalysisConfig';
 
 import type { VersionData } from './StatusBar';
@@ -349,7 +350,7 @@ export const Header: React.FC<HeaderProps> = ({
   const handleCopyClick = useCallback(async () => {
     try {
       const sgfContent = exportSGF();
-      await navigator.clipboard.writeText(sgfContent);
+      await writeClipboardText(sgfContent);
       showToast('SGF copied to clipboard!', 'success');
       triggerAutoSave();
     } catch (error) {
@@ -360,7 +361,7 @@ export const Header: React.FC<HeaderProps> = ({
   // Paste SGF from clipboard (with OGS URL support)
   const handlePasteClick = useCallback(async () => {
     try {
-      const content = await navigator.clipboard.readText();
+      const content = await readClipboardText();
       if (!content.trim()) {
         return;
       }

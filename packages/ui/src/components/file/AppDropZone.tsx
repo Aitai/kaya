@@ -14,6 +14,7 @@ import { useGameTree } from '../../contexts/GameTreeContext';
 import { useLibrary } from '../../contexts/LibraryContext';
 import { useTauriDrag } from '../../contexts/TauriDragContext';
 import { loadContentOrOGSUrl, isOGSUrl, getFilenameForSGF } from '../../services/ogsLoader';
+import { readClipboardText } from '../../services/clipboard';
 import './AppDropZone.css';
 
 interface AppDropZoneProps {
@@ -305,9 +306,12 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
           return;
         }
 
+        // Prevent default browser paste behavior immediately to avoid permission popups
+        e.preventDefault();
+
         try {
-          // Read clipboard using async API
-          const clipboardText = await navigator.clipboard.readText();
+          // Read clipboard using our utility (handles Tauri vs browser)
+          const clipboardText = await readClipboardText();
           if (!clipboardText?.trim()) return;
 
           const trimmed = clipboardText.trim();
@@ -319,9 +323,6 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
           if (!looksLikeSGF && !looksLikeOGSUrl) {
             return;
           }
-
-          // Prevent default browser paste behavior
-          e.preventDefault();
 
           // Check for unsaved changes first
           const canProceed = await checkUnsavedChanges();
