@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - 2025-12-16
+
+### <!-- 0 -->🚀 Features
+
+- *(ui)* Create new game on paste with game name as filename ([8be79df](https://github.com/kaya-go/kaya/commit/8be79df1cbec73d609142bfe0faeacbb346d9ff8))
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(desktop)* Use tauri clipboard plugin to avoid paste permission popup ([15de470](https://github.com/kaya-go/kaya/commit/15de4709ef802f3e81c1cb6eea311a0c497ccccf))
+
+- Preserve analysis cache when loading SGF with embedded analysis ([9af0088](https://github.com/kaya-go/kaya/commit/9af0088874345c2492d7a92969a33936d59afd19))
+
+- *(ai-engine)* Always display black win rate in analysis bar ([1bff38f](https://github.com/kaya-go/kaya/commit/1bff38f8ce7317f1ce670605960e7bce1ed783a7))
+
 ## [0.1.2] - 2025-12-14
 
 ### <!-- 0 -->🚀 Features
@@ -17,6 +31,10 @@ All notable changes to this project will be documented in this file.
 - *(ai)* Use neutral model descriptions with 4 variants ([ed3f591](https://github.com/kaya-go/kaya/commit/ed3f591dfecbb2b4baf778f3b1743afefa3848d7))
 
 - *(ai)* Format recommended badge rendering and improve default model selection logic ([a818916](https://github.com/kaya-go/kaya/commit/a8189161d72d3f982a1505fc45a3f0ce396d5cd7))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.1.2 ([c44393b](https://github.com/kaya-go/kaya/commit/c44393b85ecc337627bfa9cf3c7eb41615f65eb3))
 
 ## [0.1.1] - 2025-12-13
 
