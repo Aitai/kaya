@@ -18,7 +18,7 @@ export interface MoveSuggestion {
 export interface AnalysisResult {
   /** Ordered list of move suggestions (best moves first) */
   moveSuggestions: MoveSuggestion[];
-  /** Overall win rate for the current player (0.0 to 1.0) */
+  /** Black's win rate (0.0 to 1.0), always from Black's perspective */
   winRate: number;
   /** Overall score lead estimate (Positive = Black leads, Negative = White leads) */
   scoreLead: number;

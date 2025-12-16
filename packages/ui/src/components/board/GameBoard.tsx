@@ -809,11 +809,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
                       {formatWinRate(analysisResult?.winRate)}
                     </span>
                     <span className="ai-analysis-summary__metric-label">
-                      {analysisResult?.currentTurn
-                        ? analysisResult.currentTurn === 'B'
-                          ? t('analysisBar.blackWinRate')
-                          : t('analysisBar.whiteWinRate')
-                        : t('analysisBar.winRate')}
+                      {t('analysisBar.blackWinRate')}
                     </span>
                   </div>
 
