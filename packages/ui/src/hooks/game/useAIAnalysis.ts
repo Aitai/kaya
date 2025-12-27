@@ -19,6 +19,12 @@ import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 
 const AI_SETTINGS_STORAGE_KEY = 'kaya-ai-settings';
 
+// Hugging Face model repository commit hash for version pinning
+// Use a specific commit to ensure reproducible model downloads
+// Update this when releasing new model versions
+const HF_MODEL_COMMIT = 'b1ca31fd8dc472c8619bab4f31d0e3cf2a63c694'; // Release 0.1.0
+const HF_REPO_BASE = `https://huggingface.co/kaya-go/kaya/resolve/${HF_MODEL_COMMIT}`;
+
 // Predefined models - hosted on Hugging Face for reliable CORS support
 const PREDEFINED_MODELS: Array<{
   id: string;
@@ -34,7 +40,7 @@ const PREDEFINED_MODELS: Array<{
     id: 'katago-strongest',
     name: 'kata1-b28c512nbt-s11165M',
     description: 'Strongest network',
-    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.onnx',
+    url: `${HF_REPO_BASE}/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.onnx`,
     size: '~700 MB',
     predefinedId: 'strongest',
     recommended: true,
@@ -44,7 +50,7 @@ const PREDEFINED_MODELS: Array<{
     id: 'katago-strongest-quant',
     name: 'kata1-b28c512nbt-s11165M (quantized)',
     description: 'Strongest network, reduced memory footprint',
-    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.quant.onnx',
+    url: `${HF_REPO_BASE}/kata1-b28c512nbt-adam-s11165M-d5387M/kata1-b28c512nbt-adam-s11165M-d5387M.quant.onnx`,
     size: '~180 MB',
     predefinedId: 'strongest-quant',
   },
@@ -52,7 +58,7 @@ const PREDEFINED_MODELS: Array<{
     id: 'katago-latest',
     name: 'kata1-b28c512nbt-s12043M',
     description: 'Latest checkpoint (Dec 2025)',
-    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-s12043015936-d5616446734/kata1-b28c512nbt-s12043015936-d5616446734.onnx',
+    url: `${HF_REPO_BASE}/kata1-b28c512nbt-s12043015936-d5616446734/kata1-b28c512nbt-s12043015936-d5616446734.onnx`,
     size: '~700 MB',
     predefinedId: 'latest',
   },
@@ -60,7 +66,7 @@ const PREDEFINED_MODELS: Array<{
     id: 'katago-latest-quant',
     name: 'kata1-b28c512nbt-s12043M (quantized)',
     description: 'Latest checkpoint (Dec 2025), reduced memory footprint',
-    url: 'https://huggingface.co/kaya-go/kaya/resolve/main/kata1-b28c512nbt-s12043015936-d5616446734/kata1-b28c512nbt-s12043015936-d5616446734.quant.onnx',
+    url: `${HF_REPO_BASE}/kata1-b28c512nbt-s12043015936-d5616446734/kata1-b28c512nbt-s12043015936-d5616446734.quant.onnx`,
     size: '~180 MB',
     predefinedId: 'latest-quant',
   },
