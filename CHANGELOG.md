@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.4] - 2025-12-27
+
+### <!-- 0 -->🚀 Features
+
+- *(ai)* Pin katago models to specific hugging face commit hash ([47ff9bc](https://github.com/kaya-go/kaya/commit/47ff9bc144d68bd083e01f3df52c4e1f7bc6fc30))
+
 ## [0.1.3] - 2025-12-16
 
 ### <!-- 0 -->🚀 Features
@@ -15,6 +21,10 @@ All notable changes to this project will be documented in this file.
 - Preserve analysis cache when loading SGF with embedded analysis ([9af0088](https://github.com/kaya-go/kaya/commit/9af0088874345c2492d7a92969a33936d59afd19))
 
 - *(ai-engine)* Always display black win rate in analysis bar ([1bff38f](https://github.com/kaya-go/kaya/commit/1bff38f8ce7317f1ce670605960e7bce1ed783a7))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.1.3 ([6376203](https://github.com/kaya-go/kaya/commit/63762035e74558f656e79731f9fb48af49340484))
 
 ## [0.1.2] - 2025-12-14
 
