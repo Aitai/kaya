@@ -1,22 +1,55 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { ask, message } from '@tauri-apps/plugin-dialog';
 import { listen } from '@tauri-apps/api/event';
+import { useTranslation } from '@kaya/ui';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import './Updater.css';
 
+// Mock update data for DEV mode testing
+const DEV_MOCK_UPDATE = {
+  available: true,
+  version: '99.0.0-dev',
+  body: `## What's New in 99.0.0
+
+### ✨ Features
+- **AI Analysis Improvements**: Enhanced move suggestions with better accuracy
+- **New board themes**: Added 5 new beautiful board textures
+- **Performance boost**: 30% faster game tree navigation
+
+### 🐛 Bug Fixes
+- Fixed issue with SGF export on large games
+- Resolved dark mode flickering on startup
+- Fixed keyboard shortcuts not working in some dialogs
+
+### 📝 Notes
+This is a **mock update** for testing the updater UI in development mode.`,
+  downloadAndInstall: async () => {
+    // Simulate download progress
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  },
+} as unknown as Update;
+
 export function Updater() {
-  const { t, ready } = useTranslation();
+  const { t } = useTranslation();
   const [update, setUpdate] = useState<Update | null>(null);
   const [status, setStatus] = useState<'idle' | 'available' | 'installing'>('idle');
+  const [devModeTriggered, setDevModeTriggered] = useState(false);
 
   const checkForUpdates = useCallback(
     async (silent = false) => {
       try {
+        // In DEV mode, show mock update dialog for testing UI
+        if (import.meta.env.DEV && !silent) {
+          setUpdate(DEV_MOCK_UPDATE);
+          setStatus('available');
+          setDevModeTriggered(true);
+          return;
+        }
+
         const updateResult = await check();
         if (updateResult?.available) {
           const skippedVersion = localStorage.getItem('kaya-skipped-version');
@@ -59,18 +92,33 @@ export function Updater() {
     };
   }, [checkForUpdates]);
 
-  // Auto-check on startup (silent) - wait for translations to be ready
+  // Auto-check on startup (silent) - only in production
   useEffect(() => {
-    if (!import.meta.env.DEV && ready) {
+    if (!import.meta.env.DEV) {
       checkForUpdates(true);
     }
-  }, [ready, checkForUpdates]);
+  }, [checkForUpdates]);
 
   const handleUpdate = async () => {
     if (!update) return;
     setStatus('installing');
     try {
       await update.downloadAndInstall();
+
+      // In DEV mode, just show a message instead of actually restarting
+      if (devModeTriggered) {
+        await message(
+          'DEV MODE: Update "installed" successfully!\n\nIn production, this would prompt for restart.',
+          {
+            title: 'DEV: Update Complete',
+            kind: 'info',
+          }
+        );
+        setStatus('idle');
+        setUpdate(null);
+        setDevModeTriggered(false);
+        return;
+      }
 
       // Ask user to restart
       const restart = await ask(t('updater.restartPrompt'), {
@@ -102,43 +150,61 @@ export function Updater() {
 
   const handleSkip = () => {
     if (update) {
-      localStorage.setItem('kaya-skipped-version', update.version);
+      // Don't persist skip for DEV mode mock updates
+      if (!devModeTriggered) {
+        localStorage.setItem('kaya-skipped-version', update.version);
+      }
       setStatus('idle');
       setUpdate(null);
+      setDevModeTriggered(false);
     }
   };
 
   const handleLater = () => {
     setStatus('idle');
     setUpdate(null);
+    setDevModeTriggered(false);
   };
 
+  // Don't render if no update or idle
   if (status === 'idle' || !update) return null;
 
   return (
     <div className="updater-overlay">
       <div className="updater-dialog">
-        <h2>{t('updater.updateAvailable')}</h2>
-        <p>{t('updater.versionAvailable', { version: update.version })}</p>
+        <div className="updater-header">
+          <h2>{t('updater.updateAvailable')}</h2>
+          {devModeTriggered && <span className="updater-dev-badge">DEV</span>}
+        </div>
+        <p className="updater-version">
+          {t('updater.versionAvailable', { version: update.version })}
+        </p>
         {update.body && (
           <div className="updater-release-notes">
             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{update.body}</ReactMarkdown>
           </div>
         )}
 
-        {status === 'installing' ? (
-          <div className="updater-status">
-            <p>{t('updater.installing')}</p>
-          </div>
-        ) : (
-          <div className="updater-actions">
-            <button onClick={handleSkip}>{t('updater.skipVersion')}</button>
-            <button onClick={handleLater}>{t('updater.remindLater')}</button>
-            <button className="primary" onClick={handleUpdate}>
-              {t('updater.updateNow')}
-            </button>
-          </div>
-        )}
+        <div className="updater-footer">
+          {status === 'installing' ? (
+            <div className="updater-status">
+              <div className="updater-spinner" />
+              <p>{t('updater.installing')}</p>
+            </div>
+          ) : (
+            <div className="updater-actions">
+              <button className="updater-btn secondary" onClick={handleSkip}>
+                {t('updater.skipVersion')}
+              </button>
+              <button className="updater-btn secondary" onClick={handleLater}>
+                {t('updater.remindLater')}
+              </button>
+              <button className="updater-btn primary" onClick={handleUpdate}>
+                {t('updater.updateNow')}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

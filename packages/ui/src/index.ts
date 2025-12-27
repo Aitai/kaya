@@ -158,6 +158,8 @@ export { i18n, locales, defaultLocale, detectLocale, loadLocale, getLocale } fro
 export type { Locale } from './i18n';
 export { I18nProvider, useI18n } from './i18n/I18nProvider';
 export { LanguageSwitcher } from './components/ui/LanguageSwitcher';
+// Re-export useTranslation from react-i18next for convenience
+export { useTranslation } from 'react-i18next';
 
 // Note: CSS files are copied to dist/ during build
 // Apps should import them directly from @kaya/ui/dist/assets/ui.css
