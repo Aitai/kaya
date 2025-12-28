@@ -14,7 +14,8 @@
   gap: 16px;
 }
 
-@media (max-width: 1440px) {
+/* Hide status bar on tablet and mobile (matches project breakpoints in MOBILE_RESPONSIVE.md) */
+@media (max-width: 1024px) {
   .status-bar {
     display: none;
   }
