@@ -152,7 +152,9 @@
     "analyzing": "正在分析...",
     "stopping": "正在停止...",
     "analyzingProgress": "分析中：{{progress}}%",
-    "stopAnalysisButton": "停止分析"
+    "stopAnalysisButton": "停止分析",
+    "analysisModeOn": "分析模式已开启 - 点击关闭",
+    "analysisModeOff": "分析模式已关闭 - 点击开启"
   },
 
   "analysisLegend": {
@@ -417,6 +419,7 @@
     "exitScoringMode": "退出计分模式 (S)",
     "showAnalysis": "显示分析栏 (A)",
     "hideAnalysis": "隐藏分析栏 (A)",
+    "analysisActiveHidden": "分析模式已激活（点击显示面板）",
     "enterNavigationMode": "进入导航模式 (N)",
     "exitNavigationMode": "退出导航模式 (N)",
     "enterEditMode": "进入编辑模式 (E)",

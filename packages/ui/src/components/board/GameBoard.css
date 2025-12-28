@@ -188,6 +188,37 @@
   }
 }
 
+/* Analysis mode running indicator - when analysis is active but bar is hidden */
+.gameboard-analysis-button.analysis-running {
+  position: relative;
+}
+
+.gameboard-analysis-button.analysis-running::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg-secondary);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
 .ai-analysis-summary {
   display: flex;
   align-items: center;

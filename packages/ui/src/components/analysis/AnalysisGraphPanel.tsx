@@ -1,7 +1,17 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { LuMap, LuZap, LuSquare, LuTrash2, LuInfo, LuX, LuLayers, LuLoader } from 'react-icons/lu';
+import {
+  LuMap,
+  LuZap,
+  LuSquare,
+  LuTrash2,
+  LuInfo,
+  LuX,
+  LuLayers,
+  LuLoader,
+  LuBrain,
+} from 'react-icons/lu';
 import { useGameTree } from '../../contexts/GameTreeContext';
 import { AnalysisLegendModal } from './AnalysisLegendModal';
 import {
@@ -34,6 +44,8 @@ export const AnalysisGraphPanel: React.FC<AnalysisGraphPanelProps> = ({ classNam
     analysisCacheSize,
     navigate,
     navigateToMove,
+    analysisMode,
+    toggleAnalysisMode,
   } = useGameTree();
 
   const {
@@ -169,6 +181,17 @@ export const AnalysisGraphPanel: React.FC<AnalysisGraphPanelProps> = ({ classNam
   return (
     <div className={`analysis-graph-panel ${className}`}>
       <div className="analysis-panel-toolbar">
+        {/* Analysis Mode Indicator */}
+        <button
+          className={`analysis-mode-indicator ${analysisMode ? 'active' : ''}`}
+          onClick={toggleAnalysisMode}
+          title={analysisMode ? t('analysis.analysisModeOn') : t('analysis.analysisModeOff')}
+          aria-label={analysisMode ? t('analysis.analysisModeOn') : t('analysis.analysisModeOff')}
+        >
+          <span className="analysis-mode-dot" />
+          <LuBrain size={14} />
+        </button>
+        <div className="analysis-toolbar-separator" />
         <button
           className={`analysis-action-button analysis-heatmap-button ${showOwnership ? 'active' : ''}`}
           title={t('analysis.toggleOwnership')}

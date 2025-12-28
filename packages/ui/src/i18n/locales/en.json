@@ -152,7 +152,9 @@
     "analyzing": "Analyzing...",
     "stopping": "Stopping...",
     "analyzingProgress": "Analyzing: {{progress}}%",
-    "stopAnalysisButton": "Stop analysis"
+    "stopAnalysisButton": "Stop analysis",
+    "analysisModeOn": "Analysis Mode On - Click to disable",
+    "analysisModeOff": "Analysis Mode Off - Click to enable"
   },
 
   "analysisLegend": {
@@ -417,6 +419,7 @@
     "exitScoringMode": "Exit scoring mode (S)",
     "showAnalysis": "Show analysis bar (A)",
     "hideAnalysis": "Hide analysis bar (A)",
+    "analysisActiveHidden": "Analysis mode active (click to show panel)",
     "enterNavigationMode": "Enter navigation mode (N)",
     "exitNavigationMode": "Exit navigation mode (N)",
     "enterEditMode": "Enter edit mode (E)",

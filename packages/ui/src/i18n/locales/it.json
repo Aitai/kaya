@@ -152,7 +152,9 @@
     "analyzing": "Analizzando...",
     "stopping": "Fermando...",
     "analyzingProgress": "Analizzando: {{progress}}%",
-    "stopAnalysisButton": "Ferma analisi"
+    "stopAnalysisButton": "Ferma analisi",
+    "analysisModeOn": "Modalità analisi attiva - Clicca per disattivare",
+    "analysisModeOff": "Modalità analisi disattiva - Clicca per attivare"
   },
 
   "analysisLegend": {
@@ -414,6 +416,7 @@
     "exitScoringMode": "Esci dalla modalità punteggio (S)",
     "showAnalysis": "Mostra barra analisi (A)",
     "hideAnalysis": "Nascondi barra analisi (A)",
+    "analysisActiveHidden": "Modalità analisi attiva (clicca per mostrare pannello)",
     "enterNavigationMode": "Attiva modalità navigazione (N)",
     "exitNavigationMode": "Esci dalla modalità navigazione (N)",
     "enterEditMode": "Attiva modalità modifica (E)",

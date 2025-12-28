@@ -152,7 +152,9 @@
     "analyzing": "분석 중...",
     "stopping": "중지 중...",
     "analyzingProgress": "분석 중: {{progress}}%",
-    "stopAnalysisButton": "분석 중지"
+    "stopAnalysisButton": "분석 중지",
+    "analysisModeOn": "분석 모드 켜짐 - 클릭하여 끄기",
+    "analysisModeOff": "분석 모드 꺼짐 - 클릭하여 켜기"
   },
 
   "analysisLegend": {
@@ -417,6 +419,7 @@
     "exitScoringMode": "계가 모드 종료 (S)",
     "showAnalysis": "분석 바 표시 (A)",
     "hideAnalysis": "분석 바 숨기기 (A)",
+    "analysisActiveHidden": "분석 모드 활성화됨 (클릭하여 패널 표시)",
     "enterNavigationMode": "탐색 모드 시작 (N)",
     "exitNavigationMode": "탐색 모드 종료 (N)",
     "enterEditMode": "편집 모드 시작 (E)",

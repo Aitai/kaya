@@ -663,32 +663,52 @@ export function useAIAnalysis({ currentBoard }: UseAIAnalysisProps) {
   // Derived values
   // Ownership heatmap state
   const [showOwnership, setShowOwnership] = useState(false);
+  // Top moves heatmap state (default OFF - user must enable)
+  const [showTopMoves, setShowTopMoves] = useState(false);
+  // Analysis bar visibility (independent from analysisMode which controls engine)
+  const [showAnalysisBar, setShowAnalysisBar] = useState(false);
+
+  // Helper to check if any analysis feature is active
+  const checkShouldDisableAnalysis = useCallback(
+    (newShowOwnership: boolean, newShowTopMoves: boolean, newShowAnalysisBar: boolean) => {
+      // Disable analysis mode only if ALL toggles are off
+      return !newShowOwnership && !newShowTopMoves && !newShowAnalysisBar;
+    },
+    []
+  );
+
   const toggleOwnership = useCallback(() => {
     setShowOwnership(prev => {
       const newValue = !prev;
       // When enabling ownership view, also enable analysis mode to start the engine
       if (newValue && !analysisMode) {
         setAnalysisMode(true);
+      } else if (!newValue && analysisMode) {
+        // Check if we should disable analysis mode (all toggles off)
+        if (checkShouldDisableAnalysis(!prev, showTopMoves, showAnalysisBar)) {
+          setAnalysisMode(false);
+        }
       }
       return newValue;
     });
-  }, [analysisMode, setAnalysisMode]);
+  }, [analysisMode, setAnalysisMode, showTopMoves, showAnalysisBar, checkShouldDisableAnalysis]);
 
-  // Top moves heatmap state (default OFF - user must enable)
-  const [showTopMoves, setShowTopMoves] = useState(false);
   const toggleTopMoves = useCallback(() => {
     setShowTopMoves(prev => {
       const newValue = !prev;
       // When enabling top moves view, also enable analysis mode to start the engine
       if (newValue && !analysisMode) {
         setAnalysisMode(true);
+      } else if (!newValue && analysisMode) {
+        // Check if we should disable analysis mode (all toggles off)
+        if (checkShouldDisableAnalysis(showOwnership, !prev, showAnalysisBar)) {
+          setAnalysisMode(false);
+        }
       }
       return newValue;
     });
-  }, [analysisMode, setAnalysisMode]);
+  }, [analysisMode, setAnalysisMode, showOwnership, showAnalysisBar, checkShouldDisableAnalysis]);
 
-  // Analysis bar visibility (independent from analysisMode which controls engine)
-  const [showAnalysisBar, setShowAnalysisBar] = useState(false);
   const toggleShowAnalysisBar = useCallback(() => {
     setShowAnalysisBar(prev => {
       const newValue = !prev;
@@ -698,17 +718,20 @@ export function useAIAnalysis({ currentBoard }: UseAIAnalysisProps) {
       setShowTopMoves(newValue);
       // Sync analysisMode with showAnalysisBar:
       // - When enabling analysis bar, enable analysisMode to trigger live analysis
-      // - When disabling analysis bar, disable analysisMode to stop live analysis
-      // This ensures that navigating to positions without cached results only triggers
-      // computation when the analysis bar is visible
+      // - When disabling analysis bar, check if all toggles are off
       if (newValue && !analysisMode) {
         setAnalysisMode(true);
       } else if (!newValue && analysisMode) {
-        setAnalysisMode(false);
+        // When closing analysis bar, also turn off top moves (already done above)
+        // Check if we should disable analysis mode (all toggles off)
+        // Note: showTopMoves will be set to false above, so use false for the check
+        if (checkShouldDisableAnalysis(showOwnership, false, false)) {
+          setAnalysisMode(false);
+        }
       }
       return newValue;
     });
-  }, [analysisMode, setAnalysisMode]);
+  }, [analysisMode, setAnalysisMode, showOwnership, checkShouldDisableAnalysis]);
 
   const winRate = useMemo(() => analysisResult?.winRate ?? null, [analysisResult]);
   const scoreLead = useMemo(() => analysisResult?.scoreLead ?? null, [analysisResult]);
