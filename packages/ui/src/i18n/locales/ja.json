@@ -98,7 +98,7 @@
     "downloadModel": "モデルをダウンロード",
     "deleteModel": "モデルを削除",
     "uploadCustomModel": "カスタムモデルをアップロード",
-    "uploadCustomModelDescription": "上級者向け。KataGoの重みをONNX形式に変換するには:",
+    "uploadCustomModelDescription": ".onnxモデルのみサポートされています。KataGoの重み（.bin.gzまたは.bin）は事前に変換が必要です:",
     "analysisOptions": "分析オプション",
     "inferenceBackend": "推論バックエンド",
     "inferenceBackendDescription": "AIモデルの実行方法を選択。ネイティブが最速、WebGPUはGPU使用、WASMはCPU（最も互換性あり）。",
