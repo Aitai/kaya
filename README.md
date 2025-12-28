@@ -77,9 +77,8 @@ Kaya is built with modern, performant technologies:
 
 We welcome contributions! Whether it's bug reports, feature requests, or code contributions.
 
-- 🐛 [Report a bug](https://github.com/kaya-go/kaya/issues/new)
-- 💡 [Suggest a feature](https://github.com/kaya-go/kaya/issues/new)
-- 📖 [Improve documentation](https://github.com/kaya-go/kaya/pulls)
+- 🐛 [Report a bug](https://github.com/kaya-go/kaya/issues/new?template=bug_report.md)
+- 💡 [Suggest a feature](https://github.com/kaya-go/kaya/issues/new?template=feature_request.md)
 - 🛠️ **[Contributing Guide](CONTRIBUTING.md)** - Get started with development
 
 ---
