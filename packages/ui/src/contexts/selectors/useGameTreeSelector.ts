@@ -125,6 +125,9 @@ export function useGameTreeBoard() {
         moveNumber: ctx.moveNumber,
         gameId: ctx.gameId,
         analysisCacheSize: ctx.analysisCacheSize,
+        // Game settings (display options)
+        gameSettings: ctx.gameSettings,
+        setGameSettings: ctx.setGameSettings,
       }),
       []
     ),

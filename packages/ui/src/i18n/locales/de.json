@@ -119,6 +119,18 @@
     "modelDeleteFailed": "Modell löschen fehlgeschlagen"
   },
 
+  "kayaConfig": {
+    "title": "Einstellungen",
+    "close": "Einstellungen schließen",
+    "analysisTab": "Analyse",
+    "gameTab": "Spiel",
+    "boardSettings": "Brett-Einstellungen",
+    "fuzzyStonePlacement": "Unscharfe Steinplatzierung",
+    "fuzzyStonePlacementDescription": "Fügt leichte zufällige Verschiebungen zu Steinpositionen hinzu für ein natürlicheres, handplatziertes Aussehen.",
+    "on": "Ein",
+    "off": "Aus"
+  },
+
   "analysis": {
     "toggleOwnership": "Gebiets-Heatmap umschalten",
     "toggleTopMoves": "Beste Züge umschalten",

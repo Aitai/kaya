@@ -119,6 +119,18 @@
     "modelDeleteFailed": "模型删除失败"
   },
 
+  "kayaConfig": {
+    "title": "设置",
+    "close": "关闭设置",
+    "analysisTab": "分析",
+    "gameTab": "游戏",
+    "boardSettings": "棋盘设置",
+    "fuzzyStonePlacement": "模糊落子",
+    "fuzzyStonePlacementDescription": "为棋子位置添加轻微随机偏移，呈现更自然的手工摆放效果。",
+    "on": "开",
+    "off": "关"
+  },
+
   "analysis": {
     "toggleOwnership": "切换地域热图",
     "toggleTopMoves": "切换最佳着法",

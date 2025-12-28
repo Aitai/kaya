@@ -35,6 +35,14 @@ export interface AISettings {
   saveAnalysisToSgf: boolean;
 }
 
+/**
+ * Game-related settings (non-AI)
+ */
+export interface GameSettings {
+  /** Enable fuzzy stone placement for a more natural board appearance */
+  fuzzyStonePlacement: boolean;
+}
+
 export interface AIModel {
   data: File | ArrayBuffer | string;
   name?: string;
@@ -106,6 +114,10 @@ export interface GameTreeContextValue {
   analysisCache: React.MutableRefObject<Map<string, AnalysisResult>>;
   analysisCacheSize: number;
   updateAnalysisCacheSize: () => void;
+
+  // Game Settings (non-AI)
+  gameSettings: GameSettings;
+  setGameSettings: (settings: Partial<GameSettings>) => void;
 
   // Model Library
   modelLibrary: AIModelEntry[];

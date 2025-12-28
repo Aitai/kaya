@@ -119,6 +119,18 @@
     "modelDeleteFailed": "모델 삭제 실패"
   },
 
+  "kayaConfig": {
+    "title": "설정",
+    "close": "설정 닫기",
+    "analysisTab": "분석",
+    "gameTab": "게임",
+    "boardSettings": "바둑판 설정",
+    "fuzzyStonePlacement": "퍼지 착점",
+    "fuzzyStonePlacementDescription": "돌의 위치에 약간의 무작위 오프셋을 추가하여 손으로 놓은 듯한 자연스러운 모습을 연출합니다.",
+    "on": "켜짐",
+    "off": "꺼짐"
+  },
+
   "analysis": {
     "toggleOwnership": "영역 히트맵 전환",
     "toggleTopMoves": "최선수 표시 전환",

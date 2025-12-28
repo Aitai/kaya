@@ -97,9 +97,7 @@ export function useFuzzyPlacement({
     if (needsInitialization || gameChanged || dimensionsChanged) {
       generateMaps();
     }
-    // Note: This effect intentionally does NOT depend on signMap or currentBoard
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, gameId, width, height]); // Only these deps, nothing else!
+  }, [enabled, gameId, width, height, generateMaps]);
 
   return mapsRef.current;
 }

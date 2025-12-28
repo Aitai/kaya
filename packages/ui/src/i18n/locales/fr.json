@@ -119,6 +119,18 @@
     "modelDeleteFailed": "Échec de la suppression"
   },
 
+  "kayaConfig": {
+    "title": "Paramètres",
+    "close": "Fermer les paramètres",
+    "analysisTab": "Analyse",
+    "gameTab": "Jeu",
+    "boardSettings": "Paramètres du plateau",
+    "fuzzyStonePlacement": "Placement flou des pierres",
+    "fuzzyStonePlacementDescription": "Ajoute de légères variations aléatoires à la position des pierres pour un aspect plus naturel.",
+    "on": "Activé",
+    "off": "Désactivé"
+  },
+
   "analysis": {
     "toggleOwnership": "Afficher/masquer la carte de territoire",
     "toggleTopMoves": "Afficher/masquer les meilleurs coups",

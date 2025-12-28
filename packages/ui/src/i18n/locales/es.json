@@ -119,6 +119,18 @@
     "modelDeleteFailed": "Error al eliminar el modelo"
   },
 
+  "kayaConfig": {
+    "title": "Configuración",
+    "close": "Cerrar configuración",
+    "analysisTab": "Análisis",
+    "gameTab": "Juego",
+    "boardSettings": "Configuración del tablero",
+    "fuzzyStonePlacement": "Colocación difusa de piedras",
+    "fuzzyStonePlacementDescription": "Añade pequeños desplazamientos aleatorios a las posiciones de las piedras para una apariencia más natural.",
+    "on": "Activado",
+    "off": "Desactivado"
+  },
+
   "analysis": {
     "toggleOwnership": "Alternar mapa de calor de territorio",
     "toggleTopMoves": "Alternar mejores movimientos",

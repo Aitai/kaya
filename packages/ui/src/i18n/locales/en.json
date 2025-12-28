@@ -119,6 +119,18 @@
     "modelDeleteFailed": "Failed to delete model"
   },
 
+  "kayaConfig": {
+    "title": "Settings",
+    "close": "Close settings",
+    "analysisTab": "Analysis",
+    "gameTab": "Game",
+    "boardSettings": "Board Settings",
+    "fuzzyStonePlacement": "Fuzzy Stone Placement",
+    "fuzzyStonePlacementDescription": "Add slight random offsets to stone positions for a more natural, hand-placed appearance.",
+    "on": "On",
+    "off": "Off"
+  },
+
   "analysis": {
     "toggleOwnership": "Toggle Ownership Heatmap",
     "toggleTopMoves": "Toggle Top Moves",
