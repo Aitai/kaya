@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.9] - 2025-12-28
+
+### <!-- 0 -->🚀 Features
+
+- *(ui)* Add translations and keyboard shortcut for suggest move button ([b0e85ba](https://github.com/kaya-go/kaya/commit/b0e85badec2adf4a5117be71eb59c09792b90e6f))
+
+- *(ui)* Auto-trigger suggest move after engine initialization ([562ff50](https://github.com/kaya-go/kaya/commit/562ff50a07db194d59810b80fc4f989dfbf0572b))
+
+- *(ui)* Add analysis mode indicator with toggle logic ([c5f26ca](https://github.com/kaya-go/kaya/commit/c5f26ca4cf9a6a459db481d3802c8f8d02aafbfe))
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ui)* Play sound when AI suggests a move ([c8c01fa](https://github.com/kaya-go/kaya/commit/c8c01fa0986e6278102d41836942dec7c2869c1f))
+
+- *(ui)* Lower status bar hide breakpoint from 1440px to 1024px ([6f1075b](https://github.com/kaya-go/kaya/commit/6f1075b893f953dc9e20529d298f526c2e5d9409))
+
+### <!-- 2 -->🚜 Refactor
+
+- *(ui)* Separate AI engine lifecycle from analysis context ([663ee20](https://github.com/kaya-go/kaya/commit/663ee205842b6048b791b8b08d80bbbdb0b3447f))
+
+- *(ui)* Use createEngine factory to remove Tauri engine duplication ([737f5fb](https://github.com/kaya-go/kaya/commit/737f5fb7aec1d11f5c6ea6f96d1e3dcab4d948f4))
+
+### <!-- 3 -->📚 Documentation
+
+- *(ui)* Add comments clarifying move generation vs analysis separation ([b0dc8ef](https://github.com/kaya-go/kaya/commit/b0dc8ef6a4d8686d197362c5e464accf055e4ed5))
+
 ## [0.1.8] - 2025-12-28
 
 ### <!-- 0 -->🚀 Features
@@ -41,6 +67,8 @@ All notable changes to this project will be documented in this file.
 ### <!-- 7 -->⚙️ Miscellaneous Tasks
 
 - Add stale bot to close inactive issues and PRs ([a5584c1](https://github.com/kaya-go/kaya/commit/a5584c13bc4cf48278043971aad2f2231ca5f0f0))
+
+- Release v0.1.8 ([b253e76](https://github.com/kaya-go/kaya/commit/b253e7660f577b7c2432a5b5ea52773f1f635cd1))
 
 ## [0.1.7] - 2025-12-28
 
