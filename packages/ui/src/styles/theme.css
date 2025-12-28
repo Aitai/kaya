@@ -169,4 +169,12 @@ body {
     min-height: 40px;
     min-width: 40px;
   }
+
+  /* Toggle switches should keep their standard iOS-style dimensions */
+  .toggle-switch {
+    min-height: 31px;
+    min-width: 51px;
+    height: 31px;
+    width: 51px;
+  }
 }
