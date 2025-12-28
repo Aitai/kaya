@@ -15,6 +15,7 @@ import {
   LuCalculator,
   LuGamepad2,
   LuPencil,
+  LuBot,
   LuBrain,
   LuEye,
   LuEyeOff,
@@ -854,7 +855,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
             className="gameboard-action-button gameboard-ai-move-button"
             title="Generate AI move for current player"
           >
-            {isGeneratingMove ? <LuLoader size={16} className="spinner" /> : <LuBrain size={16} />}
+            {isGeneratingMove ? <LuLoader size={16} className="spinner" /> : <LuBot size={16} />}
             <span className="btn-text">{isGeneratingMove ? 'Generating...' : 'AI Move'}</span>
           </button>
         )}
