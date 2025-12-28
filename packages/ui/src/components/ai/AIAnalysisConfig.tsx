@@ -400,7 +400,7 @@ export const AIAnalysisConfig: React.FC = () => {
             <section className="ai-config-section">
               <div className="section-header">
                 <LuSettings className="section-icon" />
-                <h3>{t('aiConfig.settings')}</h3>
+                <h3>{t('aiConfig.analysisOptions')}</h3>
               </div>
 
               <div className="settings-list">

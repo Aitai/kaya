@@ -99,7 +99,7 @@
     "deleteModel": "모델 삭제",
     "uploadCustomModel": "사용자 모델 업로드",
     "uploadCustomModelDescription": "고급 사용자용. KataGo 가중치를 ONNX 형식으로 변환하려면:",
-    "settings": "설정",
+    "analysisOptions": "분석 옵션",
     "inferenceBackend": "추론 백엔드",
     "inferenceBackendDescription": "AI 모델 실행 방법을 선택합니다. 네이티브가 가장 빠르고, WebGPU는 GPU 사용, WASM은 CPU(가장 호환성 높음).",
     "nativeAuto": "네이티브 - 자동 (GPU 사용 가능 시)",
