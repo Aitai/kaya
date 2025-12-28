@@ -13,7 +13,7 @@ import React, {
   useCallback,
   type ReactNode,
 } from 'react';
-import { I18nextProvider, useTranslation } from 'react-i18next';
+import { I18nextProvider } from 'react-i18next';
 import { i18n, type Locale, locales, loadLocale, detectLocale, defaultLocale } from './index';
 
 interface I18nContextValue {
@@ -41,10 +41,9 @@ interface I18nProviderProps {
  * Inner component that syncs i18n language changes with React state
  */
 function I18nSync({ children }: { children: ReactNode }): React.ReactElement {
-  const { i18n: i18nInstance } = useTranslation();
   const [locale, setLocaleState] = useState<Locale>(() => {
     // Initialize from i18n's current language
-    const currentLang = i18nInstance.language;
+    const currentLang = i18n.language;
     return (currentLang in locales ? currentLang : defaultLocale) as Locale;
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -60,7 +59,8 @@ function I18nSync({ children }: { children: ReactNode }): React.ReactElement {
     init();
   }, []);
 
-  // Listen to i18n language changes
+  // Listen to i18n language changes - use the actual i18n instance from the module
+  // (not the wrapped one from useTranslation which may have issues with event listeners in v16+)
   useEffect(() => {
     const handleLanguageChanged = (lng: string) => {
       if (lng in locales) {
@@ -68,11 +68,11 @@ function I18nSync({ children }: { children: ReactNode }): React.ReactElement {
       }
     };
 
-    i18nInstance.on('languageChanged', handleLanguageChanged);
+    i18n.on('languageChanged', handleLanguageChanged);
     return () => {
-      i18nInstance.off('languageChanged', handleLanguageChanged);
+      i18n.off('languageChanged', handleLanguageChanged);
     };
-  }, [i18nInstance]);
+  }, []);
 
   const setLocale = useCallback(
     async (newLocale: Locale) => {

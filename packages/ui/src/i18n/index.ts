@@ -8,8 +8,15 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Import translations
+// Import all translations statically to ensure they're bundled correctly
 import en from './locales/en.json';
+import zh from './locales/zh.json';
+import ko from './locales/ko.json';
+import ja from './locales/ja.json';
+import fr from './locales/fr.json';
+import de from './locales/de.json';
+import es from './locales/es.json';
+import it from './locales/it.json';
 
 export const locales = {
   en: 'English',
@@ -52,16 +59,16 @@ export function detectLocale(): Locale {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TranslationResource = Record<string, any>;
 
-// Lazy load translations for non-English locales
-const localeLoaders: Record<Locale, () => Promise<{ default: TranslationResource }>> = {
-  en: () => Promise.resolve({ default: en }),
-  zh: () => import('./locales/zh.json'),
-  ko: () => import('./locales/ko.json'),
-  ja: () => import('./locales/ja.json'),
-  fr: () => import('./locales/fr.json'),
-  de: () => import('./locales/de.json'),
-  es: () => import('./locales/es.json'),
-  it: () => import('./locales/it.json'),
+// Map of all locale translations (statically imported)
+const localeMessages: Record<Locale, TranslationResource> = {
+  en,
+  zh,
+  ko,
+  ja,
+  fr,
+  de,
+  es,
+  it,
 };
 
 /**
@@ -69,11 +76,9 @@ const localeLoaders: Record<Locale, () => Promise<{ default: TranslationResource
  */
 export async function loadLocale(locale: Locale): Promise<void> {
   if (!i18n.hasResourceBundle(locale, 'translation')) {
-    try {
-      const { default: messages } = await localeLoaders[locale]();
+    const messages = localeMessages[locale];
+    if (messages) {
       i18n.addResourceBundle(locale, 'translation', messages);
-    } catch (error) {
-      console.warn(`Failed to load locale "${locale}", using fallback`);
     }
   }
 
