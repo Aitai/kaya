@@ -25,7 +25,6 @@ import {
   LuCalculator,
   LuLoader,
   LuX,
-  LuBrain,
 } from 'react-icons/lu';
 import {
   useGameTreeNavigation,
@@ -35,7 +34,6 @@ import {
 } from '../../contexts/selectors';
 import { useBoardNavigation } from '../../contexts/BoardNavigationContext';
 import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
-import { useToast } from '../ui/Toast';
 import './BoardControls.css';
 
 export const BoardControls: React.FC = memo(() => {
@@ -68,7 +66,6 @@ export const BoardControls: React.FC = memo(() => {
   const { scoringMode, toggleScoringMode, autoEstimateDeadStones, clearDeadStones, isEstimating } =
     useGameTreeScore();
   const { navigationMode } = useBoardNavigation();
-  const { showToast } = useToast();
   const [showResignConfirm, setShowResignConfirm] = useState(false);
 
   // State for inline editing
