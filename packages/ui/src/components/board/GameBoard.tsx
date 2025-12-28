@@ -631,6 +631,10 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
   ]);
 
   // Handler for AI move suggestion (separate from analysis)
+  // Note: This uses the same engine as analysis but doesn't affect:
+  // - Analysis cache (no results stored)
+  // - Win rate graph (no setAnalysisResult called)
+  // - Analysis UI overlays (no ownership/heatmap updates)
   const handleSuggestMove = useCallback(async () => {
     if (!isModelLoaded) {
       showToast(t('gameboardActions.loadAiModelFirst'), 'error');
@@ -647,7 +651,8 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     setPendingSuggestMove(true);
     setIsGeneratingMove(true);
 
-    // If analysis mode is not enabled, enable it to initialize the engine
+    // Enable analysis mode to initialize the engine
+    // The engine is shared but move generation doesn't affect analysis cache/UI
     if (!aiAnalysisMode) {
       setAnalysisMode(true);
     }
