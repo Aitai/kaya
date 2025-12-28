@@ -22,6 +22,7 @@ import {
   NewGameConfig,
   AISettings,
   AIModel,
+  GameSettings,
   GameTreeContextValue,
 } from '../types/game';
 
@@ -35,6 +36,7 @@ import { useAIAnalysis } from '../hooks/game/useAIAnalysis';
 import { useAutoSave } from '../hooks/game/useAutoSave';
 import { usePatternMatching } from '../hooks/game/usePatternMatching';
 import { useGameHistory } from '../hooks/game/useGameHistory';
+import { useGameSettings } from '../hooks/game/useGameSettings';
 import { injectAnalysisToTree, extractAnalysisFromTree } from '../utils/sgfAnalysis';
 import {
   parse as parseSGF,
@@ -295,7 +297,10 @@ export const GameTreeProvider: React.FC<{
     currentNode,
   });
 
-  // 8. Pattern Matching
+  // 8. Game Settings (non-AI)
+  const { gameSettings, setGameSettings } = useGameSettings();
+
+  // 9. Pattern Matching
   const { moveName, moveUrl, patternMatchingEnabled, setPatternMatchingEnabled } =
     usePatternMatching({
       gameTree: gameTree!,
@@ -589,6 +594,10 @@ export const GameTreeProvider: React.FC<{
       analysisCacheSize,
       updateAnalysisCacheSize,
 
+      // Game Settings (non-AI)
+      gameSettings,
+      setGameSettings,
+
       // Model Library
       modelLibrary,
       selectedModelId,
@@ -756,6 +765,7 @@ export const GameTreeProvider: React.FC<{
       isModelLoaded,
       aiSettings,
       isAIConfigOpen,
+      gameSettings,
       modelLibrary,
       selectedModelId,
       moveNumber,

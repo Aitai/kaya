@@ -179,11 +179,16 @@ export const BoardControls: React.FC = memo(() => {
     const THROTTLE_MS = 50; // Minimum time between wheel navigations
 
     const handleWheel = (e: WheelEvent) => {
-      // Only handle wheel events when scrolling over the board panel area
+      // Only handle wheel events when scrolling over the board wrapper (goban) or game tree
+      // Exclude scrollable elements like edit toolbar, score estimator, etc.
       const target = e.target as HTMLElement;
-      const isOnBoard = target.closest('.board-panel, .mobile-board-panel');
+      const isOnBoardWrapper = target.closest('.gameboard-board-wrapper');
+      const isOnGameTree = target.closest('.react-flow');
+      const isOnScrollableElement = target.closest(
+        '.edit-toolbar, .score-estimator, .ai-analysis-config'
+      );
 
-      if (isOnBoard && !isThrottled) {
+      if ((isOnBoardWrapper || isOnGameTree) && !isOnScrollableElement && !isThrottled) {
         // Don't preventDefault - causes warnings with passive listeners
         lastDelta += e.deltaY;
 

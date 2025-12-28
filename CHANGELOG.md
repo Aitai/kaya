@@ -2,11 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7] - 2025-12-28
+
+### <!-- 0 -->🚀 Features
+
+- *(ui)* Show analysis panel by default ([fa82ea3](https://github.com/kaya-go/kaya/commit/fa82ea3704b5c20edd3d766c823a36ff14a76b16))
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ui)* Fix light mode styling for various UI components ([c3984a5](https://github.com/kaya-go/kaya/commit/c3984a5fec08ee07c5d50687af82e7de5c0ec935))
+
+- Edit toolbar layout and scroll behavior at 1440px width ([725eff9](https://github.com/kaya-go/kaya/commit/725eff9d50b4318a45610e62ae113990ac895528))
+
+- *(ui)* Add padding to win rate y-axis limits in analysis chart ([95f2775](https://github.com/kaya-go/kaya/commit/95f277547664fd85b1fa0da2d6259c45611df4eb))
+
+- *(ui)* Increase bottom padding for x-axis labels in analysis chart ([3b0228f](https://github.com/kaya-go/kaya/commit/3b0228fda4d28db1c30a225bc3545e6c1a913959))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Add CLA assistant workflow and contributor license agreement ([50dee15](https://github.com/kaya-go/kaya/commit/50dee152e2e0fe778eb55c3bc73723e637f910c3))
+
 ## [0.1.6] - 2025-12-27
 
 ### <!-- 0 -->🚀 Features
 
 - *(desktop)* Improve updater UI with dev mode testing and better styling ([644f04e](https://github.com/kaya-go/kaya/commit/644f04e6031b1807c6698cce48a8bbe3eeedfbfc))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.1.6 ([075b95d](https://github.com/kaya-go/kaya/commit/075b95d7c801f7003d0ffe25077389411fa51ef1))
 
 ## [0.1.5] - 2025-12-27
 

@@ -98,7 +98,8 @@
     "downloadModel": "Modell herunterladen",
     "deleteModel": "Modell löschen",
     "uploadCustomModel": "Eigenes Modell hochladen",
-    "settings": "Einstellungen",
+    "uploadCustomModelDescription": "Für fortgeschrittene Benutzer. Konvertieren Sie KataGo-Gewichte ins ONNX-Format mit:",
+    "analysisOptions": "Analyseoptionen",
     "inferenceBackend": "Inferenz-Backend",
     "inferenceBackendDescription": "Wählen Sie, wie das KI-Modell ausgeführt wird. Native ist am schnellsten, WebGPU nutzt die GPU, WASM nutzt die CPU (höchste Kompatibilität).",
     "nativeAuto": "Native - Automatisch (GPU wenn verfügbar)",
@@ -116,7 +117,24 @@
     "modelDownloadedSuccess": "Modell erfolgreich heruntergeladen",
     "modelDownloadFailed": "Modell-Download fehlgeschlagen",
     "modelDeletedSuccess": "Modell gelöscht",
-    "modelDeleteFailed": "Modell löschen fehlgeschlagen"
+    "modelDeleteFailed": "Modell löschen fehlgeschlagen",
+    "getStartedTitle": "KI-Analyse starten",
+    "getStartedDescription": "Laden Sie ein Modell herunter, um KI-gestützte Zugvorschläge und Spielanalysen zu aktivieren.",
+    "downloadRecommended": "Empfohlenes Modell herunterladen",
+    "downloading": "Wird heruntergeladen...",
+    "poweredBy": "KI-Engine basiert auf"
+  },
+
+  "kayaConfig": {
+    "title": "Einstellungen",
+    "close": "Einstellungen schließen",
+    "analysisTab": "Analyse",
+    "gameTab": "Spiel",
+    "boardSettings": "Brett-Einstellungen",
+    "fuzzyStonePlacement": "Unscharfe Steinplatzierung",
+    "fuzzyStonePlacementDescription": "Fügt leichte zufällige Verschiebungen zu Steinpositionen hinzu für ein natürlicheres, handplatziertes Aussehen.",
+    "on": "Ein",
+    "off": "Aus"
   },
 
   "analysis": {

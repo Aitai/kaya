@@ -34,6 +34,7 @@
   --text-disabled: #656565;
 
   --accent-primary: #007acc;
+  --accent-color: #007acc;
   --accent-hover: #1c8ad6;
   --accent-active: #0062a3;
 
@@ -60,6 +61,7 @@
   --text-disabled: #a0a0a0;
 
   --accent-primary: #0078d4;
+  --accent-color: #0078d4;
   --accent-hover: #106ebe;
   --accent-active: #005a9e;
 
@@ -166,5 +168,13 @@ body {
   [role='button'] {
     min-height: 40px;
     min-width: 40px;
+  }
+
+  /* Toggle switches should keep their standard iOS-style dimensions */
+  .toggle-switch {
+    min-height: 31px;
+    min-width: 51px;
+    height: 31px;
+    width: 51px;
   }
 }

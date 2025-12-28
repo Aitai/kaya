@@ -17,7 +17,12 @@ import {
 import { useGameTree } from '../../contexts/GameTreeContext';
 import { useToast } from '../ui/Toast';
 import { isTauriApp } from '../../services/fileSave';
-import { BASE_MODELS, QUANTIZATION_OPTIONS, parseModelId } from '../../hooks/game/useAIAnalysis';
+import {
+  BASE_MODELS,
+  QUANTIZATION_OPTIONS,
+  parseModelId,
+  getModelId,
+} from '../../hooks/game/useAIAnalysis';
 import './AIAnalysisConfig.css';
 
 export const AIAnalysisConfig: React.FC = () => {
@@ -152,6 +157,35 @@ export const AIAnalysisConfig: React.FC = () => {
   // Check if any model is currently downloading
   const isAnyDownloading = modelLibrary.some(m => m.isDownloading);
 
+  // Check if any model is downloaded
+  const hasAnyDownloaded = modelLibrary.some(m => m.isDownloaded);
+
+  // Get the recommended model's default variant ID (fp32 for full compatibility)
+  const recommendedModelId = useMemo(() => {
+    const recommendedBase = BASE_MODELS.findIndex(m => m.recommended);
+    if (recommendedBase >= 0) {
+      return getModelId(recommendedBase, 'fp32');
+    }
+    return null;
+  }, []);
+
+  // Get the recommended model's download state
+  const recommendedModel = useMemo(() => {
+    if (!recommendedModelId) return null;
+    return modelLibrary.find(m => m.id === recommendedModelId) || null;
+  }, [recommendedModelId, modelLibrary]);
+
+  // Handle downloading the recommended model (no toast - progress shows in UI)
+  const handleDownloadRecommended = async () => {
+    if (recommendedModelId) {
+      try {
+        await downloadModel(recommendedModelId);
+      } catch (err) {
+        showToast(t('aiConfig.modelDownloadFailed'), 'error');
+      }
+    }
+  };
+
   const modalContent = (
     <div
       className="ai-info-modal-overlay"
@@ -192,6 +226,36 @@ export const AIAnalysisConfig: React.FC = () => {
               <div className="config-note" style={{ marginBottom: '12px' }}>
                 {t('aiConfig.modelLibraryDescription')}
               </div>
+
+              {/* Get Started Banner - shown when no models are downloaded */}
+              {!hasAnyDownloaded && (
+                <div className="model-get-started-banner">
+                  <div className="get-started-content">
+                    <LuDownload className="get-started-icon" />
+                    <div className="get-started-text">
+                      <strong>{t('aiConfig.getStartedTitle')}</strong>
+                      <span>{t('aiConfig.getStartedDescription')}</span>
+                    </div>
+                  </div>
+                  <button
+                    className="get-started-btn"
+                    onClick={handleDownloadRecommended}
+                    disabled={isAnyDownloading}
+                  >
+                    {recommendedModel?.isDownloading ? (
+                      <>
+                        <LuLoader className="spinning" size={16} />
+                        {t('aiConfig.downloading')} {recommendedModel.downloadProgress ?? 0}%
+                      </>
+                    ) : (
+                      <>
+                        <LuDownload size={16} />
+                        {t('aiConfig.downloadRecommended')}
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
 
               <div className="model-library-list">
                 {/* Base Models with Quantization Options */}
@@ -383,6 +447,16 @@ export const AIAnalysisConfig: React.FC = () => {
                 >
                   <LuUpload size={16} /> {t('aiConfig.uploadCustomModel')}
                 </button>
+                <p className="model-upload-description">
+                  {t('aiConfig.uploadCustomModelDescription')}{' '}
+                  <a
+                    href="https://github.com/kaya-go/katago-onnx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    kaya-go/katago-onnx
+                  </a>
+                </p>
               </div>
             </section>
 
@@ -390,7 +464,7 @@ export const AIAnalysisConfig: React.FC = () => {
             <section className="ai-config-section">
               <div className="section-header">
                 <LuSettings className="section-icon" />
-                <h3>{t('aiConfig.settings')}</h3>
+                <h3>{t('aiConfig.analysisOptions')}</h3>
               </div>
 
               <div className="settings-list">
@@ -500,6 +574,18 @@ export const AIAnalysisConfig: React.FC = () => {
                 </div>
               </div>
             </section>
+
+            {/* KataGo Attribution Footer */}
+            <div className="ai-config-footer">
+              {t('aiConfig.poweredBy')}{' '}
+              <a
+                href="https://github.com/lightvector/KataGo"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                KataGo
+              </a>
+            </div>
           </div>
         </div>
       </div>

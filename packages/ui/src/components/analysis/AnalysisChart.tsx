@@ -61,7 +61,7 @@ export const AnalysisChart: React.FC<AnalysisChartProps> = ({
 
   // Fixed height, dynamic width based on container
   const chartHeight = 150;
-  const padding = { top: 12, right: 36, bottom: 20, left: 40 };
+  const padding = { top: 12, right: 36, bottom: 28, left: 40 };
 
   // Measure container width with ResizeObserver
   // Uses contentRect to avoid forced reflows (clientWidth triggers layout)
@@ -133,12 +133,18 @@ export const AnalysisChart: React.FC<AnalysisChartProps> = ({
     [chartConfig.maxMove, chartConfig.innerWidth, padding.left]
   );
 
+  // Win rate Y-axis padding: extend domain slightly below 0% and above 100%
+  const winRatePadding = 0.05; // 5% padding on each side
+
   const winRateYScale = useCallback(
     (winRate: number): number => {
       // Win rate is 0-1, invert so 1 (100% Black) is at top
-      return padding.top + (1 - winRate) * chartConfig.innerHeight;
+      // Add padding so the axis extends from -5% to 105%
+      const paddedRange = 1 + 2 * winRatePadding; // 1.1 total range
+      const normalized = (1 + winRatePadding - winRate) / paddedRange;
+      return padding.top + normalized * chartConfig.innerHeight;
     },
-    [chartConfig.innerHeight, padding.top]
+    [chartConfig.innerHeight, padding.top, winRatePadding]
   );
 
   const scoreYScale = useCallback(

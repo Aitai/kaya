@@ -98,7 +98,8 @@
     "downloadModel": "Download model",
     "deleteModel": "Delete model to free space",
     "uploadCustomModel": "Upload Custom Model",
-    "settings": "Settings",
+    "uploadCustomModelDescription": "For advanced users. Convert KataGo weights to ONNX format using:",
+    "analysisOptions": "Analysis Options",
     "inferenceBackend": "Inference Backend",
     "inferenceBackendDescription": "Choose how the AI model runs. Native is fastest on desktop, WebGPU uses your graphics card, WASM runs on CPU (most compatible).",
     "nativeAuto": "Native - Auto (GPU if available)",
@@ -116,7 +117,24 @@
     "modelDownloadedSuccess": "Model downloaded successfully",
     "modelDownloadFailed": "Failed to download model",
     "modelDeletedSuccess": "Model deleted",
-    "modelDeleteFailed": "Failed to delete model"
+    "modelDeleteFailed": "Failed to delete model",
+    "getStartedTitle": "Get Started with AI Analysis",
+    "getStartedDescription": "Download a model to enable AI-powered move suggestions and game analysis.",
+    "downloadRecommended": "Download Recommended Model",
+    "downloading": "Downloading...",
+    "poweredBy": "AI engine powered by"
+  },
+
+  "kayaConfig": {
+    "title": "Settings",
+    "close": "Close settings",
+    "analysisTab": "Analysis",
+    "gameTab": "Game",
+    "boardSettings": "Board Settings",
+    "fuzzyStonePlacement": "Fuzzy Stone Placement",
+    "fuzzyStonePlacementDescription": "Add slight random offsets to stone positions for a more natural, hand-placed appearance.",
+    "on": "On",
+    "off": "Off"
   },
 
   "analysis": {

@@ -98,7 +98,8 @@
     "downloadModel": "Scarica modello",
     "deleteModel": "Elimina modello",
     "uploadCustomModel": "Carica modello personalizzato",
-    "settings": "Impostazioni",
+    "uploadCustomModelDescription": "Per utenti avanzati. Converti i pesi KataGo in formato ONNX usando:",
+    "analysisOptions": "Opzioni di analisi",
     "inferenceBackend": "Backend di inferenza",
     "inferenceBackendDescription": "Scegli come eseguire il modello IA. Native è il più veloce, WebGPU usa la GPU, WASM usa la CPU (massima compatibilità).",
     "nativeAuto": "Native - Automatico (GPU se disponibile)",
@@ -116,7 +117,24 @@
     "modelDownloadedSuccess": "Modello scaricato con successo",
     "modelDownloadFailed": "Download modello fallito",
     "modelDeletedSuccess": "Modello eliminato",
-    "modelDeleteFailed": "Eliminazione modello fallita"
+    "modelDeleteFailed": "Eliminazione modello fallita",
+    "getStartedTitle": "Inizia con l'analisi IA",
+    "getStartedDescription": "Scarica un modello per attivare i suggerimenti di mosse e l'analisi delle partite con l'IA.",
+    "downloadRecommended": "Scarica il modello consigliato",
+    "downloading": "Download in corso...",
+    "poweredBy": "Motore IA basato su"
+  },
+
+  "kayaConfig": {
+    "title": "Impostazioni",
+    "close": "Chiudi impostazioni",
+    "analysisTab": "Analisi",
+    "gameTab": "Gioco",
+    "boardSettings": "Impostazioni della tavola",
+    "fuzzyStonePlacement": "Posizionamento sfocato delle pietre",
+    "fuzzyStonePlacementDescription": "Aggiunge leggeri spostamenti casuali alle posizioni delle pietre per un aspetto più naturale.",
+    "on": "Attivo",
+    "off": "Disattivo"
   },
 
   "analysis": {

@@ -17,7 +17,8 @@
   min-height: 0;
 }
 
-@media (max-width: 1024px) {
+/* Match the EditToolbar breakpoint (1440px) for consistent layout */
+@media (max-width: 1440px) {
   .gameboard-board-area {
     flex-direction: column;
   }

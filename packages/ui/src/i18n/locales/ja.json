@@ -98,7 +98,8 @@
     "downloadModel": "モデルをダウンロード",
     "deleteModel": "モデルを削除",
     "uploadCustomModel": "カスタムモデルをアップロード",
-    "settings": "設定",
+    "uploadCustomModelDescription": "上級者向け。KataGoの重みをONNX形式に変換するには:",
+    "analysisOptions": "分析オプション",
     "inferenceBackend": "推論バックエンド",
     "inferenceBackendDescription": "AIモデルの実行方法を選択。ネイティブが最速、WebGPUはGPU使用、WASMはCPU（最も互換性あり）。",
     "nativeAuto": "ネイティブ - 自動（GPU利用可能時）",
@@ -116,7 +117,24 @@
     "modelDownloadedSuccess": "モデルのダウンロード成功",
     "modelDownloadFailed": "モデルのダウンロード失敗",
     "modelDeletedSuccess": "モデル削除完了",
-    "modelDeleteFailed": "モデルの削除失敗"
+    "modelDeleteFailed": "モデルの削除失敗",
+    "getStartedTitle": "AI分析を始める",
+    "getStartedDescription": "モデルをダウンロードして、AIによる着手提案と局面分析を有効にしましょう。",
+    "downloadRecommended": "おすすめモデルをダウンロード",
+    "downloading": "ダウンロード中...",
+    "poweredBy": "AIエンジン:"
+  },
+
+  "kayaConfig": {
+    "title": "設定",
+    "close": "設定を閉じる",
+    "analysisTab": "分析",
+    "gameTab": "ゲーム",
+    "boardSettings": "盤面設定",
+    "fuzzyStonePlacement": "ファジー配置",
+    "fuzzyStonePlacementDescription": "石の位置にわずかなランダムオフセットを加え、手で置いたような自然な見た目にします。",
+    "on": "オン",
+    "off": "オフ"
   },
 
   "analysis": {

@@ -31,6 +31,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useGameTree, useGameTreeCore } from '../../contexts/GameTreeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { rafThrottle } from '../../utils/throttle';
 import type { GameTreeNode } from '@kaya/gametree';
 import type { SGFProperty } from '../../contexts/GameTreeContext';
@@ -463,7 +464,8 @@ function buildNodeMap(
 function buildGraphElements(
   rootNode: GameTreeNode<SGFProperty>,
   currentNodeId: string | number | null,
-  horizontal: boolean
+  horizontal: boolean,
+  edgeColor: string = '#fff'
 ): { nodes: Node[]; edges: Edge[]; includedNodeIds: Set<string | number> } {
   const MAX_NODES = 1000;
 
@@ -614,7 +616,7 @@ function buildGraphElements(
           id: `e${String(n.id)}-${String(child.id)}`,
           source: String(n.id),
           target: String(child.id),
-          style: { stroke: '#fff', strokeWidth: 1.5 },
+          style: { stroke: edgeColor, strokeWidth: 1.5 },
         });
       }
     }
@@ -631,6 +633,8 @@ const LOCAL_STORAGE_ZOOM_KEY = 'kaya-game-tree-zoom';
 export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
   ({ horizontal: controlledHorizontal, onLayoutChange, showMinimap = false }, ref) => {
     const { gameTree, rootId, currentNodeId, goToNode } = useGameTree();
+    const { theme } = useTheme();
+    const edgeColor = theme === 'dark' ? '#fff' : '#333';
     const [internalHorizontal, setInternalHorizontal] = React.useState(true);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
@@ -780,7 +784,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
 
       setNeedsLayout(true);
       visibleNodeIdsRef.current = new Set();
-    }, [gameTree, rootId, horizontal]);
+    }, [gameTree, rootId, horizontal, edgeColor]);
 
     // Build layout when necessary (initial load, file change, or when current node isn't visible)
     React.useEffect(() => {
@@ -818,7 +822,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           nodes: rawNodes,
           edges: rawEdges,
           includedNodeIds,
-        } = buildGraphElements(root, currentNodeId, horizontal);
+        } = buildGraphElements(root, currentNodeId, horizontal, edgeColor);
 
         const applyLayout = (layoutedNodes: Node[], layoutedEdges: Edge[]) => {
           // Don't update isCurrent in node data - StoneNode will calculate it from context
@@ -958,7 +962,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           layoutTaskRef.current = null;
         }
       };
-    }, [needsLayout, gameTree, rootId, horizontal, currentNodeId, setNodes, setEdges]);
+    }, [needsLayout, gameTree, rootId, horizontal, currentNodeId, edgeColor, setNodes, setEdges]);
 
     // Ensure the currently selected node is visible; if not, request a layout rebuild
     React.useEffect(() => {

@@ -98,7 +98,8 @@
     "downloadModel": "Télécharger le modèle",
     "deleteModel": "Supprimer le modèle",
     "uploadCustomModel": "Importer un modèle",
-    "settings": "Paramètres",
+    "uploadCustomModelDescription": "Pour utilisateurs avancés. Convertissez les poids KataGo au format ONNX avec :",
+    "analysisOptions": "Options d'analyse",
     "inferenceBackend": "Backend d'inférence",
     "inferenceBackendDescription": "Choisissez comment le modèle s'exécute. Natif est le plus rapide, WebGPU utilise la carte graphique, WASM fonctionne sur CPU.",
     "nativeAuto": "Natif - Auto (GPU si disponible)",
@@ -116,7 +117,24 @@
     "modelDownloadedSuccess": "Modèle téléchargé avec succès",
     "modelDownloadFailed": "Échec du téléchargement",
     "modelDeletedSuccess": "Modèle supprimé",
-    "modelDeleteFailed": "Échec de la suppression"
+    "modelDeleteFailed": "Échec de la suppression",
+    "getStartedTitle": "Démarrer l'analyse IA",
+    "getStartedDescription": "Téléchargez un modèle pour activer les suggestions de coups et l'analyse de partie par l'IA.",
+    "downloadRecommended": "Télécharger le modèle recommandé",
+    "downloading": "Téléchargement...",
+    "poweredBy": "Moteur IA basé sur"
+  },
+
+  "kayaConfig": {
+    "title": "Paramètres",
+    "close": "Fermer les paramètres",
+    "analysisTab": "Analyse",
+    "gameTab": "Jeu",
+    "boardSettings": "Paramètres du plateau",
+    "fuzzyStonePlacement": "Placement flou des pierres",
+    "fuzzyStonePlacementDescription": "Ajoute de légères variations aléatoires à la position des pierres pour un aspect plus naturel.",
+    "on": "Activé",
+    "off": "Désactivé"
   },
 
   "analysis": {

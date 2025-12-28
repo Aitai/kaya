@@ -98,7 +98,8 @@
     "downloadModel": "모델 다운로드",
     "deleteModel": "모델 삭제",
     "uploadCustomModel": "사용자 모델 업로드",
-    "settings": "설정",
+    "uploadCustomModelDescription": "고급 사용자용. KataGo 가중치를 ONNX 형식으로 변환하려면:",
+    "analysisOptions": "분석 옵션",
     "inferenceBackend": "추론 백엔드",
     "inferenceBackendDescription": "AI 모델 실행 방법을 선택합니다. 네이티브가 가장 빠르고, WebGPU는 GPU 사용, WASM은 CPU(가장 호환성 높음).",
     "nativeAuto": "네이티브 - 자동 (GPU 사용 가능 시)",
@@ -116,7 +117,24 @@
     "modelDownloadedSuccess": "모델 다운로드 성공",
     "modelDownloadFailed": "모델 다운로드 실패",
     "modelDeletedSuccess": "모델 삭제 완료",
-    "modelDeleteFailed": "모델 삭제 실패"
+    "modelDeleteFailed": "모델 삭제 실패",
+    "getStartedTitle": "AI 분석 시작하기",
+    "getStartedDescription": "모델을 다운로드하여 AI 기반 수 제안 및 게임 분석을 활성화하세요.",
+    "downloadRecommended": "추천 모델 다운로드",
+    "downloading": "다운로드 중...",
+    "poweredBy": "AI 엔진:"
+  },
+
+  "kayaConfig": {
+    "title": "설정",
+    "close": "설정 닫기",
+    "analysisTab": "분석",
+    "gameTab": "게임",
+    "boardSettings": "바둑판 설정",
+    "fuzzyStonePlacement": "퍼지 착점",
+    "fuzzyStonePlacementDescription": "돌의 위치에 약간의 무작위 오프셋을 추가하여 손으로 놓은 듯한 자연스러운 모습을 연출합니다.",
+    "on": "켜짐",
+    "off": "꺼짐"
   },
 
   "analysis": {

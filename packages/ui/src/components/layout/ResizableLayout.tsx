@@ -40,7 +40,7 @@ const DEFAULT_VISIBILITY: SidebarPanelVisibility = {
 
 const DEFAULT_LEFT_VISIBILITY: LeftPanelVisibility = {
   library: true,
-  analysisGraph: false,
+  analysisGraph: true,
 };
 
 interface ResizableLayoutProps {

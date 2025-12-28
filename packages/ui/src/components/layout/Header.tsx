@@ -37,7 +37,7 @@ import { ToastContainer, useToast } from '../ui/Toast';
 import { saveFile, isTauriApp } from '../../services/fileSave';
 import { loadContentOrOGSUrl, getFilenameForSGF } from '../../services/ogsLoader';
 import { readClipboardText, writeClipboardText } from '../../services/clipboard';
-import { AIAnalysisConfig } from '../ai/AIAnalysisConfig';
+import { KayaConfig } from '../ai/KayaConfig';
 
 import type { VersionData } from './StatusBar';
 
@@ -669,7 +669,7 @@ export const Header: React.FC<HeaderProps> = ({
         className="header-right-group"
         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
       >
-        <AIAnalysisConfig />
+        <KayaConfig />
         {showThemeToggle && (
           <div className="header-toggles">
             {onToggleLibrary && (

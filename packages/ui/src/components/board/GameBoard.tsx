@@ -63,8 +63,16 @@ interface GameBoardProps {
 export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
   const { t } = useTranslation();
   // Use optimized selectors instead of full useGameTree
-  const { currentBoard, currentNode, nextMoveNode, markerMap, gameInfo, moveNumber, gameId } =
-    useGameTreeBoard();
+  const {
+    currentBoard,
+    currentNode,
+    nextMoveNode,
+    markerMap,
+    gameInfo,
+    moveNumber,
+    gameId,
+    gameSettings,
+  } = useGameTreeBoard();
   const { playMove, resign, placeStoneDirect, removeSetupStone } = useGameTreeActions();
   const { scoringMode, deadStones, toggleDeadStones, toggleScoringMode, territoryMap } =
     useGameTreeScore();
@@ -161,7 +169,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
 
   // Fuzzy placement: Completely decoupled from board state
   // Maps are stable per game and never regenerate during play
-  const fuzzyEnabled = true; // Can be made configurable later
+  const fuzzyEnabled = gameSettings.fuzzyStonePlacement;
   const { shiftMap, randomMap } = useFuzzyPlacement({
     enabled: fuzzyEnabled,
     width: boardWidth,
