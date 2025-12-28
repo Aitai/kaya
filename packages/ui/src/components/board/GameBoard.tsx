@@ -99,6 +99,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
   const [showNextMove, setShowNextMove] = useState(false);
   const [showResignConfirm, setShowResignConfirm] = useState(false);
   const [isGeneratingMove, setIsGeneratingMove] = useState(false);
+  const [pendingSuggestMove, setPendingSuggestMove] = useState(false);
 
   // AI Move generation
   const { isModelLoaded, analysisMode: aiAnalysisMode, setAnalysisMode } = useGameTree();
@@ -580,26 +581,12 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     setShowResignConfirm(false);
   }, []);
 
-  // Handler for AI move suggestion (separate from analysis)
-  const handleSuggestMove = useCallback(async () => {
-    if (!isModelLoaded) {
-      showToast(t('gameboardActions.loadAiModelFirst'), 'error');
-      return;
-    }
-
-    // If engine is not ready yet, we need to wait for it
-    // The engine should be initialized when a model is loaded
-    if (!aiEngine) {
-      // If analysis mode is not enabled, enable it to initialize the engine
-      // and try again - the user will need to click again
-      if (!aiAnalysisMode) {
-        setAnalysisMode(true);
-      }
-      showToast(t('gameboardActions.aiEngineInitializing'), 'info');
-      return;
-    }
+  // Core move generation logic (used by both manual trigger and auto-trigger)
+  const executeGenerateMove = useCallback(async () => {
+    if (!aiEngine || !isModelLoaded) return;
 
     setIsGeneratingMove(true);
+    setPendingSuggestMove(false);
     try {
       // Get the current board state
       const signMap = currentBoard.signMap;
@@ -628,18 +615,39 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     } finally {
       setIsGeneratingMove(false);
     }
-  }, [
-    isModelLoaded,
-    aiAnalysisMode,
-    setAnalysisMode,
-    aiEngine,
-    currentBoard,
-    currentPlayer,
-    gameInfo.komi,
-    playMove,
-    showToast,
-    t,
-  ]);
+  }, [aiEngine, isModelLoaded, currentBoard, currentPlayer, gameInfo.komi, playMove, showToast, t]);
+
+  // Handler for AI move suggestion (separate from analysis)
+  const handleSuggestMove = useCallback(async () => {
+    if (!isModelLoaded) {
+      showToast(t('gameboardActions.loadAiModelFirst'), 'error');
+      return;
+    }
+
+    // If engine is ready, generate move immediately
+    if (aiEngine) {
+      await executeGenerateMove();
+      return;
+    }
+
+    // Engine not ready - queue the request and initialize
+    setPendingSuggestMove(true);
+    setIsGeneratingMove(true);
+
+    // If analysis mode is not enabled, enable it to initialize the engine
+    if (!aiAnalysisMode) {
+      setAnalysisMode(true);
+    }
+
+    showToast(t('gameboardActions.initializingAiEngine'), 'info');
+  }, [isModelLoaded, aiAnalysisMode, setAnalysisMode, aiEngine, executeGenerateMove, showToast, t]);
+
+  // Auto-trigger move generation when engine becomes available and a request is pending
+  useEffect(() => {
+    if (pendingSuggestMove && aiEngine && isModelLoaded) {
+      executeGenerateMove();
+    }
+  }, [pendingSuggestMove, aiEngine, isModelLoaded, executeGenerateMove]);
 
   // Calculate score when in scoring mode
   const scoreData: ScoreData | null = useMemo(() => {
