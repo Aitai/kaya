@@ -454,6 +454,7 @@ jobs:
             desktop-macos-latest/**/*.app.tar.gz
             desktop-macos-latest/**/*.app.tar.gz.sig
             desktop-ubuntu-22.04/**/*.deb
+            desktop-ubuntu-22.04/**/*.rpm
             desktop-ubuntu-22.04/**/*.AppImage
             desktop-ubuntu-22.04/**/*.AppImage.sig
             desktop-windows-latest/**/*.msi
@@ -475,7 +476,8 @@ jobs:
             | **Windows** (x64) | [.exe](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/Kaya_${{ github.event.inputs.version }}_x64-setup.exe) | [.sig](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/Kaya_${{ github.event.inputs.version }}_x64-setup.exe.sig) |
             | **Windows** (MSI) | [.msi](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/Kaya_${{ github.event.inputs.version }}_x64_en-US.msi) | [.sig](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/Kaya_${{ github.event.inputs.version }}_x64_en-US.msi.sig) |
             | **Linux** (AppImage) | [.AppImage](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/Kaya_${{ github.event.inputs.version }}_amd64.AppImage) | [.sig](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/Kaya_${{ github.event.inputs.version }}_amd64.AppImage.sig) |
-            | **Linux** (Debian) | [.deb](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/kaya_${{ github.event.inputs.version }}_amd64.deb) | - |
+            | **Linux** (Debian/Ubuntu) | [.deb](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/kaya_${{ github.event.inputs.version }}_amd64.deb) | - |
+            | **Linux** (Fedora/RHEL) | [.rpm](https://github.com/kaya-go/kaya/releases/download/v${{ github.event.inputs.version }}/kaya-${{ github.event.inputs.version }}-1.x86_64.rpm) | - |
 
             ## Installation
 
