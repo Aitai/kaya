@@ -7,6 +7,7 @@
 **A modern, elegant Go (Baduk/Weiqi) game application**
 
 [![GitHub Release](https://img.shields.io/github/v/release/kaya-go/kaya)](https://github.com/kaya-go/kaya/releases/latest)
+[![GitHub Downloads](https://img.shields.io/github/downloads/kaya-go/kaya/total)](https://github.com/kaya-go/kaya/releases)
 [![CI](https://github.com/kaya-go/kaya/workflows/CI/badge.svg)](https://github.com/kaya-go/kaya/actions)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
