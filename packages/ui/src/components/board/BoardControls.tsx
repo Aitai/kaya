@@ -34,11 +34,8 @@ import {
   useGameTreeScore,
 } from '../../contexts/selectors';
 import { useBoardNavigation } from '../../contexts/BoardNavigationContext';
-import { useGameTree } from '../../contexts/GameTreeContext';
-import { useAIAnalysis } from '../../contexts/AIAnalysisContext';
 import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
 import { useToast } from '../ui/Toast';
-import { parseGTPCoordinate } from '../../utils/gtpUtils';
 import './BoardControls.css';
 
 export const BoardControls: React.FC = memo(() => {
@@ -71,11 +68,8 @@ export const BoardControls: React.FC = memo(() => {
   const { scoringMode, toggleScoringMode, autoEstimateDeadStones, clearDeadStones, isEstimating } =
     useGameTreeScore();
   const { navigationMode } = useBoardNavigation();
-  const { isModelLoaded, analysisMode, setAnalysisMode } = useGameTree();
-  const { aiEngine } = useAIAnalysis();
   const { showToast } = useToast();
   const [showResignConfirm, setShowResignConfirm] = useState(false);
-  const [isGeneratingMove, setIsGeneratingMove] = useState(false);
 
   // State for inline editing
   const [editingMove, setEditingMove] = useState(false);
@@ -256,73 +250,6 @@ export const BoardControls: React.FC = memo(() => {
     setShowResignConfirm(false);
   }, []);
 
-  // Handler for AI move generation
-  const handleGenerateAIMove = useCallback(async () => {
-    if (!isModelLoaded) {
-      showToast('Please load an AI model first', 'error');
-      return;
-    }
-
-    // Enable analysis mode if not already enabled (to initialize the engine)
-    if (!analysisMode) {
-      setAnalysisMode(true);
-      showToast('Initializing AI engine...', 'info');
-      return;
-    }
-
-    if (!aiEngine) {
-      showToast('AI engine is initializing, please try again', 'info');
-      return;
-    }
-
-    // Check if the engine supports generateMove (only TauriEngine has this method)
-    if (!('generateMove' in aiEngine)) {
-      showToast('Move generation is only available with native engine', 'error');
-      return;
-    }
-
-    setIsGeneratingMove(true);
-    try {
-      // Get the current board state
-      const signMap = currentBoard.signMap;
-
-      // Determine whose turn it is
-      const nextToPlay = currentPlayer === 1 ? 'B' : 'W';
-
-      // Generate the move
-      const moveStr = await (aiEngine as any).generateMove(signMap, {
-        komi: gameInfo.komi ?? 7.5,
-        nextToPlay,
-      });
-
-      // Parse the move and play it
-      const vertex = parseGTPCoordinate(moveStr, currentBoard.width);
-
-      if (vertex === null) {
-        // PASS move
-        playMove([-1, -1], currentPlayer);
-      } else {
-        // Valid coordinate move
-        playMove(vertex, currentPlayer);
-      }
-    } catch (error) {
-      console.error('Failed to generate AI move:', error);
-      showToast('Failed to generate AI move', 'error');
-    } finally {
-      setIsGeneratingMove(false);
-    }
-  }, [
-    isModelLoaded,
-    analysisMode,
-    setAnalysisMode,
-    aiEngine,
-    currentBoard,
-    currentPlayer,
-    gameInfo.komi,
-    playMove,
-    showToast,
-  ]);
-
   // Handlers for inline editing
   const handleMoveClick = useCallback(() => {
     setEditValue(String(moveNumber));
@@ -428,30 +355,6 @@ export const BoardControls: React.FC = memo(() => {
           </div>
         ) : (
           <>
-            {/* AI Move Generation */}
-            {isModelLoaded && (
-              <div className="ai-move-row">
-                <button
-                  onClick={handleGenerateAIMove}
-                  disabled={isGeneratingMove}
-                  title="Generate AI move for current player"
-                  className="scoring-button scoring-auto"
-                  style={{ marginBottom: '8px' }}
-                >
-                  {isGeneratingMove ? (
-                    <>
-                      <LuLoader size={18} className="spinner" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <LuBrain size={18} />
-                      AI Move
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
             {/* Branch navigation row - works even when deep in a branch */}
             {branchInfo.hasBranches && (
               <div className="branch-controls-row">

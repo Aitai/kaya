@@ -25,6 +25,7 @@ import {
   LuInfo,
   LuX,
   LuLayers,
+  LuLoader,
 } from 'react-icons/lu';
 import { createPortal } from 'react-dom';
 import { sgfToVertex } from '@kaya/sgf';
@@ -46,6 +47,10 @@ import { ScoreEstimator, type ScoreData } from './ScoreEstimator';
 import { calculateTerritory, countDeadStones } from '../../services/scoring';
 import { EditToolbar } from '../editors/EditToolbar';
 import { useAIAnalysis } from '../ai/AIAnalysisOverlay';
+import { useAIAnalysis as useAIEngine } from '../../contexts/AIAnalysisContext';
+import { useGameTree } from '../../contexts/GameTreeContext';
+import { useToast } from '../ui/Toast';
+import { parseGTPCoordinate } from '../../utils/gtpUtils';
 import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
 import { AnalysisLegendModal } from '../analysis/AnalysisLegendModal';
 import './GameBoard.css';
@@ -84,6 +89,12 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
 
   const [showNextMove, setShowNextMove] = useState(false);
   const [showResignConfirm, setShowResignConfirm] = useState(false);
+  const [isGeneratingMove, setIsGeneratingMove] = useState(false);
+
+  // AI Move generation
+  const { isModelLoaded, analysisMode: aiAnalysisMode, setAnalysisMode } = useGameTree();
+  const { aiEngine } = useAIEngine();
+  const { showToast } = useToast();
 
   const nextMove = useMemo(() => {
     if (!showNextMove || !nextMoveNode) return null;
@@ -560,6 +571,73 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     setShowResignConfirm(false);
   }, []);
 
+  // Handler for AI move generation
+  const handleGenerateAIMove = useCallback(async () => {
+    if (!isModelLoaded) {
+      showToast('Please load an AI model first', 'error');
+      return;
+    }
+
+    // Enable analysis mode if not already enabled (to initialize the engine)
+    if (!aiAnalysisMode) {
+      setAnalysisMode(true);
+      showToast('Initializing AI engine...', 'info');
+      return;
+    }
+
+    if (!aiEngine) {
+      showToast('AI engine is initializing, please try again', 'info');
+      return;
+    }
+
+    // Check if the engine supports generateMove (only TauriEngine has this method)
+    if (!('generateMove' in aiEngine)) {
+      showToast('Move generation is only available with native engine', 'error');
+      return;
+    }
+
+    setIsGeneratingMove(true);
+    try {
+      // Get the current board state
+      const signMap = currentBoard.signMap;
+
+      // Determine whose turn it is (use existing currentPlayer from component scope)
+      const nextToPlay = currentPlayer === 1 ? 'B' : 'W';
+
+      // Generate the move
+      const moveStr = await (aiEngine as any).generateMove(signMap, {
+        komi: gameInfo.komi ?? 7.5,
+        nextToPlay,
+      });
+
+      // Parse the move and play it
+      const vertex = parseGTPCoordinate(moveStr, currentBoard.width);
+
+      if (vertex === null) {
+        // PASS move
+        playMove([-1, -1], currentPlayer);
+      } else {
+        // Valid coordinate move
+        playMove(vertex, currentPlayer);
+      }
+    } catch (error) {
+      console.error('Failed to generate AI move:', error);
+      showToast('Failed to generate AI move', 'error');
+    } finally {
+      setIsGeneratingMove(false);
+    }
+  }, [
+    isModelLoaded,
+    aiAnalysisMode,
+    setAnalysisMode,
+    aiEngine,
+    currentBoard,
+    currentPlayer,
+    gameInfo.komi,
+    playMove,
+    showToast,
+  ]);
+
   // Calculate score when in scoring mode
   const scoreData: ScoreData | null = useMemo(() => {
     if (!scoringMode) return null;
@@ -769,6 +847,17 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
             {showNextMove ? t('gameboardActions.hide') : t('gameboardActions.show')}
           </span>
         </button>
+        {isModelLoaded && (
+          <button
+            onClick={handleGenerateAIMove}
+            disabled={isGeneratingMove || scoringMode || editMode}
+            className="gameboard-action-button gameboard-ai-move-button"
+            title="Generate AI move for current player"
+          >
+            {isGeneratingMove ? <LuLoader size={16} className="spinner" /> : <LuBrain size={16} />}
+            <span className="btn-text">{isGeneratingMove ? 'Generating...' : 'AI Move'}</span>
+          </button>
+        )}
       </div>
       {(showAnalysisBar || isFullGameAnalyzing) && (
         <div className="ai-analysis-summary">
