@@ -98,6 +98,7 @@
     "downloadModel": "Scarica modello",
     "deleteModel": "Elimina modello",
     "uploadCustomModel": "Carica modello personalizzato",
+    "uploadCustomModelDescription": "Per utenti avanzati. Converti i pesi KataGo in formato ONNX usando:",
     "settings": "Impostazioni",
     "inferenceBackend": "Backend di inferenza",
     "inferenceBackendDescription": "Scegli come eseguire il modello IA. Native è il più veloce, WebGPU usa la GPU, WASM usa la CPU (massima compatibilità).",

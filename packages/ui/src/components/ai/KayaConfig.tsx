@@ -357,6 +357,16 @@ export const KayaConfig: React.FC = () => {
           >
             <LuUpload size={16} /> {t('aiConfig.uploadCustomModel')}
           </button>
+          <p className="model-upload-description">
+            {t('aiConfig.uploadCustomModelDescription')}{' '}
+            <a
+              href="https://github.com/kaya-go/katago-onnx"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              kaya-go/katago-onnx
+            </a>
+          </p>
         </div>
       </section>
 

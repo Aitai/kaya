@@ -505,6 +505,23 @@
   cursor: not-allowed;
 }
 
+.model-upload-description {
+  margin: 8px 0 0 0;
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #888);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.model-upload-description a {
+  color: var(--accent-color, #007bff);
+  text-decoration: none;
+}
+
+.model-upload-description a:hover {
+  text-decoration: underline;
+}
+
 /* Settings Section - Redesigned with Two Columns */
 .settings-list {
   display: grid;
