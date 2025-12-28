@@ -160,7 +160,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          # Use ubuntu-22.04 for Linux builds for better glibc/library compatibility
+          # See: https://tauri.app/distribute/appimage/#limitations
+          # Building on older systems provides broader compatibility with various Linux distros
+          - platform: ubuntu-22.04
+          - platform: macos-latest
+          - platform: windows-latest
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -415,9 +421,9 @@ jobs:
             desktop-macos-latest/**/*.dmg.sig
             desktop-macos-latest/**/*.app.tar.gz
             desktop-macos-latest/**/*.app.tar.gz.sig
-            desktop-ubuntu-latest/**/*.deb
-            desktop-ubuntu-latest/**/*.AppImage
-            desktop-ubuntu-latest/**/*.AppImage.sig
+            desktop-ubuntu-22.04/**/*.deb
+            desktop-ubuntu-22.04/**/*.AppImage
+            desktop-ubuntu-22.04/**/*.AppImage.sig
             desktop-windows-latest/**/*.msi
             desktop-windows-latest/**/*.msi.sig
             desktop-windows-latest/**/*.exe
