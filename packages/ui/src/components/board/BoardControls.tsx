@@ -25,6 +25,7 @@ import {
   LuCalculator,
   LuLoader,
   LuX,
+  LuBrain,
 } from 'react-icons/lu';
 import {
   useGameTreeNavigation,
@@ -33,7 +34,9 @@ import {
   useGameTreeScore,
 } from '../../contexts/selectors';
 import { useBoardNavigation } from '../../contexts/BoardNavigationContext';
+import { useGameTree } from '../../contexts/GameTreeContext';
 import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
+import { useToast } from '../ui/Toast';
 import './BoardControls.css';
 
 export const BoardControls: React.FC = memo(() => {
@@ -66,7 +69,10 @@ export const BoardControls: React.FC = memo(() => {
   const { scoringMode, toggleScoringMode, autoEstimateDeadStones, clearDeadStones, isEstimating } =
     useGameTreeScore();
   const { navigationMode } = useBoardNavigation();
+  const { aiEngine, customAIModel } = useGameTree();
+  const { showToast } = useToast();
   const [showResignConfirm, setShowResignConfirm] = useState(false);
+  const [isGeneratingMove, setIsGeneratingMove] = useState(false);
 
   // State for inline editing
   const [editingMove, setEditingMove] = useState(false);
@@ -247,6 +253,50 @@ export const BoardControls: React.FC = memo(() => {
     setShowResignConfirm(false);
   }, []);
 
+  // Handler for AI move generation
+  const handleGenerateAIMove = useCallback(async () => {
+    if (!aiEngine || !customAIModel) {
+      showToast('Please load an AI model first', 'error');
+      return;
+    }
+
+    setIsGeneratingMove(true);
+    try {
+      // Get the current board state
+      const signMap = currentBoard.signMap;
+
+      // Determine whose turn it is
+      const nextToPlay = currentPlayer === 1 ? 'B' : 'W';
+
+      // Generate the move
+      const moveStr = await aiEngine.generateMove(signMap, {
+        komi: gameInfo.komi ?? 7.5,
+        nextToPlay,
+      });
+
+      // Parse the move and play it
+      if (moveStr === 'PASS') {
+        playMove([-1, -1], currentPlayer);
+      } else {
+        // Parse GTP format (e.g., "D4")
+        const letters = 'ABCDEFGHJKLMNOPQRST';
+        const x = letters.indexOf(moveStr[0].toUpperCase());
+        const y = currentBoard.height - parseInt(moveStr.slice(1), 10);
+
+        if (x >= 0 && y >= 0 && x < currentBoard.width && y < currentBoard.height) {
+          playMove([x, y], currentPlayer);
+        } else {
+          showToast('Invalid move generated', 'error');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to generate AI move:', error);
+      showToast('Failed to generate AI move', 'error');
+    } finally {
+      setIsGeneratingMove(false);
+    }
+  }, [aiEngine, customAIModel, currentBoard, currentPlayer, gameInfo.komi, playMove, showToast]);
+
   // Handlers for inline editing
   const handleMoveClick = useCallback(() => {
     setEditValue(String(moveNumber));
@@ -352,6 +402,30 @@ export const BoardControls: React.FC = memo(() => {
           </div>
         ) : (
           <>
+            {/* AI Move Generation */}
+            {aiEngine && customAIModel && (
+              <div className="ai-move-row">
+                <button
+                  onClick={handleGenerateAIMove}
+                  disabled={isGeneratingMove}
+                  title="Generate AI move for current player"
+                  className="scoring-button scoring-auto"
+                  style={{ marginBottom: '8px' }}
+                >
+                  {isGeneratingMove ? (
+                    <>
+                      <LuLoader size={18} className="spinner" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <LuBrain size={18} />
+                      AI Move
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
             {/* Branch navigation row - works even when deep in a branch */}
             {branchInfo.hasBranches && (
               <div className="branch-controls-row">

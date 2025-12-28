@@ -36,6 +36,7 @@ fn main() {
             commands::onnx_get_available_providers,
             commands::onnx_set_provider_preference,
             commands::onnx_get_provider_preference,
+            commands::onnx_generate_move,
         ])
         .setup(|app| {
             // Restore window state for the current monitor setup

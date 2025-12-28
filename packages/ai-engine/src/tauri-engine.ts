@@ -522,4 +522,42 @@ export class TauriEngine extends Engine {
       return [];
     }
   }
+
+  /**
+   * Generate a move for whoever's turn it is
+   * Returns the best move as a GTP string (e.g., "D4", "Q16", "PASS")
+   */
+  async generateMove(signMap: SignMap, options: EngineAnalysisOptions): Promise<string> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    if (!this.invoke) {
+      throw new Error('TauriEngine can only be used in a Tauri environment');
+    }
+
+    // Convert SignMap to number[][] for Rust
+    const signMapArray = signMap.map(row => row.map(s => s as number));
+
+    // Prepare options for Rust
+    const tauriOptions: TauriAnalysisOptions = {
+      komi: options.komi ?? 7.5,
+      nextToPlay: options.nextToPlay,
+      history: this.convertHistory(options.history),
+    };
+
+    this.debugLog('Generating move', {
+      boardSize: signMap.length,
+      nextToPlay: tauriOptions.nextToPlay,
+    });
+
+    const move = await this.invoke<string>('onnx_generate_move', {
+      signMap: signMapArray,
+      options: tauriOptions,
+    });
+
+    this.debugLog('Generated move', { move });
+
+    return move;
+  }
 }
