@@ -257,24 +257,3 @@ pub fn onnx_get_provider_preference() -> String {
         ExecutionProviderPreference::Cpu => "cpu",
     }.to_string()
 }
-
-/// Generate a move for whoever's turn it is
-/// Returns the best move suggestion from the AI
-#[tauri::command]
-pub async fn onnx_generate_move(
-    sign_map: Vec<Vec<i8>>,
-    options: AnalysisOptions,
-) -> Result<String, String> {
-    tokio::task::spawn_blocking(move || {
-        let result = onnx_engine::analyze_position(sign_map, options)?;
-
-        // Return the best move (first in the suggestions list)
-        result
-            .move_suggestions
-            .first()
-            .map(|suggestion| suggestion.move_str.clone())
-            .ok_or_else(|| "No move suggestions available".to_string())
-    })
-    .await
-    .map_err(|e| format!("Task failed: {}", e))?
-}
