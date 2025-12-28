@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "Modello scaricato con successo",
     "modelDownloadFailed": "Download modello fallito",
     "modelDeletedSuccess": "Modello eliminato",
-    "modelDeleteFailed": "Eliminazione modello fallita"
+    "modelDeleteFailed": "Eliminazione modello fallita",
+    "getStartedTitle": "Inizia con l'analisi IA",
+    "getStartedDescription": "Scarica un modello per attivare i suggerimenti di mosse e l'analisi delle partite con l'IA.",
+    "downloadRecommended": "Scarica il modello consigliato",
+    "downloading": "Download in corso...",
+    "poweredBy": "Motore IA basato su"
   },
 
   "kayaConfig": {

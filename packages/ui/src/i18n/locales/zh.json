@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "模型下载成功",
     "modelDownloadFailed": "模型下载失败",
     "modelDeletedSuccess": "模型已删除",
-    "modelDeleteFailed": "模型删除失败"
+    "modelDeleteFailed": "删除模型失败",
+    "getStartedTitle": "开始 AI 分析",
+    "getStartedDescription": "下载模型以启用 AI 走法建议和对局分析。",
+    "downloadRecommended": "下载推荐模型",
+    "downloading": "下载中...",
+    "poweredBy": "AI 引擎基于"
   },
 
   "kayaConfig": {

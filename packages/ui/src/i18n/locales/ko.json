@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "모델 다운로드 성공",
     "modelDownloadFailed": "모델 다운로드 실패",
     "modelDeletedSuccess": "모델 삭제 완료",
-    "modelDeleteFailed": "모델 삭제 실패"
+    "modelDeleteFailed": "모델 삭제 실패",
+    "getStartedTitle": "AI 분석 시작하기",
+    "getStartedDescription": "모델을 다운로드하여 AI 기반 수 제안 및 게임 분석을 활성화하세요.",
+    "downloadRecommended": "추천 모델 다운로드",
+    "downloading": "다운로드 중...",
+    "poweredBy": "AI 엔진:"
   },
 
   "kayaConfig": {

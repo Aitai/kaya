@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "Modell erfolgreich heruntergeladen",
     "modelDownloadFailed": "Modell-Download fehlgeschlagen",
     "modelDeletedSuccess": "Modell gelöscht",
-    "modelDeleteFailed": "Modell löschen fehlgeschlagen"
+    "modelDeleteFailed": "Modell löschen fehlgeschlagen",
+    "getStartedTitle": "KI-Analyse starten",
+    "getStartedDescription": "Laden Sie ein Modell herunter, um KI-gestützte Zugvorschläge und Spielanalysen zu aktivieren.",
+    "downloadRecommended": "Empfohlenes Modell herunterladen",
+    "downloading": "Wird heruntergeladen...",
+    "poweredBy": "KI-Engine basiert auf"
   },
 
   "kayaConfig": {

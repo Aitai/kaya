@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "Modelo descargado correctamente",
     "modelDownloadFailed": "Error al descargar el modelo",
     "modelDeletedSuccess": "Modelo eliminado",
-    "modelDeleteFailed": "Error al eliminar el modelo"
+    "modelDeleteFailed": "Error al eliminar el modelo",
+    "getStartedTitle": "Comenzar con el análisis IA",
+    "getStartedDescription": "Descarga un modelo para activar las sugerencias de jugadas y el análisis de partidas con IA.",
+    "downloadRecommended": "Descargar modelo recomendado",
+    "downloading": "Descargando...",
+    "poweredBy": "Motor de IA basado en"
   },
 
   "kayaConfig": {

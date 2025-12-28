@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "Model downloaded successfully",
     "modelDownloadFailed": "Failed to download model",
     "modelDeletedSuccess": "Model deleted",
-    "modelDeleteFailed": "Failed to delete model"
+    "modelDeleteFailed": "Failed to delete model",
+    "getStartedTitle": "Get Started with AI Analysis",
+    "getStartedDescription": "Download a model to enable AI-powered move suggestions and game analysis.",
+    "downloadRecommended": "Download Recommended Model",
+    "downloading": "Downloading...",
+    "poweredBy": "AI engine powered by"
   },
 
   "kayaConfig": {

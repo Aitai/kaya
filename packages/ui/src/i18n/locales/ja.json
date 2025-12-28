@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "モデルのダウンロード成功",
     "modelDownloadFailed": "モデルのダウンロード失敗",
     "modelDeletedSuccess": "モデル削除完了",
-    "modelDeleteFailed": "モデルの削除失敗"
+    "modelDeleteFailed": "モデルの削除失敗",
+    "getStartedTitle": "AI分析を始める",
+    "getStartedDescription": "モデルをダウンロードして、AIによる着手提案と局面分析を有効にしましょう。",
+    "downloadRecommended": "おすすめモデルをダウンロード",
+    "downloading": "ダウンロード中...",
+    "poweredBy": "AIエンジン:"
   },
 
   "kayaConfig": {

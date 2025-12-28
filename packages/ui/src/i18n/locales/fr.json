@@ -117,7 +117,12 @@
     "modelDownloadedSuccess": "Modèle téléchargé avec succès",
     "modelDownloadFailed": "Échec du téléchargement",
     "modelDeletedSuccess": "Modèle supprimé",
-    "modelDeleteFailed": "Échec de la suppression"
+    "modelDeleteFailed": "Échec de la suppression",
+    "getStartedTitle": "Démarrer l'analyse IA",
+    "getStartedDescription": "Téléchargez un modèle pour activer les suggestions de coups et l'analyse de partie par l'IA.",
+    "downloadRecommended": "Télécharger le modèle recommandé",
+    "downloading": "Téléchargement...",
+    "poweredBy": "Moteur IA basé sur"
   },
 
   "kayaConfig": {
