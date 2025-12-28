@@ -61,7 +61,7 @@ export const AnalysisChart: React.FC<AnalysisChartProps> = ({
 
   // Fixed height, dynamic width based on container
   const chartHeight = 150;
-  const padding = { top: 12, right: 36, bottom: 20, left: 40 };
+  const padding = { top: 12, right: 36, bottom: 28, left: 40 };
 
   // Measure container width with ResizeObserver
   // Uses contentRect to avoid forced reflows (clientWidth triggers layout)
