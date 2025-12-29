@@ -78,17 +78,15 @@ fn main() {
                 app.set_menu(menu)?;
             }
 
+            // On Linux/Windows, show only a Help menu (no File menu since Quit is redundant with window controls)
             #[cfg(not(target_os = "macos"))]
             {
-                let file_menu = Submenu::new(handle, "File", true)?;
-                file_menu.append(&PredefinedMenuItem::quit(handle, None::<&str>)?)?;
-
                 let help_menu = Submenu::new(handle, "Help", true)?;
                 help_menu.append(&check_update)?;
                 help_menu.append(&PredefinedMenuItem::separator(handle)?)?;
                 help_menu.append(&PredefinedMenuItem::about(handle, None::<&str>, None)?)?;
 
-                let menu = Menu::with_items(handle, &[&file_menu, &help_menu])?;
+                let menu = Menu::with_items(handle, &[&help_menu])?;
                 app.set_menu(menu)?;
             }
 
