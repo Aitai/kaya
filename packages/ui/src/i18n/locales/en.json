@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "Toggle Ownership Heatmap",
     "toggleTopMoves": "Toggle Top Moves",
+    "toggleWinRate": "Toggle Win Rate Graph",
+    "toggleScore": "Toggle Score Graph",
+    "winRate": "Win Rate",
+    "score": "Score",
+    "visualizationGroup": "Visualization Options",
+    "actionsGroup": "Analysis Actions",
     "analyzeFullGame": "Analyze Full Game",
     "stopAnalysis": "Stop Full Game Analysis",
     "waitingForEngine": "Waiting for engine...",

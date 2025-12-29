@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "地合いヒートマップ切替",
     "toggleTopMoves": "最善手表示切替",
+    "toggleWinRate": "勝率グラフ切替",
+    "toggleScore": "目差グラフ切替",
+    "winRate": "勝率",
+    "score": "目差",
+    "visualizationGroup": "表示オプション",
+    "actionsGroup": "分析アクション",
     "analyzeFullGame": "全局分析",
     "stopAnalysis": "全局分析を停止",
     "waitingForEngine": "エンジン待機中...",

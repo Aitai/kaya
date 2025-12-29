@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "Gebiets-Heatmap umschalten",
     "toggleTopMoves": "Beste Züge umschalten",
+    "toggleWinRate": "Gewinnrate-Grafik umschalten",
+    "toggleScore": "Punkte-Grafik umschalten",
+    "winRate": "Gewinnrate",
+    "score": "Punkte",
+    "visualizationGroup": "Visualisierungsoptionen",
+    "actionsGroup": "Analyse-Aktionen",
     "analyzeFullGame": "Gesamtes Spiel analysieren",
     "stopAnalysis": "Analyse stoppen",
     "waitingForEngine": "Warte auf Engine...",

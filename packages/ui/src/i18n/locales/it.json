@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "Attiva/disattiva mappa di calore territorio",
     "toggleTopMoves": "Attiva/disattiva migliori mosse",
+    "toggleWinRate": "Attiva/disattiva grafico tasso vittoria",
+    "toggleScore": "Attiva/disattiva grafico punteggio",
+    "winRate": "Tasso vittoria",
+    "score": "Punteggio",
+    "visualizationGroup": "Opzioni di visualizzazione",
+    "actionsGroup": "Azioni di analisi",
     "analyzeFullGame": "Analizza partita completa",
     "stopAnalysis": "Ferma analisi",
     "waitingForEngine": "In attesa del motore...",

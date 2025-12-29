@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "Afficher/masquer la carte de territoire",
     "toggleTopMoves": "Afficher/masquer les meilleurs coups",
+    "toggleWinRate": "Afficher/masquer le taux de victoire",
+    "toggleScore": "Afficher/masquer le score",
+    "winRate": "Taux de victoire",
+    "score": "Score",
+    "visualizationGroup": "Options de visualisation",
+    "actionsGroup": "Actions d'analyse",
     "analyzeFullGame": "Analyser la partie entière",
     "stopAnalysis": "Arrêter l'analyse",
     "waitingForEngine": "En attente du moteur...",

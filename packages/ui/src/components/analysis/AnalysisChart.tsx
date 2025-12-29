@@ -295,26 +295,6 @@ export const AnalysisChart: React.FC<AnalysisChartProps> = ({
 
   return (
     <div className="analysis-chart-container">
-      {/* Toggle buttons */}
-      <div className="analysis-chart-toggles">
-        <button
-          className={`analysis-chart-toggle ${showWinRate ? 'active' : ''}`}
-          onClick={onToggleWinRate}
-          title="Toggle Win Rate"
-        >
-          <span className="toggle-indicator toggle-winrate" />
-          Win Rate
-        </button>
-        <button
-          className={`analysis-chart-toggle ${showScoreLead ? 'active' : ''}`}
-          onClick={onToggleScoreLead}
-          title="Toggle Score Lead"
-        >
-          <span className="toggle-indicator toggle-score" />
-          Score
-        </button>
-      </div>
-
       {/* Chart */}
       <div ref={wrapperRef} className="analysis-chart-wrapper">
         <svg

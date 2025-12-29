@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "Alternar mapa de calor de territorio",
     "toggleTopMoves": "Alternar mejores movimientos",
+    "toggleWinRate": "Alternar gráfico de tasa de victoria",
+    "toggleScore": "Alternar gráfico de puntuación",
+    "winRate": "Tasa de victoria",
+    "score": "Puntuación",
+    "visualizationGroup": "Opciones de visualización",
+    "actionsGroup": "Acciones de análisis",
     "analyzeFullGame": "Analizar partida completa",
     "stopAnalysis": "Detener análisis",
     "waitingForEngine": "Esperando motor...",

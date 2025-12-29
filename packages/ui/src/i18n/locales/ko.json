@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "영역 히트맵 전환",
     "toggleTopMoves": "최선수 표시 전환",
+    "toggleWinRate": "승률 그래프 전환",
+    "toggleScore": "집수 그래프 전환",
+    "winRate": "승률",
+    "score": "집수",
+    "visualizationGroup": "시각화 옵션",
+    "actionsGroup": "분석 작업",
     "analyzeFullGame": "전체 대국 분석",
     "stopAnalysis": "전체 대국 분석 중지",
     "waitingForEngine": "엔진 대기 중...",

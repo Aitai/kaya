@@ -140,6 +140,12 @@
   "analysis": {
     "toggleOwnership": "切换地域热图",
     "toggleTopMoves": "切换最佳着法",
+    "toggleWinRate": "切换胜率图",
+    "toggleScore": "切换目差图",
+    "winRate": "胜率",
+    "score": "目差",
+    "visualizationGroup": "可视化选项",
+    "actionsGroup": "分析操作",
     "analyzeFullGame": "分析全局",
     "stopAnalysis": "停止全局分析",
     "waitingForEngine": "等待引擎...",
