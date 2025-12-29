@@ -44,11 +44,15 @@ jobs:
         id: version
         shell: bash
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          # Get base version and strip any pre-release suffix (e.g., -dev)
+          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
+          # Create nightly version with numeric date suffix (MSI requires numeric-only pre-release)
+          DATE_SUFFIX=$(date -u +"%Y%m%d")
+          NIGHTLY_VERSION="${BASE_VERSION}-${DATE_SUFFIX}"
           SHORT_SHA=$(git rev-parse --short HEAD)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=$NIGHTLY_VERSION" >> "$GITHUB_OUTPUT"
           echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
-          echo "Build version: $VERSION ($SHORT_SHA)"
+          echo "Build version: $NIGHTLY_VERSION ($SHORT_SHA)"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -187,6 +191,9 @@ jobs:
 
           # Verify certificate was imported
           security find-identity -v -p codesigning $KEYCHAIN_PATH
+
+      - name: Set nightly version
+        run: bun run set-version ${{ steps.version.outputs.version }}
 
       - name: Build desktop app (Linux)
         if: matrix.platform == 'ubuntu-22.04'
