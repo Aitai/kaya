@@ -65,7 +65,7 @@ Builds in parallel for 3 platforms:
 
 - **Ubuntu** → `.deb`, `.AppImage`
 - **macOS** → `.dmg` (Universal Binary for Intel & Apple Silicon)
-- **Windows** → `.msi`, `.exe`
+- **Windows** → `.exe`
 
 Each build:
 

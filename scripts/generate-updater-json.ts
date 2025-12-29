@@ -91,8 +91,8 @@ if (linuxSigFile) {
 }
 
 // Windows
-// Tauri v2 updater uses .msi or .exe for Windows
-const windowsSigFile = findFile('.', /\.msi\.sig$/);
+// Tauri v2 updater uses .exe (NSIS) for Windows
+const windowsSigFile = findFile('.', /\.exe\.sig$/);
 if (windowsSigFile) {
   const sigContent = getSignatureContent('.', windowsSigFile);
   const binaryName = windowsSigFile.replace('.sig', '');

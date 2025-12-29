@@ -79,7 +79,7 @@ checkForUpdates(true);
 When you create a release using the GitHub Actions workflow:
 
 1. Builds are created for all platforms
-2. Signatures are generated for each installer (`.dmg.sig`, `.AppImage.sig`, `.msi.sig`)
+2. Signatures are generated for each installer (`.dmg.sig`, `.AppImage.sig`, `.exe.sig`)
 3. `latest.json` is generated with download URLs and signatures
 4. All files are uploaded to the GitHub release
 
@@ -97,7 +97,7 @@ The `latest.json` looks like this:
     },
     "windows-x86_64": {
       "signature": "...",
-      "url": "https://github.com/kaya-go/kaya/releases/download/v0.1.0/Kaya_0.1.0_x64_en-US.msi"
+      "url": "https://github.com/kaya-go/kaya/releases/download/v0.1.0/Kaya_0.1.0_x64-setup.exe"
     },
     "linux-x86_64": {
       "signature": "...",

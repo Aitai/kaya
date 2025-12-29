@@ -54,7 +54,7 @@
 
 | Platform       | File        | Download                                                         |
 | -------------- | ----------- | ---------------------------------------------------------------- |
-| 🪟 **Windows** | `.msi`      | [Releases page](https://github.com/kaya-go/kaya/releases/latest) |
+| 🪟 **Windows** | `.exe`      | [Releases page](https://github.com/kaya-go/kaya/releases/latest) |
 | 🍎 **macOS**   | `.dmg`      | [Releases page](https://github.com/kaya-go/kaya/releases/latest) |
 | 🐧 **Linux**   | `.AppImage` | [Releases page](https://github.com/kaya-go/kaya/releases/latest) |
 | 🌐 **Web**     | —           | [Open in browser](https://kaya-go.github.io/kaya)                |
