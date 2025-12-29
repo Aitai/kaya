@@ -183,8 +183,30 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     gameId,
   });
 
-  // Determine whose turn it is based on move number
-  const currentPlayer: Sign = moveNumber % 2 === 0 ? 1 : -1;
+  // Determine whose turn it is
+  // Check PL property first, then handicap, then alternate based on move number
+  const currentPlayer: Sign = useMemo(() => {
+    // If current node has a move, next player is the opposite
+    if (currentNode?.data.B) return -1; // Black just played, White's turn
+    if (currentNode?.data.W) return 1; // White just played, Black's turn
+
+    // No move on current node (root or setup position)
+    // Check PL (Player to play) property
+    if (currentNode?.data.PL?.[0]) {
+      return currentNode.data.PL[0] === 'W' ? -1 : 1;
+    }
+
+    // Check handicap - if handicap >= 2, White plays first
+    if (gameInfo.handicap && gameInfo.handicap >= 2) {
+      // In handicap game, White plays first (at move 0)
+      // So move 0 = White (-1), move 1 = Black (1), etc.
+      return moveNumber % 2 === 0 ? -1 : 1;
+    }
+
+    // Default: Black plays first
+    // move 0 = Black (1), move 1 = White (-1), etc.
+    return moveNumber % 2 === 0 ? 1 : -1;
+  }, [currentNode, gameInfo.handicap, moveNumber]);
 
   // Determine if we should show ghost stone (disable for non-stone edit tools)
   const shouldShowGhostStone = useMemo(() => {

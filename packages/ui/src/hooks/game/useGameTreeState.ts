@@ -5,8 +5,10 @@ import {
   stringify as stringifySGF,
   sgfNodeToGameTreeNode,
   extractGameInfo as extractGameInfoFromSGF,
+  vertexToSGF,
   type GameInfo,
 } from '@kaya/sgf';
+import { getHandicapStones, type Vertex } from '@kaya/goboard';
 import { type SGFProperty, type NewGameConfig } from '../../types/game';
 import { validateTreeIntegrity } from '../../utils/treeValidation';
 import { clearAllCaches } from '../../utils/gameCache';
@@ -324,8 +326,14 @@ export function useGameTreeState() {
     if (config?.rankWhite) rootData.WR = [config.rankWhite];
     if (config?.handicap && config.handicap > 0) {
       rootData.HA = [String(config.handicap)];
-      // Note: Handicap stones placement logic is usually handled by the UI or board logic
-      // We just set the property here. The actual AB property should be added if we want stones.
+      // Place handicap stones using AB (Add Black) property
+      const boardSize = config.boardSize || 19;
+      const handicapStones = getHandicapStones(boardSize, config.handicap);
+      if (handicapStones.length > 0) {
+        rootData.AB = handicapStones.map((vertex: Vertex) => vertexToSGF(vertex));
+      }
+      // White plays first after handicap stones are placed
+      rootData.PL = ['W'];
     }
 
     const newTree = new GameTree<SGFProperty>({

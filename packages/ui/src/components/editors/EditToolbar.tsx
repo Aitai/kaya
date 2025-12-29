@@ -33,7 +33,7 @@ import './EditToolbar.css';
 
 export const EditToolbar: React.FC = () => {
   const { t } = useTranslation();
-  const { currentNode } = useGameTreeBoard();
+  const { currentNode, gameInfo, moveNumber } = useGameTreeBoard();
   const { playMove } = useGameTreeActions();
   const {
     editTool,
@@ -56,13 +56,27 @@ export const EditToolbar: React.FC = () => {
   } = useGameTreeEdit();
 
   // Get current player from game tree
+  // Check PL property first, then handicap, then alternate based on move number
   const currentPlayer = React.useMemo(() => {
-    if (!currentNode) return 1; // Default to black
-    // Check if last move was black or white to determine next player
-    if (currentNode.data.B) return -1; // Last was black, next is white
-    if (currentNode.data.W) return 1; // Last was white, next is black
-    return 1; // Default to black
-  }, [currentNode]);
+    // If current node has a move, next player is the opposite
+    if (currentNode?.data.B) return -1; // Black just played, White's turn
+    if (currentNode?.data.W) return 1; // White just played, Black's turn
+
+    // No move on current node (root or setup position)
+    // Check PL (Player to play) property
+    if (currentNode?.data.PL?.[0]) {
+      return currentNode.data.PL[0] === 'W' ? -1 : 1;
+    }
+
+    // Check handicap - if handicap >= 2, White plays first
+    if (gameInfo.handicap && gameInfo.handicap >= 2) {
+      // In handicap game, White plays first (at move 0)
+      return moveNumber % 2 === 0 ? -1 : 1;
+    }
+
+    // Default: Black plays first
+    return moveNumber % 2 === 0 ? 1 : -1;
+  }, [currentNode, gameInfo.handicap, moveNumber]);
 
   const toolGroups = [
     {

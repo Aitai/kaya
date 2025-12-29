@@ -10,7 +10,7 @@
  * - Current player indicator
  */
 
-import React, { useCallback, useEffect, memo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, memo, useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   LuChevronLeft,
@@ -61,7 +61,7 @@ export const BoardControls: React.FC = memo(() => {
     moveNumber,
     totalMovesInBranch,
   } = useGameTreeNavigation();
-  const { currentBoard, gameInfo } = useGameTreeBoard();
+  const { currentBoard, currentNode, gameInfo } = useGameTreeBoard();
   const { playMove, resign } = useGameTreeActions();
   const { scoringMode, toggleScoringMode, autoEstimateDeadStones, clearDeadStones, isEstimating } =
     useGameTreeScore();
@@ -83,7 +83,27 @@ export const BoardControls: React.FC = memo(() => {
   }, [editingMove, editingBranch]);
 
   // Determine whose turn it is
-  const currentPlayer = moveNumber % 2 === 0 ? 1 : -1;
+  // Check PL property first, then handicap, then alternate based on move number
+  const currentPlayer = useMemo(() => {
+    // If current node has a move, next player is the opposite
+    if (currentNode?.data.B) return -1; // Black just played, White's turn
+    if (currentNode?.data.W) return 1; // White just played, Black's turn
+
+    // No move on current node (root or setup position)
+    // Check PL (Player to play) property
+    if (currentNode?.data.PL?.[0]) {
+      return currentNode.data.PL[0] === 'W' ? -1 : 1;
+    }
+
+    // Check handicap - if handicap >= 2, White plays first
+    if (gameInfo.handicap && gameInfo.handicap >= 2) {
+      // In handicap game, White plays first (at move 0)
+      return moveNumber % 2 === 0 ? -1 : 1;
+    }
+
+    // Default: Black plays first
+    return moveNumber % 2 === 0 ? 1 : -1;
+  }, [currentNode, gameInfo.handicap, moveNumber]);
 
   // Get captures from current board
   const capturesBlack = currentBoard.getCaptures(1);
