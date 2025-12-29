@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.11] - 2025-12-29
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ui)* Fix comment editing not working with shared context ([dfcbb02](https://github.com/kaya-go/kaya/commit/dfcbb02c8dfc5f1459ad20bfeea203bc10079fbb))
+
+- *(desktop)* Downgrade ndarray to 0.16 to match ort crate ([d10fac4](https://github.com/kaya-go/kaya/commit/d10fac44a09c4a99742a6b1952085c142be18a69))
+
+### <!-- 2 -->🚜 Refactor
+
+- *(e2e)* Split tests into separate files by feature ([da9a8fe](https://github.com/kaya-go/kaya/commit/da9a8fe98aebd1cf9ec8f89a929d8ac6773f486b))
+
+- *(scripts)* Add tauri:check script for rust compilation check ([b22b09e](https://github.com/kaya-go/kaya/commit/b22b09efa7335def6c8d470664b57b5d646811a2))
+
+### <!-- 6 -->🧪 Testing
+
+- Add unit tests and e2e tests with playwright ([a2b0c50](https://github.com/kaya-go/kaya/commit/a2b0c50a85c25e7835f57c8ec8e2e0c4ff9b91a8))
+
+- *(e2e)* Add comment editing tests ([7749b9f](https://github.com/kaya-go/kaya/commit/7749b9fb973e7cd846e5171635e7e1bfee63a996))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- *(ci)* Add github automation workflows and policies ([2ae303e](https://github.com/kaya-go/kaya/commit/2ae303ed87e84270f7896359385dea518528c959))
+
+- Remove optional scope validation from PR title check ([e3b6a27](https://github.com/kaya-go/kaya/commit/e3b6a27eedab7a2e2f48cb0dfef7e95f2e815385))
+
+- Remove unnecessary newline in PR title check workflow ([3e81d2d](https://github.com/kaya-go/kaya/commit/3e81d2dc2a09a8f96dc71568f9f7b875e9f75528))
+
+- *(ci)* Bump actions/labeler from 5 to 6 ([#16](https://github.com/kaya-go/kaya/issues/16))
+
+- *(ci)* Bump actions/checkout from 4 to 6 ([#18](https://github.com/kaya-go/kaya/issues/18))
+
+- *(ci)* Bump github/codeql-action from 3 to 4 ([#17](https://github.com/kaya-go/kaya/issues/17))
+
+- *(ci)* Bump actions/first-interaction from 1 to 3 ([#19](https://github.com/kaya-go/kaya/issues/19))
+
+- *(ci)* Bump mozilla-actions/sccache-action from 0.0.6 to 0.0.9 ([#21](https://github.com/kaya-go/kaya/issues/21))
+
+- *(ci)* Bump actions/stale from 9 to 10 ([#20](https://github.com/kaya-go/kaya/issues/20))
+
+- Remove CodeQL security analysis workflow ([12ddf53](https://github.com/kaya-go/kaya/commit/12ddf530ee379315169cc44296137db857e36dbc))
+
+- Add rust/tauri compilation check to PR builds ([772bb0a](https://github.com/kaya-go/kaya/commit/772bb0a875cb2e51f214c3d940b224cef13b6ef9))
+
 ## [0.1.10] - 2025-12-29
 
 ### <!-- 0 -->🚀 Features
@@ -23,6 +67,8 @@ All notable changes to this project will be documented in this file.
 - Add rpm to release artifacts and downloads table ([1b58a0d](https://github.com/kaya-go/kaya/commit/1b58a0d9119b22b438030147baa540a6695b35c6))
 
 - Add PR title validation for conventional commits ([464eefa](https://github.com/kaya-go/kaya/commit/464eefa66c2d2e152659b10928e37dc64caffffd))
+
+- Release v0.1.10 ([6f2d5be](https://github.com/kaya-go/kaya/commit/6f2d5be0cc0e7e873f597d65aaee6a81f5d1e093))
 
 ## [0.1.9] - 2025-12-28
 
