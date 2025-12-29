@@ -305,6 +305,7 @@
     "noComment": "Sin comentario. Haz clic para a\u00f1adir.",
     "placeholder": "Escribe un comentario (markdown soportado)...",
     "markdownHint": "Consejo: Usa markdown para formatear. Ctrl/Cmd+S para guardar, Esc para cancelar.",
+    "enterHint": "Enter para guardar • Shift+Enter para nueva línea • Esc para cancelar",
     "hint": "Consejo: Usa markdown para formatear. Ctrl/Cmd+S para guardar, Esc para cancelar.",
     "editComment": "Editar comentario",
     "save": "Guardar",

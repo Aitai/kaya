@@ -308,6 +308,7 @@
     "noComment": "无评论。点击添加。",
     "placeholder": "输入评论（支持 markdown）...",
     "markdownHint": "提示：使用 markdown 格式化。Ctrl/Cmd+S 保存，Esc 取消。",
+    "enterHint": "Enter 保存 • Shift+Enter 换行 • Esc 取消",
     "hint": "提示：使用 markdown 格式化。Ctrl/Cmd+S 保存，Esc 取消。",
     "editComment": "编辑评论",
     "save": "保存",

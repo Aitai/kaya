@@ -1,32 +1,130 @@
 /**
  * CommentEditor Component
  *
- * Displays and edits comments for the current move with markdown support
+ * Displays and edits comments for the current move with markdown support.
+ * Uses a shared context to synchronize state between header actions and editor.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext, createContext, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useGameTreeBoard, useGameTreeEdit } from '../../contexts/GameTreeContext';
 import './CommentEditor.css';
 
-// Header actions component for external use
-export const CommentHeaderActions: React.FC<{
+// ============================================================================
+// Context for shared editing state
+// ============================================================================
+
+interface CommentEditorContextValue {
   moveNumber: number;
   isEditing: boolean;
-  onEdit: () => void;
-  onSave: () => void;
-  onCancel: () => void;
-}> = ({ moveNumber, isEditing, onEdit, onSave, onCancel }) => {
+  editText: string;
+  setEditText: (text: string) => void;
+  currentComment: string;
+  currentNodeId: string | number | null;
+  handleEdit: () => void;
+  handleSave: () => void;
+  handleCancel: () => void;
+}
+
+const CommentEditorContext = createContext<CommentEditorContextValue | null>(null);
+
+/**
+ * Provider component that manages comment editing state.
+ * Wrap your app with this to share state between CommentHeaderActions and CommentEditor.
+ */
+export const CommentEditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { currentNode, moveNumber } = useGameTreeBoard();
+  const { setNodeComment: updateComment } = useGameTreeEdit();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState('');
+  const prevNodeIdRef = useRef<string | number | null>(null);
+
+  const currentComment = currentNode?.data.C?.[0] || '';
+  const currentNodeId = currentNode?.id ?? null;
+
+  // Reset editing state when navigating to a different node
+  useEffect(() => {
+    if (prevNodeIdRef.current !== currentNodeId) {
+      setEditText(currentComment);
+      setIsEditing(false);
+      prevNodeIdRef.current = currentNodeId;
+    }
+  }, [currentNodeId, currentComment]);
+
+  // Update edit text when comment changes externally (but not while editing)
+  useEffect(() => {
+    if (!isEditing) {
+      setEditText(currentComment);
+    }
+  }, [currentComment, isEditing]);
+
+  const handleEdit = useCallback(() => {
+    setEditText(currentComment);
+    setIsEditing(true);
+  }, [currentComment]);
+
+  const handleSave = useCallback(() => {
+    updateComment(editText);
+    setIsEditing(false);
+  }, [editText, updateComment]);
+
+  const handleCancel = useCallback(() => {
+    setEditText(currentComment);
+    setIsEditing(false);
+  }, [currentComment]);
+
+  const value: CommentEditorContextValue = {
+    moveNumber,
+    isEditing,
+    editText,
+    setEditText,
+    currentComment,
+    currentNodeId,
+    handleEdit,
+    handleSave,
+    handleCancel,
+  };
+
+  return <CommentEditorContext.Provider value={value}>{children}</CommentEditorContext.Provider>;
+};
+
+/**
+ * Hook to access the shared comment editor state.
+ * Must be used within a CommentEditorProvider.
+ */
+export const useCommentEditorState = (): CommentEditorContextValue => {
+  const context = useContext(CommentEditorContext);
+  if (!context) {
+    throw new Error('useCommentEditorState must be used within a CommentEditorProvider');
+  }
+  return context;
+};
+
+// ============================================================================
+// Header Actions Component
+// ============================================================================
+
+/**
+ * Header actions for the comment panel.
+ * Shows edit button when not editing, save/cancel when editing.
+ */
+export const CommentHeaderActions: React.FC = () => {
   const { t } = useTranslation();
+  const { moveNumber, isEditing, handleEdit, handleSave, handleCancel } = useCommentEditorState();
+
   return (
     <>
       {moveNumber > 0 && (
         <span className="move-number">{t('comment.move', { number: moveNumber })}</span>
       )}
       {!isEditing && (
-        <button onClick={onEdit} className="comment-edit-button" title={t('comment.editComment')}>
+        <button
+          onClick={handleEdit}
+          className="comment-edit-button"
+          title={t('comment.editComment')}
+        >
           <svg
             width="14"
             height="14"
@@ -45,14 +143,14 @@ export const CommentHeaderActions: React.FC<{
       {isEditing && (
         <div className="comment-actions">
           <button
-            onClick={onSave}
+            onClick={handleSave}
             className="comment-save-button"
             title={t('comment.saveShortcut')}
           >
             {t('comment.save')}
           </button>
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
             className="comment-cancel-button"
             title={t('comment.cancelShortcut')}
           >
@@ -64,75 +162,62 @@ export const CommentHeaderActions: React.FC<{
   );
 };
 
-// Hook to get comment editor state for external header actions
-export const useCommentEditorState = () => {
-  const { currentNode, moveNumber } = useGameTreeBoard();
-  const { setNodeComment: updateComment } = useGameTreeEdit();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editText, setEditText] = useState('');
+// ============================================================================
+// Comment Editor Component
+// ============================================================================
 
-  const currentComment = currentNode?.data.C?.[0] || '';
-
-  useEffect(() => {
-    setEditText(currentComment);
-    setIsEditing(false);
-  }, [currentComment, currentNode?.id]);
-
-  const handleEdit = useCallback(() => {
-    setEditText(currentComment);
-    setIsEditing(true);
-  }, [currentComment]);
-
-  const handleSave = useCallback(() => {
-    updateComment(editText);
-    setIsEditing(false);
-  }, [editText, updateComment]);
-
-  const handleCancel = useCallback(() => {
-    setEditText(currentComment);
-    setIsEditing(false);
-  }, [currentComment]);
-
-  return {
-    moveNumber,
-    isEditing,
-    editText,
-    setEditText,
-    currentComment,
-    currentNode,
-    handleEdit,
-    handleSave,
-    handleCancel,
-  };
-};
-
+/**
+ * Main comment editor component.
+ * Displays markdown-rendered comments or an editable textarea.
+ */
 export const CommentEditor: React.FC = () => {
   const { t } = useTranslation();
   const {
-    moveNumber,
     isEditing,
     editText,
     setEditText,
     currentComment,
-    currentNode,
+    currentNodeId,
     handleEdit,
     handleSave,
     handleCancel,
   } = useCommentEditorState();
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Focus textarea when entering edit mode
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      // Move cursor to end
+      const len = textareaRef.current.value.length;
+      textareaRef.current.setSelectionRange(len, len);
+    }
+  }, [isEditing]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      // Stop propagation to prevent global keyboard shortcuts from firing
+      e.stopPropagation();
+
       if (e.key === 'Escape') {
+        e.preventDefault();
         handleCancel();
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        // Enter without Shift saves the comment
+        e.preventDefault();
+        handleSave();
       } else if (e.key === 's' && (e.metaKey || e.ctrlKey)) {
+        // Ctrl/Cmd+S also saves
         e.preventDefault();
         handleSave();
       }
+      // Shift+Enter naturally inserts a newline (default textarea behavior)
     },
     [handleCancel, handleSave]
   );
 
-  if (!currentNode) {
+  if (currentNodeId === null) {
     return (
       <div className="comment-editor">
         <div className="comment-empty">{t('comment.noMoveSelected')}</div>
@@ -141,29 +226,27 @@ export const CommentEditor: React.FC = () => {
   }
 
   return (
-    <div className="comment-editor">
+    <div className={`comment-editor ${isEditing ? 'comment-editor--editing' : ''}`}>
       {isEditing ? (
         <div className="comment-editor-container">
           <textarea
+            ref={textareaRef}
             value={editText}
             onChange={e => setEditText(e.target.value)}
             onKeyDown={handleKeyDown}
             className="comment-textarea"
             placeholder={t('comment.placeholder')}
-            autoFocus
           />
-          <div className="comment-hint">{t('comment.markdownHint')}</div>
+          <div className="comment-hint">{t('comment.enterHint')}</div>
         </div>
       ) : (
-        <div className="comment-display">
+        <div className="comment-display" onClick={handleEdit}>
           {currentComment ? (
             <div className="comment-markdown">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentComment}</ReactMarkdown>
             </div>
           ) : (
-            <div className="comment-empty" onClick={handleEdit}>
-              {t('comment.noComment')}
-            </div>
+            <div className="comment-empty">{t('comment.noComment')}</div>
           )}
         </div>
       )}

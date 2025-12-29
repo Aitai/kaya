@@ -308,6 +308,7 @@
     "noComment": "No comment. Click to add one.",
     "placeholder": "Enter comment (markdown supported)...",
     "markdownHint": "Tip: Use markdown for formatting. Ctrl/Cmd+S to save, Esc to cancel.",
+    "enterHint": "Enter to save • Shift+Enter for new line • Esc to cancel",
     "hint": "Tip: Use markdown for formatting. Ctrl/Cmd+S to save, Esc to cancel.",
     "editComment": "Edit comment",
     "save": "Save",

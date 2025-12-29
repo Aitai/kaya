@@ -305,6 +305,7 @@
     "noComment": "Kein Kommentar. Klicken zum Hinzuf\u00fcgen.",
     "placeholder": "Kommentar eingeben (Markdown unterst\u00fctzt)...",
     "markdownHint": "Tipp: Markdown zur Formatierung verwenden. Strg/Cmd+S zum Speichern, Esc zum Abbrechen.",
+    "enterHint": "Enter zum Speichern • Shift+Enter für neue Zeile • Esc zum Abbrechen",
     "hint": "Tipp: Markdown zur Formatierung verwenden. Strg/Cmd+S zum Speichern, Esc zum Abbrechen.",
     "editComment": "Kommentar bearbeiten",
     "save": "Speichern",

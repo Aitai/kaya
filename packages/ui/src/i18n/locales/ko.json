@@ -308,6 +308,7 @@
     "noComment": "댓글 없음. 클릭하여 추가.",
     "placeholder": "댓글 입력 (마크다운 지원)...",
     "markdownHint": "힌트: 마크다운으로 서식 지정 가능. Ctrl/Cmd+S로 저장, Esc로 취소.",
+    "enterHint": "Enter로 저장 • Shift+Enter로 줄 바꿈 • Esc로 취소",
     "hint": "힌트: 마크다운으로 서식 지정 가능. Ctrl/Cmd+S로 저장, Esc로 취소.",
     "editComment": "댓글 편집",
     "save": "저장",

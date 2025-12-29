@@ -305,6 +305,7 @@
     "noComment": "Nessun commento. Clicca per aggiungere.",
     "placeholder": "Scrivi un commento (markdown supportato)...",
     "markdownHint": "Suggerimento: Usa markdown per formattare. Ctrl/Cmd+S per salvare, Esc per annullare.",
+    "enterHint": "Invio per salvare • Shift+Invio per nuova riga • Esc per annullare",
     "hint": "Suggerimento: Usa markdown per formattare. Ctrl/Cmd+S per salvare, Esc per annullare.",
     "editComment": "Modifica commento",
     "save": "Salva",

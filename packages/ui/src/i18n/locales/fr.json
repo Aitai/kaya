@@ -305,6 +305,7 @@
     "noComment": "Pas de commentaire. Cliquez pour en ajouter un.",
     "placeholder": "Entrez un commentaire (markdown support\u00e9)...",
     "markdownHint": "Astuce : Utilisez le markdown. Ctrl/Cmd+S pour sauver, \u00c9chap pour annuler.",
+    "enterHint": "Entr\u00e9e pour sauvegarder \u2022 Maj+Entr\u00e9e pour nouvelle ligne \u2022 \u00c9chap pour annuler",
     "hint": "Astuce : Utilisez le markdown. Ctrl/Cmd+S pour sauver, \u00c9chap pour annuler.",
     "editComment": "\u00c9diter le commentaire",
     "save": "Sauver",

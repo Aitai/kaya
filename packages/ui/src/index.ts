@@ -73,6 +73,7 @@ export { SaveToLibraryDialog } from './components/dialogs/SaveToLibraryDialog';
 export {
   CommentEditor,
   CommentHeaderActions,
+  CommentEditorProvider,
   useCommentEditorState,
 } from './components/editors/CommentEditor';
 export { LoadingOverlay } from './components/ui/LoadingOverlay';

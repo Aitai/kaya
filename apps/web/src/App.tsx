@@ -14,7 +14,7 @@ import {
   useGameInfoEditMode,
   CommentEditor,
   CommentHeaderActions,
-  useCommentEditorState,
+  CommentEditorProvider,
   LoadingOverlay,
   StatusBar,
   useGameTree,
@@ -228,15 +228,6 @@ function AppContent({
   // Game info editor state for header actions
   const { isEditMode: gameInfoEditMode, toggleEditMode: toggleGameInfoEditMode } =
     useGameInfoEditMode();
-
-  // Comment editor state for header actions
-  const {
-    moveNumber,
-    isEditing: isCommentEditing,
-    handleEdit,
-    handleSave,
-    handleCancel,
-  } = useCommentEditorState();
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -468,15 +459,7 @@ function AppContent({
                 onToggle={toggleGameInfoEditMode}
               />
             }
-            commentHeaderActions={
-              <CommentHeaderActions
-                moveNumber={moveNumber}
-                isEditing={isCommentEditing}
-                onEdit={handleEdit}
-                onSave={handleSave}
-                onCancel={handleCancel}
-              />
-            }
+            commentHeaderActions={<CommentHeaderActions />}
             gameInfoContent={
               <GameInfoEditor
                 isEditMode={gameInfoEditMode}
@@ -580,11 +563,13 @@ function LibraryProviderWrapper({ versionData }: { versionData: VersionData | un
       getIsDirty={getIsDirty}
       onSaveComplete={handleSaveComplete}
     >
-      <AppContent
-        versionData={versionData}
-        activeMobileTab={activeMobileTab}
-        onMobileTabChange={setActiveMobileTab}
-      />
+      <CommentEditorProvider>
+        <AppContent
+          versionData={versionData}
+          activeMobileTab={activeMobileTab}
+          onMobileTabChange={setActiveMobileTab}
+        />
+      </CommentEditorProvider>
     </LibraryProvider>
   );
 }

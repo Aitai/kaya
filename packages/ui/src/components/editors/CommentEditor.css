@@ -8,6 +8,13 @@
   height: 100%;
   flex: 1;
   overflow: hidden;
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
+}
+
+/* Subtle border when editing - uses inset shadow to avoid layout shift */
+.comment-editor--editing {
+  box-shadow: inset 0 0 0 1.5px rgba(100, 149, 237, 0.5);
 }
 
 .move-number {
@@ -43,30 +50,61 @@
 
 .comment-save-button,
 .comment-cancel-button {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-  border: 1px solid var(--border);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   border-radius: 4px;
-  background: var(--background);
-  color: var(--foreground);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .comment-save-button {
-  background: var(--accent);
-  color: var(--accent-foreground);
-  border-color: var(--accent);
-  margin-right: 0.5rem;
+  background: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #3b82f6;
 }
 
 .comment-save-button:hover {
-  opacity: 0.9;
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.comment-save-button:active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.comment-cancel-button {
+  background: var(--background, #ffffff);
+  color: var(--foreground, #374151);
+  border: 1px solid var(--border, #d1d5db);
+}
+
+/* Dark mode support */
+:root[data-theme='dark'] .comment-cancel-button,
+.dark .comment-cancel-button {
+  background: var(--background, #1f2937);
+  color: var(--foreground, #e5e7eb);
+  border-color: var(--border, #4b5563);
 }
 
 .comment-cancel-button:hover {
-  background: var(--muted);
-  border-color: var(--border);
+  background: var(--muted, #f3f4f6);
+  color: var(--foreground, #111827);
+}
+
+:root[data-theme='dark'] .comment-cancel-button:hover,
+.dark .comment-cancel-button:hover {
+  background: var(--muted, #374151);
+  color: var(--foreground, #f9fafb);
+}
+
+.comment-cancel-button:active {
+  opacity: 0.8;
 }
 
 .comment-actions {

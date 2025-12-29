@@ -308,6 +308,7 @@
     "noComment": "コメントなし。クリックして追加。",
     "placeholder": "コメントを入力（markdown対応）...",
     "markdownHint": "ヒント: markdownで書式設定可能。Ctrl/Cmd+Sで保存、Escでキャンセル。",
+    "enterHint": "Enterで保存 • Shift+Enterで改行 • Escでキャンセル",
     "hint": "ヒント: markdownで書式設定可能。Ctrl/Cmd+Sで保存、Escでキャンセル。",
     "editComment": "コメントを編集",
     "save": "保存",
