@@ -1,5 +1,5 @@
-const GA_MEASUREMENT_ID = 'G-1SDFY0DH0V'; // Replace with your Desktop App Measurement ID
-const GA_API_SECRET = '6DU9XInsTL2QzIVXByDzdw'; // Replace with your API Secret
+const GA_MEASUREMENT_ID = 'G-1SDFY0DH0V';
+const GA_API_SECRET = '6DU9XInsTL2QzIVXByDzdw';
 
 const GA_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`;
 
@@ -15,38 +15,40 @@ const getClientId = () => {
 const isDev = import.meta.env.DEV;
 
 export const analytics = {
-  sendEvent: async (eventName: string, params: Record<string, any> = {}) => {
+  sendEvent: async (eventName: string, params: Record<string, unknown> = {}) => {
+    // Disable analytics in development mode
     if (isDev) {
-      console.log(`[Analytics] ${eventName}`, params);
       return;
     }
+
+    const payload = {
+      client_id: getClientId(),
+      events: [
+        {
+          name: eventName,
+          params: {
+            ...params,
+            engagement_time_msec: 100,
+            session_id: getClientId(),
+          },
+        },
+      ],
+    };
 
     try {
       await fetch(GA_ENDPOINT, {
         method: 'POST',
-        body: JSON.stringify({
-          client_id: getClientId(),
-          events: [
-            {
-              name: eventName,
-              params: {
-                ...params,
-                engagement_time_msec: 100,
-                session_id: getClientId(),
-              },
-            },
-          ],
-        }),
+        body: JSON.stringify(payload),
       });
-    } catch (error) {
-      console.error('Failed to send analytics event', error);
+    } catch {
+      // Silently fail - analytics should not affect user experience
     }
   },
 
   pageView: (pageTitle: string) => {
     analytics.sendEvent('page_view', {
       page_title: pageTitle,
-      page_location: 'app://desktop', // Custom location for desktop app
+      page_location: 'https://kaya.desktop',
     });
   },
 };
