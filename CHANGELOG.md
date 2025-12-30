@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.12] - 2025-12-30
+
+### <!-- 0 -->🚀 Features
+
+- *(desktop)* Add about metadata with description and github link ([bef3344](https://github.com/kaya-go/kaya/commit/bef3344e465211652826e18b04fd6f9fad29ea61))
+
+- *(desktop)* Add custom about dialog with version info and github links ([bffb2b7](https://github.com/kaya-go/kaya/commit/bffb2b7df9c8e4e652ef1583698e858b835f20f5))
+
+- *(ui)* Add About dialog accessible from footer and menu ([1f2d1c6](https://github.com/kaya-go/kaya/commit/1f2d1c622a4b361a448e2ef1441dd7e047417e72))
+
+- *(web)* Add PWA support for installable web app ([5deb058](https://github.com/kaya-go/kaya/commit/5deb058acc346bdd96d864ddc37e795546994250))
+
+- *(ui)* Require model download before enabling analysis mode ([993f6f7](https://github.com/kaya-go/kaya/commit/993f6f79b2aac473a5280a34be5f39261067ea3d))
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(desktop)* Remove empty File menu on Linux/Windows ([f605944](https://github.com/kaya-go/kaya/commit/f6059446ab194f7b04c01e9ba1b3ba170ca821fd))
+
+- *(ci)* Read version from package.json instead of gitignored version.json ([f2f6349](https://github.com/kaya-go/kaya/commit/f2f6349c6983da2f039139c3ce2d1b740a0baa82))
+
+- *(ci)* Add tauri signing keys to nightly builds ([3486723](https://github.com/kaya-go/kaya/commit/3486723a97ca9755d3caa9e8697fb9c9367fd7c8))
+
+- *(ci)* Use numeric date suffix for nightly version (MSI compatibility) ([6c4df53](https://github.com/kaya-go/kaya/commit/6c4df5387329f46a063411ce7d2b009da3630732))
+
+- *(ci)* Skip msi build for nightly, use nsis exe only ([7e20b15](https://github.com/kaya-go/kaya/commit/7e20b15227270a25674466389561ba8f151393a6))
+
+- *(ci)* Use standard version from package.json for nightly builds ([a267adb](https://github.com/kaya-go/kaya/commit/a267adb0200b9d9f657e1432d648ff2a930a43cc))
+
+- *(web)* Disable google analytics on localhost ([3b45a4d](https://github.com/kaya-go/kaya/commit/3b45a4d5533e6a2b9d14050b0769ab40996ee012))
+
+- *(desktop)* Rename help menu to about on linux/windows ([ffba96a](https://github.com/kaya-go/kaya/commit/ffba96a11f7b48429abbb395400f26e62dc0b6de))
+
+- *(desktop)* Fix about dialog icon path and add icon to public ([93854d1](https://github.com/kaya-go/kaya/commit/93854d18bb18181fff6d02ccf923d826469cfc55))
+
+- *(desktop)* Update analytics page_location to match GA4 data stream URL ([b95056b](https://github.com/kaya-go/kaya/commit/b95056b7ff45d27ef2ac35b4065a00cd0065e29a))
+
+- *(web)* Resolve service worker reload conflict causing black screen ([f2c6b7e](https://github.com/kaya-go/kaya/commit/f2c6b7ef504269de6208f42441b2a502897afa09))
+
+### <!-- 3 -->📚 Documentation
+
+- Clarify git commit behavior in agent rules ([3e3b23c](https://github.com/kaya-go/kaya/commit/3e3b23c5feb66d1363fe8476285a2b5cebbb0c10))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Add nightly build workflow for linux, macos, and windows ([0aa460e](https://github.com/kaya-go/kaya/commit/0aa460e86a3ef9c85aa4472e1341eb6a3776e08e))
+
+- Remove msi build, use nsis exe only for windows ([9e131c1](https://github.com/kaya-go/kaya/commit/9e131c1549df99e8335eca713c3d6220a821bd96))
+
 ## [0.1.11] - 2025-12-29
 
 ### <!-- 1 -->🐛 Bug Fixes
@@ -45,6 +93,8 @@ All notable changes to this project will be documented in this file.
 - Remove CodeQL security analysis workflow ([12ddf53](https://github.com/kaya-go/kaya/commit/12ddf530ee379315169cc44296137db857e36dbc))
 
 - Add rust/tauri compilation check to PR builds ([772bb0a](https://github.com/kaya-go/kaya/commit/772bb0a875cb2e51f214c3d940b224cef13b6ef9))
+
+- Release v0.1.11 ([53a81ad](https://github.com/kaya-go/kaya/commit/53a81ad1d3a6e98387afeb61b250fe0f9d817bc8))
 
 ## [0.1.10] - 2025-12-29
 
