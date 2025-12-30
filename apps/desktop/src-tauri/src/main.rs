@@ -43,8 +43,21 @@ fn main() {
                 window_state::restore_window_state(&window, app.handle());
             }
 
-            use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+            use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu, AboutMetadata};
             let handle = app.handle();
+
+            // Create about metadata with app information
+            // Version comes from Cargo.toml automatically, detailed build info is in the app footer
+            let about_metadata = AboutMetadata {
+                name: Some("Kaya".to_string()),
+                version: Some(env!("CARGO_PKG_VERSION").to_string()),
+                copyright: Some("© 2025 Kaya Team".to_string()),
+                license: Some("AGPL-3.0".to_string()),
+                website: Some("https://github.com/kaya-go/kaya".to_string()),
+                website_label: Some("GitHub Repository".to_string()),
+                comments: Some("A beautiful Go game application with AI analysis powered by KataGo".to_string()),
+                ..Default::default()
+            };
 
             let check_update = MenuItem::with_id(
                 handle,
@@ -61,7 +74,7 @@ fn main() {
                 app_menu.append(&PredefinedMenuItem::about(
                     handle,
                     None::<&str>,
-                    Some(tauri::menu::AboutMetadata::default()),
+                    Some(about_metadata.clone()),
                 )?)?;
                 app_menu.append(&PredefinedMenuItem::separator(handle)?)?;
                 app_menu.append(&check_update)?;
@@ -82,7 +95,7 @@ fn main() {
             #[cfg(not(target_os = "macos"))]
             {
                 let about_menu = Submenu::new(handle, "About", true)?;
-                about_menu.append(&PredefinedMenuItem::about(handle, None::<&str>, None)?)?;
+                about_menu.append(&PredefinedMenuItem::about(handle, None::<&str>, Some(about_metadata))?)?;
                 about_menu.append(&PredefinedMenuItem::separator(handle)?)?;
                 about_menu.append(&check_update)?;
 
