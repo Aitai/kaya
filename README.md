@@ -45,6 +45,7 @@
 - 🌐 **Web Version** - Play directly in your browser (works on mobile and tablet too)
   - [**Stable Version**](https://kaya-go.github.io/kaya) - Latest official release (Recommended)
   - [**Next Version**](https://kaya-go.github.io/kaya/next/) - Built from `main` branch (Newest features, less stable)
+- 📱 **Installable PWA** - Install the web app on mobile or desktop for offline use (no app store needed)
 
 ---
 

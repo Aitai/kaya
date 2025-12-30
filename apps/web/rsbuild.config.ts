@@ -44,6 +44,10 @@ export default defineConfig({
         to: '.',
       },
       {
+        from: 'public/sw.js',
+        to: '.',
+      },
+      {
         from: 'public/vendor',
         to: 'vendor',
       },

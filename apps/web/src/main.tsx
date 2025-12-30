@@ -3,6 +3,17 @@ import { createRoot } from 'react-dom/client';
 import { ThemeProvider, I18nProvider } from '@kaya/ui';
 import App from './App.tsx';
 import '@kaya/ui/dist/styles/ui.css';
+import { registerServiceWorker } from './pwa.ts';
+
+// Register PWA service worker
+registerServiceWorker({
+  onNeedRefresh: () => {
+    console.log('[PWA] New content available, refresh to update');
+  },
+  onOfflineReady: () => {
+    console.log('[PWA] App ready to work offline');
+  },
+});
 
 // Suppress benign ResizeObserver warning from react-resizable-panels
 // This is a common timing issue and doesn't affect functionality
