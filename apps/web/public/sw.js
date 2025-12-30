@@ -28,8 +28,9 @@ self.addEventListener('install', event => {
       return cache.addAll(PRECACHE_ASSETS);
     })
   );
-  // Activate immediately
-  self.skipWaiting();
+  // Don't skipWaiting() here - it causes conflicts with coi-serviceworker
+  // which also triggers page reloads. Let the user decide when to update
+  // via the "Update available" prompt, or wait for explicit SKIP_WAITING message.
 });
 
 // Activate event - clean up old caches
@@ -46,8 +47,8 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  // Take control of all clients immediately
-  self.clients.claim();
+  // Don't call clients.claim() immediately - let coi-serviceworker handle
+  // page control to avoid conflicts with CORS isolation reloads
 });
 
 // Fetch event - selective caching, avoid interfering with WASM/workers

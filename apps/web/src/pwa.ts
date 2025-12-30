@@ -55,15 +55,9 @@ export function registerServiceWorker(options?: {
       console.error('[PWA] Service worker registration failed:', error);
     });
 
-  // Reload when new service worker takes control
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      console.log('[PWA] New version activated, reloading...');
-      window.location.reload();
-    }
-  });
+  // Note: We don't auto-reload on controllerchange because it conflicts with
+  // coi-serviceworker which also triggers reloads for CORS isolation.
+  // The user will be prompted to refresh when a new version is available.
 }
 
 export function skipWaiting() {
