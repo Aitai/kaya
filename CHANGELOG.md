@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 
 - *(ci)* Add linux appimage EGL fix to release workflow ([346c4bc](https://github.com/kaya-go/kaya/commit/346c4bcd61236f7c4557a42d4854437c671f5ad5))
 
+- *(ui)* Only process left-click for drag-to-paint markers ([7715d9d](https://github.com/kaya-go/kaya/commit/7715d9d942f2c05f752bd4571aa73f737ce286ec))
+
 ### <!-- 6 -->🧪 Testing
 
 - *(e2e)* Add gameplay and edit tools tests ([45c4834](https://github.com/kaya-go/kaya/commit/45c48340271c3f6e75e937f01eb5594fd6b5dc27))
@@ -25,6 +27,8 @@ All notable changes to this project will be documented in this file.
 ### <!-- 7 -->⚙️ Miscellaneous Tasks
 
 - Ignore ONNX Runtime WASM files copied from node_modules ([002e44c](https://github.com/kaya-go/kaya/commit/002e44ce99f1871f178cd048b9585960b2e42c6b))
+
+- Release v0.2.0 ([924be08](https://github.com/kaya-go/kaya/commit/924be080aca6c37b6302e9e43e9350be15f24847))
 
 ## [0.1.12] - 2025-12-30
 
