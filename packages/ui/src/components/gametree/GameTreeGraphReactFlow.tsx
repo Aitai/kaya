@@ -166,21 +166,22 @@ const StoneNode = React.memo(({ data }: { data: any }) => {
       };
     }
     if (color === 'black') {
+      // Black stone with light ring for visibility against dark backgrounds
       return {
         background: 'radial-gradient(circle at 35% 35%, #555 0%, #222 30%, #000 100%)',
         boxShadow: isCurrent
           ? '0 2px 4px rgba(0, 0, 0, 0.4), 0 0 0 3px #4A9EFF'
-          : '0 2px 4px rgba(0, 0, 0, 0.4)',
+          : '0 2px 4px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(255, 255, 255, 0.45)',
         border: 'none',
       };
     } else {
-      // White stone or empty node
+      // White stone with dark ring for visibility against light backgrounds
       return {
         background:
           'radial-gradient(circle at 30% 30%, #fff 0%, #f0f0f0 25%, #d5d5d5 60%, #bbb 100%)',
         boxShadow: isCurrent
           ? '0 3px 5px rgba(0, 0, 0, 0.3), 0 0 0 3px #4A9EFF'
-          : '0 3px 5px rgba(0, 0, 0, 0.3)',
+          : '0 3px 5px rgba(0, 0, 0, 0.3), 0 0 0 1.5px rgba(0, 0, 0, 0.35)',
         border: 'none',
       };
     }
@@ -1063,7 +1064,11 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
     }, []);
 
     return (
-      <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div
+        ref={containerRef}
+        className="gametree-graph-container"
+        style={{ width: '100%', height: '100%', position: 'relative' }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}

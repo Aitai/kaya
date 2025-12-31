@@ -38,7 +38,7 @@
   flex: 1;
   overflow: auto;
   position: relative;
-  background-color: var(--background);
+  background-color: var(--bg-secondary);
 }
 
 .gametree-graph-canvas {
