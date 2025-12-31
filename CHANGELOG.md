@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2025-12-31
+
+### <!-- 0 -->🚀 Features
+
+- *(ui)* Enable undo/redo keyboard shortcuts globally ([dfbb57d](https://github.com/kaya-go/kaya/commit/dfbb57da0e66525d6ce5aefa74623ba18a1b853a))
+
+- *(ui)* Add subtle outlines to game tree stones for better visibility ([9e7c784](https://github.com/kaya-go/kaya/commit/9e7c78429d7a5d3ac889fa3cfbd29ad33328978e))
+
+- *(ui)* Add drag-to-paint and toggle markers for edit tools ([016abf6](https://github.com/kaya-go/kaya/commit/016abf6f4985adf26116c679fa0e13d5a6ce5873))
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- Pin linuxdeploy version for Linux AppImage EGL fix ([26c6984](https://github.com/kaya-go/kaya/commit/26c69842c33e038e0c70e0b1186058e4c595d359))
+
+- *(ci)* Add linux appimage EGL fix to release workflow ([346c4bc](https://github.com/kaya-go/kaya/commit/346c4bcd61236f7c4557a42d4854437c671f5ad5))
+
+### <!-- 6 -->🧪 Testing
+
+- *(e2e)* Add gameplay and edit tools tests ([45c4834](https://github.com/kaya-go/kaya/commit/45c48340271c3f6e75e937f01eb5594fd6b5dc27))
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Ignore ONNX Runtime WASM files copied from node_modules ([002e44c](https://github.com/kaya-go/kaya/commit/002e44ce99f1871f178cd048b9585960b2e42c6b))
+
 ## [0.1.12] - 2025-12-30
 
 ### <!-- 0 -->🚀 Features
@@ -49,6 +73,8 @@ All notable changes to this project will be documented in this file.
 - Add nightly build workflow for linux, macos, and windows ([0aa460e](https://github.com/kaya-go/kaya/commit/0aa460e86a3ef9c85aa4472e1341eb6a3776e08e))
 
 - Remove msi build, use nsis exe only for windows ([9e131c1](https://github.com/kaya-go/kaya/commit/9e131c1549df99e8335eca713c3d6220a821bd96))
+
+- Release v0.1.12 ([38c6ad5](https://github.com/kaya-go/kaya/commit/38c6ad595ab7254c98e2613286f3cae96ab81828))
 
 ## [0.1.11] - 2025-12-29
 
