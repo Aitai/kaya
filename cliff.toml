@@ -23,9 +23,17 @@ body = """
         - {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
             {% if commit.breaking %}[**breaking**] {% endif %}\
             {{ commit.message | upper_first }}\
-            {% if "issues/" not in commit.message %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/kaya-go/kaya/commit/{{ commit.id }})){% endif %}
+            {% if "issues/" not in commit.message %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/kaya-go/kaya/commit/{{ commit.id }})){% endif %}\
+            {% if commit.github.pr.authors %} by {{ commit.github.pr.authors | map(attribute="username") | map(prefix="@") | join(sep=", ") }}\
+            {% elif commit.github.username %} by @{{ commit.github.username }}{% endif %}
     {% endfor %}
-{% endfor %}\n
+{% endfor %}
+{% if github.contributors | length != 0 %}
+    ### 🙏 Contributors
+    {% for contributor in github.contributors %}
+        * @{{ contributor.username }}{% if contributor.is_first_time %} *(first contribution)* 🎉{% endif %}
+    {%- endfor %}
+{% endif %}\n
 """
 # template for the changelog footer
 footer = """
@@ -84,3 +92,7 @@ topo_order = false
 sort_commits = "oldest"
 # limit the number of commits included in the changelog.
 # limit_commits = 42
+
+[remote.github]
+owner = "kaya-go"
+repo = "kaya"
