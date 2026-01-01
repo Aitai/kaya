@@ -331,8 +331,6 @@ const Vertex = React.memo<VertexProps>(
               position: 'absolute',
               top: '50%',
               left: '50%',
-              width: '90%',
-              height: '90%',
               borderRadius: '50%',
               transform: shift
                 ? `translate(-50%, -50%) ${getShiftTransform(shift)}`
@@ -1253,7 +1251,7 @@ export const Goban: React.FC<GobanProps> = ({
               ) : currentPlayer !== undefined ? (
                 // Otherwise show the ghost stone (only if currentPlayer is defined)
                 <div
-                  className="shudan-ghost-stone"
+                  className={`shudan-ghost-stone shudan-ghost-stone_${currentPlayer === 1 ? 'black' : 'white'}`}
                   style={{
                     width: '100%',
                     height: '100%',
