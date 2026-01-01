@@ -1053,14 +1053,15 @@ export const Goban: React.FC<GobanProps> = ({
   }, [handleContainerTouchMove]);
 
   // Container styles with uniform padding (except top/bottom for tighter coordinate spacing)
+  // When coordinates are hidden, use minimal padding to maximize board space
   const containerStyle: React.CSSProperties = {
     position: 'relative',
     display: 'inline-block',
-    padding: vertexSize,
-    paddingTop: vertexSize * 0.6,
-    paddingBottom: vertexSize * 0.4,
-    paddingLeft: vertexSize * 0.5,
-    paddingRight: vertexSize * 0.5,
+    padding: showCoordinates ? vertexSize : 0,
+    paddingTop: showCoordinates ? vertexSize * 0.6 : 0,
+    paddingBottom: showCoordinates ? vertexSize * 0.4 : 0,
+    paddingLeft: showCoordinates ? vertexSize * 0.5 : 0,
+    paddingRight: showCoordinates ? vertexSize * 0.5 : 0,
     boxSizing: 'border-box',
     ...style,
   };

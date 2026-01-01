@@ -134,6 +134,8 @@
     "boardSettings": "盤面設定",
     "themeSettings": "碁盤テーマ",
     "themeDescription": "碁盤と碁石のビジュアルテーマを選択します。",
+    "showCoordinates": "座標を表示",
+    "showCoordinatesDescription": "碁盤の端に座標（A-T, 1-19）を表示します。",
     "fuzzyStonePlacement": "ファジー配置",
     "fuzzyStonePlacementDescription": "石の位置にわずかなランダムオフセットを加え、手で置いたような自然な見た目にします。",
     "on": "オン",

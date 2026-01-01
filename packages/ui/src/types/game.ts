@@ -41,6 +41,8 @@ export interface AISettings {
 export interface GameSettings {
   /** Enable fuzzy stone placement for a more natural board appearance */
   fuzzyStonePlacement: boolean;
+  /** Show board coordinates (A-T, 1-19) */
+  showCoordinates: boolean;
 }
 
 export interface AIModel {

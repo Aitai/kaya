@@ -134,6 +134,8 @@
     "boardSettings": "棋盘设置",
     "themeSettings": "棋盘主题",
     "themeDescription": "选择棋盘和棋子的视觉主题。",
+    "showCoordinates": "显示坐标",
+    "showCoordinatesDescription": "在棋盘边缘显示坐标（A-T, 1-19）。",
     "fuzzyStonePlacement": "模糊落子",
     "fuzzyStonePlacementDescription": "为棋子位置添加轻微随机偏移，呈现更自然的手工摆放效果。",
     "on": "开",

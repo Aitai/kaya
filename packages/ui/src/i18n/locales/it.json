@@ -134,6 +134,8 @@
     "boardSettings": "Impostazioni della tavola",
     "themeSettings": "Tema del goban",
     "themeDescription": "Scegli un tema visivo per il goban e le pietre.",
+    "showCoordinates": "Mostra coordinate",
+    "showCoordinatesDescription": "Visualizza le coordinate della tavola (A-T, 1-19) lungo i bordi.",
     "fuzzyStonePlacement": "Posizionamento sfocato delle pietre",
     "fuzzyStonePlacementDescription": "Aggiunge leggeri spostamenti casuali alle posizioni delle pietre per un aspetto più naturale.",
     "on": "Attivo",

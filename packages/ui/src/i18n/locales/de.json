@@ -134,6 +134,8 @@
     "boardSettings": "Brett-Einstellungen",
     "themeSettings": "Brett-Thema",
     "themeDescription": "Wählen Sie ein visuelles Thema für das Go-Brett und die Steine.",
+    "showCoordinates": "Koordinaten anzeigen",
+    "showCoordinatesDescription": "Zeigt Brettkoordinaten (A-T, 1-19) am Rand des Bretts an.",
     "fuzzyStonePlacement": "Unscharfe Steinplatzierung",
     "fuzzyStonePlacementDescription": "Fügt leichte zufällige Verschiebungen zu Steinpositionen hinzu für ein natürlicheres, handplatziertes Aussehen.",
     "on": "Ein",

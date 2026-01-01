@@ -568,6 +568,31 @@ export const KayaConfig: React.FC = () => {
       </div>
 
       <div className="settings-list">
+        {/* Show Coordinates Toggle */}
+        <div className="setting-item setting-item-toggle setting-item-full">
+          <div className="setting-info">
+            <label htmlFor="show-coordinates-check" className="setting-label">
+              {t('kayaConfig.showCoordinates')}
+            </label>
+            <p className="setting-description">{t('kayaConfig.showCoordinatesDescription')}</p>
+          </div>
+          <div className="toggle-with-label">
+            <span className={`toggle-status ${gameSettings.showCoordinates ? 'on' : 'off'}`}>
+              {gameSettings.showCoordinates ? 'On' : 'Off'}
+            </span>
+            <button
+              id="show-coordinates-check"
+              type="button"
+              role="switch"
+              aria-checked={gameSettings.showCoordinates}
+              className={`toggle-switch ${gameSettings.showCoordinates ? 'active' : ''}`}
+              onClick={() => setGameSettings({ showCoordinates: !gameSettings.showCoordinates })}
+            >
+              <span className="toggle-switch-handle" />
+            </button>
+          </div>
+        </div>
+
         {/* Fuzzy Stone Placement Toggle */}
         <div className="setting-item setting-item-toggle setting-item-full">
           <div className="setting-info">

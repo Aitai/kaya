@@ -453,9 +453,11 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     if (!containerRef.current) return;
 
     const calculateSize = (width: number, height: number) => {
-      // Use actual board dimensions + 2 for margins (coordinates)
-      const divisionsX = Math.max(boardWidth + 2, 1);
-      const divisionsY = Math.max(boardHeight + 2, 1);
+      // Use actual board dimensions + margin for coordinates (if shown)
+      // When coordinates are hidden, use the full space
+      const coordMargin = gameSettings.showCoordinates ? 2 : 0;
+      const divisionsX = Math.max(boardWidth + coordMargin, 1);
+      const divisionsY = Math.max(boardHeight + coordMargin, 1);
       const maxVertexWidth = Math.floor(width / divisionsX);
       const maxVertexHeight = Math.floor(height / divisionsY);
       const newVertexSize = Math.min(maxVertexWidth, maxVertexHeight);
@@ -480,7 +482,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [boardWidth, boardHeight]);
+  }, [boardWidth, boardHeight, gameSettings.showCoordinates]);
 
   const handleVertexClick = useCallback(
     (evt: React.MouseEvent, vertex: Vertex) => {
@@ -1192,13 +1194,17 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
       )}
 
       <div className="gameboard-board-area">
-        <div ref={containerRef} className="gameboard-board-wrapper" {...swipeHandlers}>
+        <div
+          ref={containerRef}
+          className={`gameboard-board-wrapper ${!gameSettings.showCoordinates ? 'no-coordinates' : ''}`}
+          {...swipeHandlers}
+        >
           <Goban
             key={gameId}
             gameId={gameId}
             vertexSize={vertexSize}
             signMap={currentBoard.signMap}
-            showCoordinates={true}
+            showCoordinates={gameSettings.showCoordinates}
             fuzzyStonePlacement={fuzzyEnabled}
             shiftMap={shiftMap}
             randomMap={randomMap}

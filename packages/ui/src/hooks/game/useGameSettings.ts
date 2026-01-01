@@ -8,6 +8,7 @@ const GAME_SETTINGS_STORAGE_KEY = 'kaya-game-settings';
  */
 const DEFAULT_GAME_SETTINGS: GameSettings = {
   fuzzyStonePlacement: true, // Enabled by default for natural stone appearance
+  showCoordinates: true, // Show coordinates by default
 };
 
 /**
@@ -23,6 +24,10 @@ function loadGameSettings(): GameSettings {
           typeof parsed.fuzzyStonePlacement === 'boolean'
             ? parsed.fuzzyStonePlacement
             : DEFAULT_GAME_SETTINGS.fuzzyStonePlacement,
+        showCoordinates:
+          typeof parsed.showCoordinates === 'boolean'
+            ? parsed.showCoordinates
+            : DEFAULT_GAME_SETTINGS.showCoordinates,
       };
     }
   } catch (e) {

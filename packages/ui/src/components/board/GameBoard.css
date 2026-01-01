@@ -37,6 +37,11 @@
   padding: 10px;
 }
 
+/* Remove padding when coordinates are hidden to maximize board space */
+.gameboard-board-wrapper.no-coordinates {
+  padding: 0;
+}
+
 /* Landscape adjustment to preventing truncation */
 @media (max-width: 1024px) and (orientation: landscape) {
   .gameboard-board-area {

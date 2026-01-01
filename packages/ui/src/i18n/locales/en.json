@@ -134,6 +134,8 @@
     "boardSettings": "Board Settings",
     "themeSettings": "Board Theme",
     "themeDescription": "Choose a visual theme for the Go board and stones.",
+    "showCoordinates": "Show Coordinates",
+    "showCoordinatesDescription": "Display board coordinates (A-T, 1-19) around the edges of the board.",
     "fuzzyStonePlacement": "Fuzzy Stone Placement",
     "fuzzyStonePlacementDescription": "Add slight random offsets to stone positions for a more natural, hand-placed appearance.",
     "on": "On",

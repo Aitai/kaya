@@ -134,6 +134,8 @@
     "boardSettings": "Configuración del tablero",
     "themeSettings": "Tema del tablero",
     "themeDescription": "Elige un tema visual para el tablero y las piedras.",
+    "showCoordinates": "Mostrar coordenadas",
+    "showCoordinatesDescription": "Mostrar coordenadas del tablero (A-T, 1-19) alrededor de los bordes.",
     "fuzzyStonePlacement": "Colocación difusa de piedras",
     "fuzzyStonePlacementDescription": "Añade pequeños desplazamientos aleatorios a las posiciones de las piedras para una apariencia más natural.",
     "on": "Activado",
