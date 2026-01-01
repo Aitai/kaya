@@ -462,7 +462,7 @@
     "exitEditMode": "Exit edit mode (E)",
     "showNextMove": "Show next move",
     "hideNextMove": "Hide next move",
-    "suggestMove": "Suggest Move",
+    "suggestMove": "Suggest",
     "suggestMoveTitle": "Ask AI to suggest a move (G)",
     "suggesting": "Suggesting...",
     "loadAiModelFirst": "Please load an AI model first",

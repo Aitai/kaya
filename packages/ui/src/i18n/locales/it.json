@@ -459,7 +459,7 @@
     "exitEditMode": "Esci dalla modalità modifica (E)",
     "showNextMove": "Mostra prossima mossa",
     "hideNextMove": "Nascondi prossima mossa",
-    "suggestMove": "Suggerisci mossa",
+    "suggestMove": "Suggerisci",
     "suggestMoveTitle": "Chiedi all'IA di suggerire una mossa (G)",
     "suggesting": "Suggerendo...",
     "loadAiModelFirst": "Carica prima un modello AI",

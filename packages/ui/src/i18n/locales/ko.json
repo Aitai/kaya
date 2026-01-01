@@ -462,7 +462,7 @@
     "exitEditMode": "편집 모드 종료 (E)",
     "showNextMove": "다음 수 표시",
     "hideNextMove": "다음 수 숨기기",
-    "suggestMove": "수 제안",
+    "suggestMove": "제안",
     "suggestMoveTitle": "AI에게 수 제안 요청 (G)",
     "suggesting": "제안 중...",
     "loadAiModelFirst": "먼저 AI 모델을 로드해 주세요",

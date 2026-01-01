@@ -462,7 +462,7 @@
     "exitEditMode": "退出编辑模式 (E)",
     "showNextMove": "显示下一手",
     "hideNextMove": "隐藏下一手",
-    "suggestMove": "建议落子",
+    "suggestMove": "建议",
     "suggestMoveTitle": "让AI建议一手 (G)",
     "suggesting": "建议中...",
     "loadAiModelFirst": "请先加载AI模型",

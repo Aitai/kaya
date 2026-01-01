@@ -459,7 +459,7 @@
     "exitEditMode": "Bearbeitungsmodus beenden (E)",
     "showNextMove": "Nächsten Zug anzeigen",
     "hideNextMove": "Nächsten Zug ausblenden",
-    "suggestMove": "Zug vorschlagen",
+    "suggestMove": "Vorschlagen",
     "suggestMoveTitle": "KI nach einem Zug fragen (G)",
     "suggesting": "Vorschlagen...",
     "loadAiModelFirst": "Bitte laden Sie zuerst ein KI-Modell",

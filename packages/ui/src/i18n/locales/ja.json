@@ -462,7 +462,7 @@
     "exitEditMode": "編集モード終了 (E)",
     "showNextMove": "次の手を表示",
     "hideNextMove": "次の手を非表示",
-    "suggestMove": "手を提案",
+    "suggestMove": "提案",
     "suggestMoveTitle": "AIに手を提案してもらう (G)",
     "suggesting": "提案中...",
     "loadAiModelFirst": "まずAIモデルをロードしてください",

@@ -459,7 +459,7 @@
     "exitEditMode": "Quitter le mode édition (E)",
     "showNextMove": "Afficher le prochain coup",
     "hideNextMove": "Masquer le prochain coup",
-    "suggestMove": "Suggérer un coup",
+    "suggestMove": "Suggérer",
     "suggestMoveTitle": "Demander à l'IA de suggérer un coup (G)",
     "suggesting": "Suggestion...",
     "loadAiModelFirst": "Veuillez d'abord charger un modèle IA",

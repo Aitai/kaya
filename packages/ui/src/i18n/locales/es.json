@@ -459,7 +459,7 @@
     "exitEditMode": "Salir del modo edición (E)",
     "showNextMove": "Mostrar siguiente movimiento",
     "hideNextMove": "Ocultar siguiente movimiento",
-    "suggestMove": "Sugerir jugada",
+    "suggestMove": "Sugerir",
     "suggestMoveTitle": "Pedir a la IA que sugiera una jugada (G)",
     "suggesting": "Sugiriendo...",
     "loadAiModelFirst": "Por favor, carga primero un modelo de IA",
