@@ -132,21 +132,13 @@ interface BoardThemeConfig {
 
 ## Built-in Themes
 
-### Classic (Default)
+### Hikaru (Default)
 
-The default Kaya theme with warm wood tones and SVG stones.
+The default Kaya theme with clean SVG graphics.
 
-- **Board**: Traditional kaya wood color (#f1b458)
+- **Board**: Traditional kaya wood color
 - **Stones**: Clean SVG-based black and white stones
-- **Style**: Modern, clean appearance
-
-### Hikaru
-
-An anime-inspired theme with crisp SVG graphics.
-
-- **Board**: Light bamboo texture
-- **Stones**: Flat, stylized stones with clean edges
-- **Style**: Bright, modern anime aesthetic
+- **Style**: Modern, crisp appearance
 
 ### Shell-Slate
 
@@ -163,6 +155,30 @@ Chinese Yunzi stones on a kaya board.
 - **Board**: Warm kaya wood texture
 - **Stones**: Biconvex Yunzi stones with characteristic luster
 - **Style**: Traditional Chinese aesthetic
+
+### Happy Stones
+
+Playful, friendly stone design.
+
+- **Board**: Warm wood tone
+- **Stones**: Cartoon-style friendly stones
+- **Style**: Casual, approachable
+
+### Kifu
+
+Minimalist black and white style.
+
+- **Board**: Plain background with clean grid
+- **Stones**: Simple flat circles
+- **Style**: Document/record style, good for printing
+
+### BadukTV
+
+Broadcast-style appearance inspired by Korean Go TV.
+
+- **Board**: Professional broadcast look
+- **Stones**: Clear, high-contrast stones
+- **Style**: TV broadcast aesthetic
 
 ## Implementation Details
 

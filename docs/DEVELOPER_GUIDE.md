@@ -225,10 +225,43 @@ localStorage.getItem('kaya-analysis-cache');
 
 ### Adding Keyboard Shortcuts
 
-Check for conflicts in:
+Kaya uses a centralized keyboard shortcuts system with user-customizable bindings.
 
-- `packages/ui/src/Header.tsx` (global shortcuts)
-- `packages/ui/src/GameBoard.tsx` (board shortcuts)
+**Location:** `packages/ui/src/hooks/useKeyboardShortcuts.ts`
+
+**Adding a new shortcut:**
+
+1. Add the shortcut ID to the `ShortcutId` type
+2. Add default binding in `DEFAULT_SHORTCUTS`
+3. Add translation key in all locale files under `shortcuts.{id}`
+4. Use `matchesShortcut(event, 'your.shortcutId')` in your component
+
+```typescript
+// In useKeyboardShortcuts.ts
+export type ShortcutId =
+  | 'nav.back'
+  | 'your.newShortcut'; // Add your new shortcut
+
+const DEFAULT_SHORTCUTS: Record<ShortcutId, ...> = {
+  'your.newShortcut': {
+    category: 'board',
+    defaultBinding: createBinding('x'),
+  },
+};
+
+// In your component
+const { matchesShortcut } = useKeyboardShortcuts();
+
+useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (matchesShortcut(e, 'your.newShortcut')) {
+      // Handle the shortcut
+    }
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [matchesShortcut]);
+```
 
 ### Working with WASM
 

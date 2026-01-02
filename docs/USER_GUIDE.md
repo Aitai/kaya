@@ -194,11 +194,63 @@ The Analysis panel shows a win rate graph across all analyzed positions. Click a
 - Komi included for White
 - Winner and margin shown
 
-### 9. Theme
+### 9. Edit Mode
 
+Edit mode allows you to modify the board position and add annotations.
+
+**Activating:**
+
+1. Click the **✏️** button in the toolbar, or press `E`
+2. The edit toolbar appears with available tools
+
+**Stone Placement:**
+
+- **Black Stone** - Place black stones (doesn't follow game rules)
+- **White Stone** - Place white stones
+- Click an existing stone to remove it
+
+**Markers:**
+
+Add visual markers to highlight positions:
+
+- **Circle** - Mark with a circle
+- **Cross** - Mark with an X
+- **Triangle** - Mark with a triangle
+- **Square** - Mark with a square
+
+**Drag-to-Paint:** Hold and drag to paint multiple markers at once. Click a marked intersection again to remove the marker.
+
+**Labels:**
+
+- **Letter Labels** - Add A, B, C... labels to positions
+- **Number Labels** - Add 1, 2, 3... labels to positions
+
+**Hotspot:**
+
+Mark the current position as a hotspot (important position). Hotspots are highlighted in the game tree.
+
+### 10. Appearance Settings
+
+**Theme:**
 Click the sun/moon icon in the header to toggle dark/light mode. Theme persists across sessions.
 
-### 10. Gamepad Support
+**Board Theme:**
+Open Settings (⚙️ or `Cmd/Ctrl+,`) and go to the **Board** tab to choose from multiple board and stone styles:
+
+- **Hikaru** (Default) - Clean SVG stones with modern look
+- **Shell-Slate** - Traditional Japanese clamshell and slate stones
+- **Yunzi** - Chinese Yunzi biconvex stones
+- **Happy Stones** - Playful, friendly stone design
+- **Kifu** - Minimalist black and white style
+- **BadukTV** - Broadcast-style appearance
+
+**Board Coordinates:**
+Toggle coordinates display in Settings > Board or via the toolbar toggle. Useful for cleaner screenshots or personal preference.
+
+**Board Controls:**
+The captures display and navigation buttons below the board can be collapsed via Settings > Board if you prefer a more minimalist view.
+
+### 11. Gamepad Support
 
 Connect a gamepad for controller navigation:
 
@@ -211,27 +263,67 @@ Supports standard gamepads and 8BitDo Lite 2.
 
 ## Keyboard Reference
 
+All keyboard shortcuts can be customized in Settings > Shortcuts.
+
 ### Navigation
 
-| Key         | Action             |
-| ----------- | ------------------ |
-| `←`         | Previous move      |
-| `→`         | Next move          |
-| `↑`         | Previous variation |
-| `↓`         | Next variation     |
-| `Home`      | First move         |
-| `End`       | Last move          |
-| `Shift+←/→` | Jump 10 moves      |
+| Key    | Action             |
+| ------ | ------------------ |
+| `←`    | Previous move      |
+| `→`    | Next move          |
+| `↑`    | Previous variation |
+| `↓`    | Next variation     |
+| `Home` | First move         |
+| `End`  | Last move          |
 
-### Actions
+### Board Modes
 
-| Key | Action            |
-| --- | ----------------- |
-| `E` | Toggle edit mode  |
-| `S` | Toggle score mode |
-| `M` | Toggle sound      |
-| `B` | Toggle sidebar    |
-| `F` | Toggle fullscreen |
+| Key | Action                 |
+| --- | ---------------------- |
+| `E` | Toggle edit mode       |
+| `N` | Toggle navigation mode |
+| `S` | Toggle score mode      |
+| `A` | Toggle AI analysis     |
+| `M` | Toggle sound           |
+
+### AI Analysis
+
+| Key | Action           |
+| --- | ---------------- |
+| `G` | Suggest move     |
+| `T` | Toggle top moves |
+| `O` | Toggle ownership |
+
+### View
+
+| Key          | Action            |
+| ------------ | ----------------- |
+| `F`          | Toggle fullscreen |
+| `Cmd/Ctrl+B` | Toggle sidebar    |
+| `Cmd/Ctrl+L` | Toggle library    |
+| `Cmd/Ctrl+,` | Open settings     |
+
+### File
+
+| Key          | Action    |
+| ------------ | --------- |
+| `Cmd/Ctrl+S` | Save      |
+| `Cmd/Ctrl+V` | Paste SGF |
+
+### Edit
+
+| Key          | Action |
+| ------------ | ------ |
+| `Cmd/Ctrl+Z` | Undo   |
+| `Cmd/Ctrl+Y` | Redo   |
+
+### Customizing Shortcuts
+
+1. Open Settings with **⚙️** or `Cmd/Ctrl+,`
+2. Go to the **Shortcuts** tab
+3. Click on any shortcut to record a new key binding
+4. Conflicts are detected and highlighted
+5. Click **Reset** to restore default bindings
 
 ## Troubleshooting
 

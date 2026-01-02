@@ -46,6 +46,8 @@ bun run clean          # Remove build artifacts
 
 - **[PROJECT_STATE.md](docs/PROJECT_STATE.md)** - Current status and features
 - **[DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)** - Workflows and debugging
+- **[USER_GUIDE.md](docs/USER_GUIDE.md)** - End-user documentation
+- **[THEMES.md](docs/THEMES.md)** - Board theme system
 - **[ASSET_MANAGEMENT.md](docs/ASSET_MANAGEMENT.md)** - No symlinks! Copy-based assets
 - **[PERFORMANCE.md](docs/PERFORMANCE.md)** - Navigation performance guide
 - **[MOBILE_RESPONSIVE.md](docs/MOBILE_RESPONSIVE.md)** - Mobile/tablet layout and touch interactions
@@ -93,7 +95,14 @@ kaya/
 bun run copy-assets  # Runs automatically in build
 ```
 
-**4. Tauri v2 Imports**
+**4. Keyboard Shortcuts System** (`packages/ui/src/hooks/useKeyboardShortcuts.ts`)
+
+- Centralized, user-customizable shortcuts
+- Use `useKeyboardShortcuts()` hook from context
+- Add new shortcuts to `ShortcutId` type and `DEFAULT_SHORTCUTS`
+- Add translations under `shortcuts.{id}` in all locale files
+
+**5. Tauri v2 Imports**
 
 ```typescript
 import { invoke } from '@tauri-apps/api/core'; // NOT @tauri-apps/api/tauri

@@ -25,9 +25,13 @@ Kaya is a modern, elegant application for playing and studying the ancient game 
 - **AI Analysis** - Real-time win rate, score estimation, and move suggestions via KataGo (ONNX)
 - **Analysis Graph** - Visual win rate chart across all moves
 - **Score Estimation** - Interactive territory and dead stone marking
+- **Edit Mode** - Add stones, markers, and labels with drag-to-paint support
+- **Board Themes** - Multiple stone and board visual styles
 - **Modern Interface** - Clean, distraction-free design with dark/light themes
+- **Customizable Shortcuts** - Configure keyboard shortcuts to your preference
+- **Multi-Language** - Available in 8 languages (EN, ZH, KO, JA, FR, DE, ES, IT)
 - **Gamepad Support** - Navigate games with a controller
-- **Cross-Platform** - Available as desktop app (Windows, macOS, Linux) and web app
+- **Cross-Platform** - Available as desktop app (Windows, macOS, Linux) and web app (PWA)
 
 ## Technology
 
@@ -43,7 +47,7 @@ The core Go libraries are TypeScript ports from the excellent [Sabaki](https://g
 
 ## Open Source
 
-Kaya is free and open source software, licensed under the MIT License. You can:
+Kaya is free and open source software, licensed under the [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.en.html). You can:
 
 - View the source code on [GitHub](https://github.com/kaya-go/kaya)
 - Report bugs or suggest features

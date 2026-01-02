@@ -53,12 +53,23 @@ Kaya is a desktop and web Go (Baduk/Weiqi) application with AI analysis. It feat
 ### UI/UX
 
 - **Collapsible Sidebar**: Game Tree, Game Info, Comment, and Analysis panels
+- **Collapsible Board Controls**: Toggle visibility of captures and navigation buttons
 - **Score Estimation**: Interactive dead stone marking with territory calculation
 - **Gamepad Support**: Controller navigation with multiple mapping profiles
+- **Board Themes**: Multiple stone and board styles (Hikaru, Shell-Slate, Yunzi, Happy Stones, Kifu, BadukTV)
 - **Dark/Light Theme**: Persisted user preference
+- **Show/Hide Coordinates**: Toggle board coordinates display
 - **Sound Effects**: Stone placement and capture sounds
+- **Configurable Keyboard Shortcuts**: Customize all shortcuts via Settings
 - **Internationalization**: Full i18n support with 8 languages (EN, ZH, KO, JA, FR, DE, ES, IT)
 - **Mobile/Tablet Responsive**: Touch-friendly layout with swipe navigation and orientation support
+
+### Edit Mode
+
+- **Stone Placement**: Add black/white stones directly on the board
+- **Markers**: Circle, cross, square, triangle markers with drag-to-paint support
+- **Labels**: Letter and number labels
+- **Hotspot Marking**: Mark important positions
 
 ## Development Commands
 
@@ -82,6 +93,7 @@ bun run clean          # Remove build artifacts
 - `README.md` - Project overview
 - `DEVELOPER_GUIDE.md` - Development workflows
 - `USER_GUIDE.md` - End-user documentation
+- `THEMES.md` - Board theme system and configuration
 - `PERFORMANCE.md` - Performance optimization guide
 - `ASSET_MANAGEMENT.md` - Asset copy strategy
 - `RELEASE_PROCESS.md` - Release workflow
