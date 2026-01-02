@@ -813,6 +813,14 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
             handleSuggestMove();
           }
           break;
+        case 't':
+          // T for "Top moves" toggle
+          toggleTopMoves();
+          break;
+        case 'o':
+          // O for "Ownership" heatmap toggle
+          toggleOwnership();
+          break;
       }
     };
 
@@ -831,6 +839,8 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     editMode,
     isGeneratingMove,
     handleSuggestMove,
+    toggleTopMoves,
+    toggleOwnership,
   ]);
 
   // Check if current tool is a draggable marker tool

@@ -24,7 +24,12 @@ import {
 import { useTranslation } from 'react-i18next';
 import { MobileMenu } from './MobileMenu';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useGameTreeFile, useGameTreeBoard, useGameTreeEdit } from '../../contexts/selectors';
+import {
+  useGameTreeFile,
+  useGameTreeBoard,
+  useGameTreeEdit,
+  useGameTreeAI,
+} from '../../contexts/selectors';
 import { useLibrary } from '../../contexts/LibraryContext';
 import { useGameSounds } from '../../useGameSounds';
 import { GamepadIndicator } from '../gamepad/GamepadIndicator';
@@ -69,6 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
     useGameTreeFile();
   const { currentBoard, gameInfo } = useGameTreeBoard();
   const { makeMainVariation, undo, redo, canUndo, canRedo, editMode } = useGameTreeEdit();
+  const { setAIConfigOpen } = useGameTreeAI();
   const {
     clearLoadedFile,
     loadedFileId,
@@ -491,6 +497,12 @@ export const Header: React.FC<HeaderProps> = ({
         if (canRedo) redo();
       }
 
+      // Ctrl+, or Cmd+, - Open settings
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault();
+        setAIConfigOpen(true);
+      }
+
       if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         toggleFullscreen();
       } else if (
@@ -517,6 +529,7 @@ export const Header: React.FC<HeaderProps> = ({
     redo,
     canUndo,
     canRedo,
+    setAIConfigOpen,
   ]);
 
   return (
