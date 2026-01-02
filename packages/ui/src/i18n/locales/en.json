@@ -470,7 +470,9 @@
     "loadAiModelFirst": "Please load an AI model first",
     "initializingAiEngine": "Initializing AI engine...",
     "aiEngineInitializing": "AI engine is initializing, please try again",
-    "failedToGenerateMove": "Failed to generate AI move"
+    "failedToGenerateMove": "Failed to generate AI move",
+    "hideControls": "Hide controls",
+    "showControls": "Show controls"
   },
 
   "analysisBar": {

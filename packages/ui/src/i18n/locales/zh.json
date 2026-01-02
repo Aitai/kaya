@@ -470,7 +470,9 @@
     "loadAiModelFirst": "请先加载AI模型",
     "initializingAiEngine": "正在初始化AI引擎...",
     "aiEngineInitializing": "AI引擎正在初始化，请重试",
-    "failedToGenerateMove": "AI建议落子失败"
+    "failedToGenerateMove": "AI建议落子失败",
+    "hideControls": "隐藏控制栏",
+    "showControls": "显示控制栏"
   },
 
   "analysisBar": {

@@ -467,7 +467,9 @@
     "loadAiModelFirst": "Por favor, carga primero un modelo de IA",
     "initializingAiEngine": "Inicializando motor de IA...",
     "aiEngineInitializing": "El motor de IA se está inicializando, inténtalo de nuevo",
-    "failedToGenerateMove": "Error al generar jugada de IA"
+    "failedToGenerateMove": "Error al generar jugada de IA",
+    "hideControls": "Ocultar controles",
+    "showControls": "Mostrar controles"
   },
 
   "analysisBar": {

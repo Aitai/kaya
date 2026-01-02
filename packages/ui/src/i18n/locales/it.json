@@ -467,7 +467,9 @@
     "loadAiModelFirst": "Carica prima un modello AI",
     "initializingAiEngine": "Inizializzazione motore AI...",
     "aiEngineInitializing": "Il motore AI si sta inizializzando, riprova",
-    "failedToGenerateMove": "Generazione mossa AI fallita"
+    "failedToGenerateMove": "Generazione mossa AI fallita",
+    "hideControls": "Nascondi controlli",
+    "showControls": "Mostra controlli"
   },
 
   "analysisBar": {

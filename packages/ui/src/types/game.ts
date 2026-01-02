@@ -43,6 +43,8 @@ export interface GameSettings {
   fuzzyStonePlacement: boolean;
   /** Show board coordinates (A-T, 1-19) */
   showCoordinates: boolean;
+  /** Show the board controls section (captures, navigation buttons) */
+  showBoardControls: boolean;
 }
 
 export interface AIModel {

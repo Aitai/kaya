@@ -467,7 +467,9 @@
     "loadAiModelFirst": "Veuillez d'abord charger un modèle IA",
     "initializingAiEngine": "Initialisation du moteur IA...",
     "aiEngineInitializing": "Le moteur IA s'initialise, veuillez réessayer",
-    "failedToGenerateMove": "Échec de la génération du coup IA"
+    "failedToGenerateMove": "Échec de la génération du coup IA",
+    "hideControls": "Masquer les contrôles",
+    "showControls": "Afficher les contrôles"
   },
 
   "analysisBar": {

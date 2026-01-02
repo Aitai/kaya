@@ -470,7 +470,9 @@
     "loadAiModelFirst": "먼저 AI 모델을 로드해 주세요",
     "initializingAiEngine": "AI 엔진 초기화 중...",
     "aiEngineInitializing": "AI 엔진이 초기화 중입니다. 다시 시도해 주세요",
-    "failedToGenerateMove": "AI 수 생성 실패"
+    "failedToGenerateMove": "AI 수 생성 실패",
+    "hideControls": "컨트롤 숨기기",
+    "showControls": "컨트롤 표시"
   },
 
   "analysisBar": {

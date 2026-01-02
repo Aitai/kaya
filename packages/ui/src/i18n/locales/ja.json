@@ -470,7 +470,9 @@
     "loadAiModelFirst": "まずAIモデルをロードしてください",
     "initializingAiEngine": "AIエンジンを初期化中...",
     "aiEngineInitializing": "AIエンジンが初期化中です。もう一度お試しください",
-    "failedToGenerateMove": "AI手の生成に失敗しました"
+    "failedToGenerateMove": "AI手の生成に失敗しました",
+    "hideControls": "コントロールを非表示",
+    "showControls": "コントロールを表示"
   },
 
   "analysisBar": {

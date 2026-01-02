@@ -467,7 +467,9 @@
     "loadAiModelFirst": "Bitte laden Sie zuerst ein KI-Modell",
     "initializingAiEngine": "KI-Engine wird initialisiert...",
     "aiEngineInitializing": "KI-Engine wird initialisiert, bitte erneut versuchen",
-    "failedToGenerateMove": "Fehler bei der KI-Zugvorschlag"
+    "failedToGenerateMove": "Fehler bei der KI-Zugvorschlag",
+    "hideControls": "Steuerung ausblenden",
+    "showControls": "Steuerung anzeigen"
   },
 
   "analysisBar": {

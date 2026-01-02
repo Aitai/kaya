@@ -27,6 +27,8 @@ import {
   LuX,
   LuLayers,
   LuLoader,
+  LuChevronDown,
+  LuChevronUp,
 } from 'react-icons/lu';
 import { createPortal } from 'react-dom';
 import { sgfToVertex } from '@kaya/sgf';
@@ -72,6 +74,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     moveNumber,
     gameId,
     gameSettings,
+    setGameSettings,
   } = useGameTreeBoard();
   const { playMove, resign, placeStoneDirect, removeSetupStone } = useGameTreeActions();
   const { scoringMode, deadStones, toggleDeadStones, toggleScoringMode, territoryMap } =
@@ -231,6 +234,11 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
   const handleToggleEditMode = useCallback(() => {
     toggleEditMode();
   }, [toggleEditMode]);
+
+  // Toggle board controls visibility
+  const handleToggleBoardControls = useCallback(() => {
+    setGameSettings({ showBoardControls: !gameSettings.showBoardControls });
+  }, [setGameSettings, gameSettings.showBoardControls]);
 
   // Determine ghost stone color based on mode and tool
   const ghostStonePlayer = useMemo((): Sign | undefined => {
@@ -1237,7 +1245,21 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
         </div>
         {editMode && <EditToolbar />}
       </div>
-      <BoardControls />
+
+      {/* Collapse bar for board controls */}
+      <button
+        className="board-controls-collapse-bar"
+        onClick={handleToggleBoardControls}
+        title={
+          gameSettings.showBoardControls
+            ? t('gameboardActions.hideControls')
+            : t('gameboardActions.showControls')
+        }
+      >
+        {gameSettings.showBoardControls ? <LuChevronDown size={14} /> : <LuChevronUp size={14} />}
+      </button>
+
+      {gameSettings.showBoardControls && <BoardControls />}
       {isMobile && scoringMode && scoreData && (
         <div style={{ padding: '0.5rem', width: '100%' }}>
           <ScoreEstimator
