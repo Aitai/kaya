@@ -562,5 +562,35 @@
   "aboutLicense": "Licenza",
   "aboutGitHub": "Repository GitHub",
   "aboutReportIssue": "Segnala un problema",
-  "aboutVersionNotAvailable": "Informazioni sulla versione non disponibili"
+  "aboutVersionNotAvailable": "Informazioni sulla versione non disponibili",
+
+  "analysisPanel": {
+    "graphTab": "Grafico",
+    "reportTab": "Rapporto"
+  },
+
+  "performanceReport": {
+    "black": "Nero",
+    "white": "Bianco",
+    "blackShort": "N",
+    "whiteShort": "B",
+    "noAnalysisData": "Nessun dato di analisi disponibile",
+    "runAnalysisHint": "Esegui l'analisi completa del gioco per generare un rapporto sulle prestazioni",
+    "partialAnalysis": "{{analyzed}} di {{total}} mosse analizzate ({{percentage}}%)",
+    "entireGame": "Partita intera",
+    "opening": "Apertura",
+    "middleGame": "Medio gioco",
+    "endGame": "Finale",
+    "accuracy": "Precisione",
+    "meanLoss": "Perdita media",
+    "points": "pt",
+    "moveDistribution": "Distribuzione mosse",
+    "aiMove": "Mossa IA",
+    "good": "Buona",
+    "inaccuracy": "Imprecisione",
+    "mistake": "Errore",
+    "blunder": "Svista",
+    "keyMistakes": "Errori chiave",
+    "moveNumber": "Mossa {{number}}"
+  }
 }

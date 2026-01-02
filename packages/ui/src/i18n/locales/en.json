@@ -566,5 +566,35 @@
   "aboutLicense": "License",
   "aboutGitHub": "GitHub Repository",
   "aboutReportIssue": "Report an Issue",
-  "aboutVersionNotAvailable": "Version information not available"
+  "aboutVersionNotAvailable": "Version information not available",
+
+  "analysisPanel": {
+    "graphTab": "Graph",
+    "reportTab": "Report"
+  },
+
+  "performanceReport": {
+    "black": "Black",
+    "white": "White",
+    "blackShort": "B",
+    "whiteShort": "W",
+    "noAnalysisData": "No analysis data available",
+    "runAnalysisHint": "Run full game analysis to generate a performance report",
+    "partialAnalysis": "{{analyzed}} of {{total}} moves analyzed ({{percentage}}%)",
+    "entireGame": "Entire Game",
+    "opening": "Opening",
+    "middleGame": "Middle Game",
+    "endGame": "End Game",
+    "accuracy": "Accuracy",
+    "meanLoss": "Mean Loss",
+    "points": "pts",
+    "moveDistribution": "Move Distribution",
+    "aiMove": "AI Move",
+    "good": "Good",
+    "inaccuracy": "Inaccuracy",
+    "mistake": "Mistake",
+    "blunder": "Blunder",
+    "keyMistakes": "Key Mistakes",
+    "moveNumber": "Move {{number}}"
+  }
 }

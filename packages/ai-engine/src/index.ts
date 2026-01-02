@@ -60,3 +60,7 @@ export * from './sgf-utils';
 
 // High-level APIs
 export * from './analyze';
+
+// Performance Report
+export * from './performance-types';
+export * from './performance-report';

@@ -565,5 +565,35 @@
   "aboutLicense": "许可证",
   "aboutGitHub": "GitHub 仓库",
   "aboutReportIssue": "报告问题",
-  "aboutVersionNotAvailable": "版本信息不可用"
+  "aboutVersionNotAvailable": "版本信息不可用",
+
+  "analysisPanel": {
+    "graphTab": "图表",
+    "reportTab": "报告"
+  },
+
+  "performanceReport": {
+    "black": "黑方",
+    "white": "白方",
+    "blackShort": "黑",
+    "whiteShort": "白",
+    "noAnalysisData": "没有可用的分析数据",
+    "runAnalysisHint": "运行全局分析以生成性能报告",
+    "partialAnalysis": "已分析 {{analyzed}}/{{total}} 手 ({{percentage}}%)",
+    "entireGame": "全局",
+    "opening": "布局",
+    "middleGame": "中盘",
+    "endGame": "官子",
+    "accuracy": "精确度",
+    "meanLoss": "平均损失",
+    "points": "目",
+    "moveDistribution": "落子分布",
+    "aiMove": "AI的手",
+    "good": "好棋",
+    "inaccuracy": "不精确",
+    "mistake": "失误",
+    "blunder": "恶手",
+    "keyMistakes": "关键失误",
+    "moveNumber": "第 {{number}} 手"
+  }
 }

@@ -565,5 +565,35 @@
   "aboutLicense": "라이선스",
   "aboutGitHub": "GitHub 저장소",
   "aboutReportIssue": "문제 신고",
-  "aboutVersionNotAvailable": "버전 정보를 사용할 수 없습니다"
+  "aboutVersionNotAvailable": "버전 정보를 사용할 수 없습니다",
+
+  "analysisPanel": {
+    "graphTab": "그래프",
+    "reportTab": "보고서"
+  },
+
+  "performanceReport": {
+    "black": "흑",
+    "white": "백",
+    "blackShort": "흑",
+    "whiteShort": "백",
+    "noAnalysisData": "분석 데이터가 없습니다",
+    "runAnalysisHint": "성능 보고서를 생성하려면 전체 게임 분석을 실행하세요",
+    "partialAnalysis": "{{total}}수 중 {{analyzed}}수 분석됨 ({{percentage}}%)",
+    "entireGame": "전체 게임",
+    "opening": "포석",
+    "middleGame": "중반",
+    "endGame": "끝내기",
+    "accuracy": "정확도",
+    "meanLoss": "평균 손실",
+    "points": "점",
+    "moveDistribution": "수 분포",
+    "aiMove": "AI 수",
+    "good": "좋은 수",
+    "inaccuracy": "부정확",
+    "mistake": "실수",
+    "blunder": "대악수",
+    "keyMistakes": "주요 실수",
+    "moveNumber": "{{number}}번째 수"
+  }
 }

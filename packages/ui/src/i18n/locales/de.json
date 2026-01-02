@@ -562,5 +562,35 @@
   "aboutLicense": "Lizenz",
   "aboutGitHub": "GitHub-Repository",
   "aboutReportIssue": "Problem melden",
-  "aboutVersionNotAvailable": "Versionsinformationen nicht verfügbar"
+  "aboutVersionNotAvailable": "Versionsinformationen nicht verfügbar",
+
+  "analysisPanel": {
+    "graphTab": "Diagramm",
+    "reportTab": "Bericht"
+  },
+
+  "performanceReport": {
+    "black": "Schwarz",
+    "white": "Weiß",
+    "blackShort": "S",
+    "whiteShort": "W",
+    "noAnalysisData": "Keine Analysedaten verfügbar",
+    "runAnalysisHint": "Führen Sie eine vollständige Spielanalyse durch, um einen Leistungsbericht zu erstellen",
+    "partialAnalysis": "{{analyzed}} von {{total}} Zügen analysiert ({{percentage}}%)",
+    "entireGame": "Gesamtes Spiel",
+    "opening": "Eröffnung",
+    "middleGame": "Mittelspiel",
+    "endGame": "Endspiel",
+    "accuracy": "Genauigkeit",
+    "meanLoss": "Mittlerer Verlust",
+    "points": "Pkt",
+    "moveDistribution": "Zugverteilung",
+    "aiMove": "KI-Zug",
+    "good": "Gut",
+    "inaccuracy": "Ungenauigkeit",
+    "mistake": "Fehler",
+    "blunder": "Patzer",
+    "keyMistakes": "Wichtige Fehler",
+    "moveNumber": "Zug {{number}}"
+  }
 }

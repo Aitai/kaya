@@ -565,5 +565,35 @@
   "aboutLicense": "ライセンス",
   "aboutGitHub": "GitHubリポジトリ",
   "aboutReportIssue": "問題を報告",
-  "aboutVersionNotAvailable": "バージョン情報は利用できません"
+  "aboutVersionNotAvailable": "バージョン情報は利用できません",
+
+  "analysisPanel": {
+    "graphTab": "グラフ",
+    "reportTab": "レポート"
+  },
+
+  "performanceReport": {
+    "black": "黒",
+    "white": "白",
+    "blackShort": "黒",
+    "whiteShort": "白",
+    "noAnalysisData": "分析データがありません",
+    "runAnalysisHint": "パフォーマンスレポートを生成するには全局分析を実行してください",
+    "partialAnalysis": "{{total}}手中{{analyzed}}手を分析済み ({{percentage}}%)",
+    "entireGame": "全局",
+    "opening": "序盤",
+    "middleGame": "中盤",
+    "endGame": "終盤",
+    "accuracy": "精度",
+    "meanLoss": "平均損失",
+    "points": "目",
+    "moveDistribution": "手の分布",
+    "aiMove": "AIの手",
+    "good": "良い手",
+    "inaccuracy": "不正確",
+    "mistake": "ミス",
+    "blunder": "悪手",
+    "keyMistakes": "重要なミス",
+    "moveNumber": "{{number}}手目"
+  }
 }

@@ -562,5 +562,35 @@
   "aboutLicense": "Licence",
   "aboutGitHub": "Dépôt GitHub",
   "aboutReportIssue": "Signaler un problème",
-  "aboutVersionNotAvailable": "Informations de version non disponibles"
+  "aboutVersionNotAvailable": "Informations de version non disponibles",
+
+  "analysisPanel": {
+    "graphTab": "Graphique",
+    "reportTab": "Rapport"
+  },
+
+  "performanceReport": {
+    "black": "Noir",
+    "white": "Blanc",
+    "blackShort": "N",
+    "whiteShort": "B",
+    "noAnalysisData": "Aucune donnée d'analyse disponible",
+    "runAnalysisHint": "Lancez l'analyse complète pour générer un rapport de performance",
+    "partialAnalysis": "{{analyzed}} sur {{total}} coups analysés ({{percentage}}%)",
+    "entireGame": "Partie entière",
+    "opening": "Ouverture",
+    "middleGame": "Milieu de partie",
+    "endGame": "Fin de partie",
+    "accuracy": "Précision",
+    "meanLoss": "Perte moyenne",
+    "points": "pts",
+    "moveDistribution": "Distribution des coups",
+    "aiMove": "Coup IA",
+    "good": "Bon",
+    "inaccuracy": "Imprécision",
+    "mistake": "Erreur",
+    "blunder": "Gaffe",
+    "keyMistakes": "Erreurs clés",
+    "moveNumber": "Coup {{number}}"
+  }
 }
