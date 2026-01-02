@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] - 2026-01-02
+
+### <!-- 0 -->🚀 Features
+
+- *(ui)* Add keyboard shortcuts for top moves, ownership, and settings ([36cd245](https://github.com/kaya-go/kaya/commit/36cd2453d00e6fdb6080b1a0586d1d1f134b9230)) by @hadim
+
+- *(ui)* Add collapsible board controls section ([4de5561](https://github.com/kaya-go/kaya/commit/4de5561020ea36cb82ec989d39e902579c931946)) by @hadim
+
+- *(ui)* Add configurable keyboard shortcuts with settings tab ([d8e107b](https://github.com/kaya-go/kaya/commit/d8e107bd5c42df07abb3e13fbea936140343aa8b)) by @hadim
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ui)* Allow actions bar buttons to wrap to second line on narrow widths ([a1f1693](https://github.com/kaya-go/kaya/commit/a1f16939354a11fb82e511b89bb5e49a5bb1b075)) by @hadim
+
+- Scale app icon to fill more of the canvas on macos ([38d1d42](https://github.com/kaya-go/kaya/commit/38d1d4219cb81e16cdbfefa84dfa144e50da7208)) by @hadim
+
+- *(desktop)* Resolve native TauriEngine import for desktop app ([d652a73](https://github.com/kaya-go/kaya/commit/d652a739f75c585a7571021302c72b4652c3d2b0)) by @hadim
+
+### <!-- 3 -->📚 Documentation
+
+- Update documentation with new features and fixes ([b35294c](https://github.com/kaya-go/kaya/commit/b35294ccaf1349f3972e0ad3b1d7651051357a8a)) by @hadim
+
+### 🙏 Contributors
+
+- @hadim
+- @github-actions[bot]
+
 ## [0.2.2] - 2026-01-01
 
 ### <!-- 0 -->🚀 Features
@@ -30,11 +57,13 @@ All notable changes to this project will be documented in this file.
 
 - *(ci)* Bump actions/cache from 4 to 5 ([#33](https://github.com/kaya-go/kaya/issues/33)) by @dependabot[bot]
 
+- Release v0.2.2 ([4c9114c](https://github.com/kaya-go/kaya/commit/4c9114c910899c355f288f12591615c7fae03fa5)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
+- @github-actions[bot]
 - @hadim
 - @dependabot[bot]
-- @github-actions[bot]
 
 ## [0.2.1] - 2025-12-31
 
