@@ -61,6 +61,9 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:desktop": "playwright test --config=playwright.desktop.config.ts",
+    "test:e2e:desktop:headed": "playwright test --config=playwright.desktop.config.ts --headed",
+    "test:e2e:desktop:ui": "playwright test --config=playwright.desktop.config.ts --ui",
     "clean": "rm -rf packages/*/dist apps/*/dist node_modules/.cache && echo '✅ Build artifacts cleared'",
     "set-version": "bun run scripts/set-version.ts",
     "prepare": "husky"

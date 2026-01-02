@@ -1,10 +1,20 @@
 /**
  * Clipboard tests - copy and paste SGF functionality
+ *
+ * Note: These tests are skipped on desktop (Tauri) because clipboard operations
+ * use @tauri-apps/plugin-clipboard-manager instead of navigator.clipboard API.
  */
 
 import { test, expect } from '@playwright/test';
 
 test.setTimeout(15000);
+
+// Skip clipboard tests on desktop - Tauri uses a different clipboard API
+// Desktop runs on port 1420, web runs on port 3000
+test.skip(
+  ({ baseURL }) => baseURL?.includes(':1420') ?? false,
+  'Clipboard API not available in Tauri WebView'
+);
 
 // Grant clipboard permissions for Chromium
 test.use({
