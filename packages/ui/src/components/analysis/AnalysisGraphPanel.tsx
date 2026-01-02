@@ -11,6 +11,7 @@ import {
   LuBrain,
 } from 'react-icons/lu';
 import { useGameTree } from '../../contexts/GameTreeContext';
+import { useKeyboardShortcuts } from '../../contexts/KeyboardShortcutsContext';
 import { AnalysisLegendModal } from './AnalysisLegendModal';
 import {
   createInitialAnalysisState,
@@ -61,6 +62,8 @@ export const AnalysisGraphPanel: React.FC<AnalysisGraphPanelProps> = ({ classNam
     toggleTopMoves,
     isAnalyzing,
   } = useAIAnalysis();
+
+  const { getBinding, bindingToDisplayString } = useKeyboardShortcuts();
 
   // Toggle state for showing/hiding each metric
   const [showWinRate, setShowWinRate] = useState(true);
@@ -198,7 +201,7 @@ export const AnalysisGraphPanel: React.FC<AnalysisGraphPanelProps> = ({ classNam
           className={`analysis-overlay-button ${showOwnership ? 'active' : ''}`}
           onClick={toggleOwnership}
           disabled={isInitializing}
-          title={t('analysis.toggleOwnership')}
+          title={`${t('analysis.toggleOwnership')} (${bindingToDisplayString(getBinding('ai.toggleOwnership'))})`}
           aria-label={t('analysis.toggleOwnership')}
           aria-pressed={showOwnership}
         >
@@ -208,7 +211,7 @@ export const AnalysisGraphPanel: React.FC<AnalysisGraphPanelProps> = ({ classNam
           className={`analysis-overlay-button ${showTopMoves ? 'active' : ''}`}
           onClick={toggleTopMoves}
           disabled={isInitializing}
-          title={t('analysis.toggleTopMoves')}
+          title={`${t('analysis.toggleTopMoves')} (${bindingToDisplayString(getBinding('ai.toggleTopMoves'))})`}
           aria-label={t('analysis.toggleTopMoves')}
           aria-pressed={showTopMoves}
         >

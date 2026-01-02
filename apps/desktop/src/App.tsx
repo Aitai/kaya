@@ -36,6 +36,8 @@ import {
   LandingPage,
   AboutDialog,
   type MobileTab,
+  useKeyboardShortcuts,
+  KeyboardShortcutsProvider,
 } from '@kaya/ui';
 import { listen } from '@tauri-apps/api/event';
 import { analytics } from './analytics';
@@ -239,6 +241,7 @@ function AppContent({
   // Game info editor state for header actions
   const { isEditMode: gameInfoEditMode, toggleEditMode: toggleGameInfoEditMode } =
     useGameInfoEditMode();
+  const { matchesShortcut, getBinding, bindingToDisplayString } = useKeyboardShortcuts();
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -254,20 +257,22 @@ function AppContent({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle header with Ctrl+Shift+M or Cmd+Shift+M
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'm') {
+      // Toggle header
+      if (matchesShortcut(e, 'view.toggleHeader')) {
         e.preventDefault();
         setShowHeader(prev => !prev);
+        return;
       }
-      // Toggle sidebar with Ctrl+Shift+B or Cmd+Shift+B
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'b') {
+      // Toggle sidebar
+      if (matchesShortcut(e, 'view.toggleSidebar')) {
         e.preventDefault();
         setShowSidebar(prev => !prev);
+        return;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [matchesShortcut]);
 
   // Show landing page on mobile/tablet layout
   if (isMobileOrTablet && !hasStarted) {
@@ -299,7 +304,7 @@ function AppContent({
         ) : (
           <div
             onClick={() => setShowHeader(true)}
-            title="Show Menu (Cmd/Ctrl+Shift+M)"
+            title={`Show Menu (${bindingToDisplayString(getBinding('view.toggleHeader'))})`}
             style={{
               height: '12px',
               width: '100%',
@@ -442,17 +447,19 @@ function AppWithToast({ versionData }: { versionData: VersionData | undefined })
   }, [showToast]);
 
   return (
-    <GameControllerManagerProvider>
-      <GameTreeProvider onAutoSaveDisabled={handleAutoSaveDisabled}>
-        <AIEngineProvider>
-          <AIAnalysisProvider>
-            <BoardNavigationProvider>
-              <LibraryProviderWrapper versionData={versionData} />
-            </BoardNavigationProvider>
-          </AIAnalysisProvider>
-        </AIEngineProvider>
-      </GameTreeProvider>
-    </GameControllerManagerProvider>
+    <KeyboardShortcutsProvider>
+      <GameControllerManagerProvider>
+        <GameTreeProvider onAutoSaveDisabled={handleAutoSaveDisabled}>
+          <AIEngineProvider>
+            <AIAnalysisProvider>
+              <BoardNavigationProvider>
+                <LibraryProviderWrapper versionData={versionData} />
+              </BoardNavigationProvider>
+            </AIAnalysisProvider>
+          </AIEngineProvider>
+        </GameTreeProvider>
+      </GameControllerManagerProvider>
+    </KeyboardShortcutsProvider>
   );
 }
 

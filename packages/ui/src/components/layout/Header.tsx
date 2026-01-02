@@ -32,6 +32,7 @@ import {
 } from '../../contexts/selectors';
 import { useLibrary } from '../../contexts/LibraryContext';
 import { useGameSounds } from '../../useGameSounds';
+import { useKeyboardShortcuts } from '../../contexts/KeyboardShortcutsContext';
 import { GamepadIndicator } from '../gamepad/GamepadIndicator';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import type { NewGameConfig } from '../../contexts/GameTreeContext';
@@ -70,6 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { soundEnabled, toggleSound } = useGameSounds();
+  const { matchesShortcut, getBinding, bindingToDisplayString } = useKeyboardShortcuts();
   const { loadSGFAsync, exportSGF, newGame, fileName, setFileName, isDirty, triggerAutoSave } =
     useGameTreeFile();
   const { currentBoard, gameInfo } = useGameTreeBoard();
@@ -461,65 +463,54 @@ export const Header: React.FC<HeaderProps> = ({
         return;
       }
 
-      // Ctrl+S or Cmd+S - Save
-      if ((e.ctrlKey || e.metaKey) && e.key === 's' && !e.shiftKey) {
+      // File shortcuts
+      if (matchesShortcut(e, 'file.save')) {
         e.preventDefault();
         handleSaveClick();
+        return;
       }
-
-      // Ctrl+Shift+S or Cmd+Shift+S - Save As
-      if ((e.ctrlKey || e.metaKey) && e.key === 's' && e.shiftKey) {
+      if (matchesShortcut(e, 'file.saveAs')) {
         e.preventDefault();
         handleSaveAsClick();
+        return;
       }
 
-      // Note: Ctrl+V paste is handled by the global paste event in AppDropZone
-      // This ensures consistent behavior with the native paste event
-
-      // Ctrl+Shift+M or Cmd+Shift+M - Make current branch main
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'm' && e.shiftKey) {
+      // Edit shortcuts
+      if (matchesShortcut(e, 'edit.makeMainBranch')) {
         e.preventDefault();
         makeMainVariation();
+        return;
       }
-
-      // Ctrl+Z or Cmd+Z - Undo (always available)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+      if (matchesShortcut(e, 'edit.undo')) {
         e.preventDefault();
         if (canUndo) undo();
+        return;
       }
-
-      // Ctrl+Shift+Z or Cmd+Shift+Z or Ctrl+Y - Redo (always available)
-      if (
-        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && e.shiftKey) ||
-        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y')
-      ) {
+      if (matchesShortcut(e, 'edit.redo')) {
         e.preventDefault();
         if (canRedo) redo();
+        return;
       }
 
-      // Ctrl+, or Cmd+, - Open settings
-      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+      // View shortcuts
+      if (matchesShortcut(e, 'view.openSettings')) {
         e.preventDefault();
         setAIConfigOpen(true);
+        return;
       }
-
-      if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (matchesShortcut(e, 'view.toggleFullscreen')) {
         toggleFullscreen();
-      } else if (
-        e.key.toLowerCase() === 's' &&
-        !e.ctrlKey &&
-        !e.metaKey &&
-        !e.altKey &&
-        e.shiftKey
-      ) {
+        return;
+      }
+      if (matchesShortcut(e, 'board.toggleSound')) {
         toggleSound();
+        return;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
-    handleCopyClick,
     handleSaveClick,
     handleSaveAsClick,
     toggleFullscreen,
@@ -530,6 +521,7 @@ export const Header: React.FC<HeaderProps> = ({
     canUndo,
     canRedo,
     setAIConfigOpen,
+    matchesShortcut,
   ]);
 
   return (
@@ -576,7 +568,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={handleSaveClick}
-          title={`${t('saveToLibrary')} (Ctrl+S)`}
+          title={`${t('saveToLibrary')} (${bindingToDisplayString(getBinding('file.save'))})`}
           className="header-btn-primary header-desktop-only"
           disabled={!isDirty && loadedFileId !== null}
         >
@@ -584,7 +576,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={handleSaveAsClick}
-          title={`${t('saveAs')} (Ctrl+Shift+S)`}
+          title={`${t('saveAs')} (${bindingToDisplayString(getBinding('file.saveAs'))})`}
           className="header-btn-primary header-desktop-only"
         >
           <LuBookmarkPlus size={18} /> <span className="btn-text">{t('saveAsShort')}</span>
@@ -608,7 +600,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
           <button
             onClick={handlePasteClick}
-            title={`${t('pasteSgfOrOgs')} (Ctrl+V)`}
+            title={`${t('pasteSgfOrOgs')} (${bindingToDisplayString(getBinding('file.paste'))})`}
             className="header-btn-secondary"
           >
             <LuClipboardPaste size={18} /> <span className="btn-text">{t('paste')}</span>
@@ -708,7 +700,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               className="fullscreen-toggle"
               onClick={toggleFullscreen}
-              title={isFullscreen ? `${t('exitFullscreen')} (F)` : `${t('enterFullscreen')} (F)`}
+              title={
+                isFullscreen
+                  ? `${t('exitFullscreen')} (${bindingToDisplayString(getBinding('view.toggleFullscreen'))})`
+                  : `${t('enterFullscreen')} (${bindingToDisplayString(getBinding('view.toggleFullscreen'))})`
+              }
             >
               {isFullscreen ? <LuMinimize size={20} /> : <LuMaximize size={20} />}
             </button>
@@ -722,7 +718,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               className="sound-toggle"
               onClick={toggleSound}
-              title={soundEnabled ? `${t('muteSounds')} (S)` : `${t('enableSounds')} (S)`}
+              title={
+                soundEnabled
+                  ? `${t('muteSounds')} (${bindingToDisplayString(getBinding('board.toggleSound'))})`
+                  : `${t('enableSounds')} (${bindingToDisplayString(getBinding('board.toggleSound'))})`
+              }
             >
               {soundEnabled ? <LuVolume2 size={20} /> : <LuVolumeX size={20} />}
             </button>
@@ -736,7 +736,10 @@ export const Header: React.FC<HeaderProps> = ({
               <LuGithub size={20} />
             </a>
             {onHide && (
-              <button onClick={onHide} title={`${t('hideMenu')} (Cmd/Ctrl+Shift+M)`}>
+              <button
+                onClick={onHide}
+                title={`${t('hideMenu')} (${bindingToDisplayString(getBinding('view.toggleHeader'))})`}
+              >
                 <LuPanelTopClose size={20} />
               </button>
             )}

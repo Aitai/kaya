@@ -33,6 +33,7 @@ import {
   useGameTreeScore,
 } from '../../contexts/selectors';
 import { useBoardNavigation } from '../../contexts/BoardNavigationContext';
+import { useKeyboardShortcuts } from '../../contexts/KeyboardShortcutsContext';
 import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
 import './BoardControls.css';
 
@@ -66,6 +67,7 @@ export const BoardControls: React.FC = memo(() => {
   const { scoringMode, toggleScoringMode, autoEstimateDeadStones, clearDeadStones, isEstimating } =
     useGameTreeScore();
   const { navigationMode } = useBoardNavigation();
+  const { matchesShortcut } = useKeyboardShortcuts();
   const [showResignConfirm, setShowResignConfirm] = useState(false);
 
   // State for inline editing
@@ -139,56 +141,60 @@ export const BoardControls: React.FC = memo(() => {
       // Throttle repeated key presses
       if (keyThrottled && e.repeat) return;
 
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          if (canGoBack && !keyThrottled) {
-            keyThrottled = true;
-            // Use rAF to avoid blocking UI
-            requestAnimationFrame(() => goBack());
-            setTimeout(() => {
-              keyThrottled = false;
-            }, KEY_THROTTLE_MS);
-          }
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          if (canGoForward && !keyThrottled) {
-            keyThrottled = true;
-            requestAnimationFrame(() => goForward());
-            setTimeout(() => {
-              keyThrottled = false;
-            }, KEY_THROTTLE_MS);
-          }
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          if (!keyThrottled && branchInfo.hasBranches) {
-            keyThrottled = true;
-            requestAnimationFrame(() => switchBranch('next'));
-            setTimeout(() => {
-              keyThrottled = false;
-            }, KEY_THROTTLE_MS);
-          }
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          if (!keyThrottled && branchInfo.hasBranches) {
-            keyThrottled = true;
-            requestAnimationFrame(() => switchBranch('previous'));
-            setTimeout(() => {
-              keyThrottled = false;
-            }, KEY_THROTTLE_MS);
-          }
-          break;
-        case 'Home':
-          e.preventDefault();
-          requestAnimationFrame(() => goToStart());
-          break;
-        case 'End':
-          e.preventDefault();
-          requestAnimationFrame(() => goToEnd());
-          break;
+      // Navigation shortcuts using the configurable keyboard shortcuts
+      if (matchesShortcut(e, 'nav.back')) {
+        e.preventDefault();
+        if (canGoBack && !keyThrottled) {
+          keyThrottled = true;
+          requestAnimationFrame(() => goBack());
+          setTimeout(() => {
+            keyThrottled = false;
+          }, KEY_THROTTLE_MS);
+        }
+        return;
+      }
+      if (matchesShortcut(e, 'nav.forward')) {
+        e.preventDefault();
+        if (canGoForward && !keyThrottled) {
+          keyThrottled = true;
+          requestAnimationFrame(() => goForward());
+          setTimeout(() => {
+            keyThrottled = false;
+          }, KEY_THROTTLE_MS);
+        }
+        return;
+      }
+      if (matchesShortcut(e, 'nav.branchUp')) {
+        e.preventDefault();
+        if (!keyThrottled && branchInfo.hasBranches) {
+          keyThrottled = true;
+          requestAnimationFrame(() => switchBranch('next'));
+          setTimeout(() => {
+            keyThrottled = false;
+          }, KEY_THROTTLE_MS);
+        }
+        return;
+      }
+      if (matchesShortcut(e, 'nav.branchDown')) {
+        e.preventDefault();
+        if (!keyThrottled && branchInfo.hasBranches) {
+          keyThrottled = true;
+          requestAnimationFrame(() => switchBranch('previous'));
+          setTimeout(() => {
+            keyThrottled = false;
+          }, KEY_THROTTLE_MS);
+        }
+        return;
+      }
+      if (matchesShortcut(e, 'nav.start')) {
+        e.preventDefault();
+        requestAnimationFrame(() => goToStart());
+        return;
+      }
+      if (matchesShortcut(e, 'nav.end')) {
+        e.preventDefault();
+        requestAnimationFrame(() => goToEnd());
+        return;
       }
     };
 
@@ -251,6 +257,7 @@ export const BoardControls: React.FC = memo(() => {
     switchBranch,
     branchInfo.hasBranches,
     navigationMode,
+    matchesShortcut,
   ]);
 
   const handlePass = useCallback(() => {

@@ -45,6 +45,7 @@ import { useBoardNavigation } from '../../contexts/BoardNavigationContext';
 import { useFuzzyPlacement } from '../../useFuzzyPlacement';
 import { useBoardSwipeNavigation } from '../../hooks/useSwipeGesture';
 import { useIsTouchDevice, useLayoutMode } from '../../hooks/useMediaQuery';
+import { useKeyboardShortcuts } from '../../contexts/KeyboardShortcutsContext';
 import { BoardControls } from './BoardControls';
 import { ScoreEstimator, type ScoreData } from './ScoreEstimator';
 import { calculateTerritory, countDeadStones } from '../../services/scoring';
@@ -782,6 +783,9 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     onScoreData?.(scoreData);
   }, [scoreData, onScoreData]);
 
+  // Get keyboard shortcuts
+  const { matchesShortcut, getBinding, bindingToDisplayString } = useKeyboardShortcuts();
+
   // Keyboard shortcuts for modes
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -794,41 +798,38 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
         return;
       }
 
-      // Ignore if modifier keys are pressed (Ctrl, Alt, Meta)
-      // Shift is allowed for uppercase letters
-      if (e.ctrlKey || e.altKey || e.metaKey) {
+      // Board mode shortcuts
+      if (matchesShortcut(e, 'board.toggleEditMode')) {
+        handleToggleEditMode();
+        return;
+      }
+      if (matchesShortcut(e, 'board.toggleNavigationMode')) {
+        toggleNavigationMode();
+        return;
+      }
+      if (matchesShortcut(e, 'board.toggleScoringMode')) {
+        toggleScoringMode();
+        return;
+      }
+      if (matchesShortcut(e, 'board.toggleAnalysis')) {
+        toggleShowAnalysisBar();
         return;
       }
 
-      switch (e.key.toLowerCase()) {
-        case 'e':
-          handleToggleEditMode();
-          break;
-        case 'n':
-          toggleNavigationMode();
-          break;
-        case 's':
-          if (!e.shiftKey) {
-            toggleScoringMode();
-          }
-          break;
-        case 'a':
-          toggleShowAnalysisBar();
-          break;
-        case 'g':
-          // G for "Generate" AI move suggestion
-          if (isModelLoaded && !scoringMode && !editMode && !isGeneratingMove) {
-            handleSuggestMove();
-          }
-          break;
-        case 't':
-          // T for "Top moves" toggle
-          toggleTopMoves();
-          break;
-        case 'o':
-          // O for "Ownership" heatmap toggle
-          toggleOwnership();
-          break;
+      // AI shortcuts
+      if (matchesShortcut(e, 'ai.suggestMove')) {
+        if (isModelLoaded && !scoringMode && !editMode && !isGeneratingMove) {
+          handleSuggestMove();
+        }
+        return;
+      }
+      if (matchesShortcut(e, 'ai.toggleTopMoves')) {
+        toggleTopMoves();
+        return;
+      }
+      if (matchesShortcut(e, 'ai.toggleOwnership')) {
+        toggleOwnership();
+        return;
       }
     };
 
@@ -849,6 +850,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     handleSuggestMove,
     toggleTopMoves,
     toggleOwnership,
+    matchesShortcut,
   ]);
 
   // Check if current tool is a draggable marker tool
@@ -993,8 +995,8 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
           className={`gameboard-action-button gameboard-score-button ${scoringMode ? 'active' : ''}`}
           title={
             scoringMode
-              ? t('gameboardActions.exitScoringMode')
-              : t('gameboardActions.enterScoringMode')
+              ? `${t('gameboardActions.exitScoringMode')} (${bindingToDisplayString(getBinding('board.toggleScoringMode'))})`
+              : `${t('gameboardActions.enterScoringMode')} (${bindingToDisplayString(getBinding('board.toggleScoringMode'))})`
           }
         >
           <LuCalculator size={16} />
@@ -1007,8 +1009,8 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
           className={`gameboard-action-button gameboard-analysis-button ${showAnalysisBar ? 'active' : ''}`}
           title={
             showAnalysisBar
-              ? t('gameboardActions.hideAnalysis')
-              : t('gameboardActions.showAnalysis')
+              ? `${t('gameboardActions.hideAnalysis')} (${bindingToDisplayString(getBinding('board.toggleAnalysis'))})`
+              : `${t('gameboardActions.showAnalysis')} (${bindingToDisplayString(getBinding('board.toggleAnalysis'))})`
           }
         >
           <LuBrain size={16} />
@@ -1021,8 +1023,8 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
           className={`gameboard-action-button gameboard-navigation-button ${navigationMode ? 'active' : ''}`}
           title={
             navigationMode
-              ? t('gameboardActions.exitNavigationMode')
-              : t('gameboardActions.enterNavigationMode')
+              ? `${t('gameboardActions.exitNavigationMode')} (${bindingToDisplayString(getBinding('board.toggleNavigationMode'))})`
+              : `${t('gameboardActions.enterNavigationMode')} (${bindingToDisplayString(getBinding('board.toggleNavigationMode'))})`
           }
         >
           <LuGamepad2 size={16} />
@@ -1032,7 +1034,9 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
           onClick={handleToggleEditMode}
           className={`gameboard-action-button gameboard-edit-button ${editMode ? 'active' : ''}`}
           title={
-            editMode ? t('gameboardActions.exitEditMode') : t('gameboardActions.enterEditMode')
+            editMode
+              ? `${t('gameboardActions.exitEditMode')} (${bindingToDisplayString(getBinding('board.toggleEditMode'))})`
+              : `${t('gameboardActions.enterEditMode')} (${bindingToDisplayString(getBinding('board.toggleEditMode'))})`
           }
         >
           <LuPencil size={16} />
@@ -1055,7 +1059,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
             onClick={handleSuggestMove}
             disabled={isGeneratingMove || scoringMode || editMode}
             className="gameboard-action-button gameboard-suggest-move-button"
-            title={t('gameboardActions.suggestMoveTitle')}
+            title={`${t('gameboardActions.suggestMoveTitle')} (${bindingToDisplayString(getBinding('ai.suggestMove'))})`}
           >
             {isGeneratingMove ? <LuLoader size={16} className="spinner" /> : <LuBot size={16} />}
             <span className="btn-text">
@@ -1132,7 +1136,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
                 <div className="ai-analysis-summary__actions">
                   <button
                     className={`gameboard-action-button gameboard-heatmap-button ${showOwnership ? 'active' : ''}`}
-                    title={t('analysis.toggleOwnership')}
+                    title={`${t('analysis.toggleOwnership')} (${bindingToDisplayString(getBinding('ai.toggleOwnership'))})`}
                     onClick={toggleOwnership}
                     disabled={isInitializing}
                   >
@@ -1140,7 +1144,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
                   </button>
                   <button
                     className={`gameboard-action-button gameboard-topmoves-button ${showTopMoves ? 'active' : ''}`}
-                    title={t('analysis.toggleTopMoves')}
+                    title={`${t('analysis.toggleTopMoves')} (${bindingToDisplayString(getBinding('ai.toggleTopMoves'))})`}
                     onClick={toggleTopMoves}
                     disabled={isInitializing}
                   >

@@ -15,6 +15,7 @@ import {
   LuChevronRight,
   LuGamepad2,
   LuPalette,
+  LuKeyboard,
 } from 'react-icons/lu';
 import { useGameTree } from '../../contexts/GameTreeContext';
 import { useBoardTheme } from '../../contexts/BoardThemeContext';
@@ -26,9 +27,10 @@ import {
   parseModelId,
   getModelId,
 } from '../../hooks/game/useAIAnalysis';
+import { ShortcutsTab } from '../settings/ShortcutsTab';
 import './KayaConfig.css';
 
-type ConfigTab = 'analysis' | 'game' | 'theme';
+type ConfigTab = 'analysis' | 'game' | 'theme' | 'shortcuts';
 
 export const KayaConfig: React.FC = () => {
   const { t } = useTranslation();
@@ -801,6 +803,13 @@ export const KayaConfig: React.FC = () => {
             <LuPalette size={16} />
             {t('kayaConfig.themeTab')}
           </button>
+          <button
+            className={`kaya-config-tab ${activeTab === 'shortcuts' ? 'active' : ''}`}
+            onClick={() => setActiveTab('shortcuts')}
+          >
+            <LuKeyboard size={16} />
+            {t('kayaConfig.shortcutsTab')}
+          </button>
         </div>
 
         <div className="kaya-config-content">
@@ -808,6 +817,7 @@ export const KayaConfig: React.FC = () => {
             {activeTab === 'analysis' && renderAnalysisTab()}
             {activeTab === 'game' && renderGameTab()}
             {activeTab === 'theme' && renderThemeTab()}
+            {activeTab === 'shortcuts' && <ShortcutsTab />}
           </div>
         </div>
       </div>

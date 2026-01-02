@@ -6,6 +6,21 @@ export type { Theme, ThemeContextType } from './contexts/ThemeContext';
 export { BoardThemeProvider, useBoardTheme } from './contexts/BoardThemeContext';
 export type { BuiltInThemeId, ResolvedBoardTheme } from './contexts/BoardThemeContext';
 
+// Keyboard shortcuts context
+export {
+  KeyboardShortcutsProvider,
+  useKeyboardShortcutsContext,
+  useKeyboardShortcuts,
+} from './contexts/KeyboardShortcutsContext';
+export type { ShortcutId, ShortcutCategory, KeyBinding } from './contexts/KeyboardShortcutsContext';
+
+// Keyboard shortcuts utilities (for direct use without context)
+export {
+  bindingToDisplayString,
+  eventMatchesBinding,
+  createBindingFromEvent,
+} from './hooks/useKeyboardShortcuts';
+
 // Game tree context
 export { GameTreeProvider, useGameTree } from './contexts/GameTreeContext';
 export type {
