@@ -585,6 +585,8 @@
     "middleGame": "中盤",
     "endGame": "終盤",
     "accuracy": "精度",
+    "bestMovePercent": "最善手率",
+    "top5Percent": "上位5手 %",
     "meanLoss": "平均損失",
     "points": "目",
     "moveDistribution": "手の分布",
@@ -594,6 +596,27 @@
     "mistake": "ミス",
     "blunder": "悪手",
     "keyMistakes": "重要なミス",
-    "moveNumber": "{{number}}手目"
+    "moveNumber": "{{number}}手目",
+    "rankN": "#{{n}}",
+    "notRanked": "圧外",
+    "help": {
+      "title": "レポートの見方",
+      "accuracyTitle": "精度",
+      "accuracyDesc": "全体的な棋力を測る加重スコア(0-100%)。AI手100%、良い手80%、不正確50%、ミス20%、悪手0%。",
+      "top5Title": "上位5手 %",
+      "top5Desc": "AIの上位5つの提案に含まれる手の割合。高いほどAIの推奨と一致しています。",
+      "distributionTitle": "手の分布",
+      "distributionDesc": "AIの提案順位と最善手に対する相対確率に基づく各手の分類:",
+      "aiMoveDesc": "AIの第一選択(#1提案)",
+      "goodDesc": "上位3提案内または最善手確率の50%以上",
+      "inaccuracyDesc": "順位4-10または最善手確率の10%以上",
+      "mistakeDesc": "順位11-20または最善手確率の2%以上",
+      "blunderDesc": "上位20外かつ最善手確率の2%未満",
+      "keyMistakesTitle": "重要なミス",
+      "keyMistakesDesc": "対局で最も重大なミスと悪手。手をクリックすると盤上のその位置に移動します。",
+      "phasesTitle": "対局フェーズ",
+      "phasesDesc": "19×19盤: 序盤(1-50手)、中盤(51-150手)、終盤(151手以降)。小さい盤では境界が調整されます。",
+      "note": "注: 分析はシングルパス推論のポリシーネットワーク提案に基づいています。結果はマルチパス探索エンジンと異なる場合があります。"
+    }
   }
 }

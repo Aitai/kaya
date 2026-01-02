@@ -582,6 +582,8 @@
     "middleGame": "Mittelspiel",
     "endGame": "Endspiel",
     "accuracy": "Genauigkeit",
+    "bestMovePercent": "Beste Zug %",
+    "top5Percent": "Top 5 %",
     "meanLoss": "Mittlerer Verlust",
     "points": "Pkt",
     "moveDistribution": "Zugverteilung",
@@ -591,6 +593,27 @@
     "mistake": "Fehler",
     "blunder": "Patzer",
     "keyMistakes": "Wichtige Fehler",
-    "moveNumber": "Zug {{number}}"
+    "moveNumber": "Zug {{number}}",
+    "rankN": "#{{n}}",
+    "notRanked": "k.A.",
+    "help": {
+      "title": "Bericht verstehen",
+      "accuracyTitle": "Genauigkeit",
+      "accuracyDesc": "Gewichteter Score (0-100%), der die Spielqualität misst. KI-Zug 100%, Gut 80%, Ungenauigkeit 50%, Fehler 20%, Patzer 0%.",
+      "top5Title": "Top 5 %",
+      "top5Desc": "Prozentsatz der Züge unter den Top-5-Vorschlägen der KI. Höhere Werte bedeuten konsistenteres Spiel mit den KI-Empfehlungen.",
+      "distributionTitle": "Zugverteilung",
+      "distributionDesc": "Klassifizierung jedes Zuges basierend auf seinem Rang in den KI-Vorschlägen und der relativen Wahrscheinlichkeit zum besten Zug:",
+      "aiMoveDesc": "Erste Wahl der KI (Vorschlag #1)",
+      "goodDesc": "In den Top 3 oder ≥50% Wahrscheinlichkeit des besten Zuges",
+      "inaccuracyDesc": "Rang 4-10 oder ≥10% Wahrscheinlichkeit des besten Zuges",
+      "mistakeDesc": "Rang 11-20 oder ≥2% Wahrscheinlichkeit des besten Zuges",
+      "blunderDesc": "Nicht in Top 20 und <2% Wahrscheinlichkeit des besten Zuges",
+      "keyMistakesTitle": "Wichtige Fehler",
+      "keyMistakesDesc": "Die bedeutendsten Fehler und Patzer der Partie. Klicken Sie auf einen Zug, um zur Position zu navigieren.",
+      "phasesTitle": "Spielphasen",
+      "phasesDesc": "Eröffnung (Züge 1-50), Mittelspiel (51-150), Endspiel (151+) auf einem 19×19 Brett. Grenzen werden für kleinere Bretter angepasst.",
+      "note": "Hinweis: Die Analyse basiert auf Policy-Netzwerk-Vorschlägen aus Single-Pass-Inferenz. Ergebnisse können von Multi-Pass-Suchmaschinen abweichen."
+    }
   }
 }

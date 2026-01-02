@@ -1,168 +1,94 @@
 # Game Performance Report
 
-Design document for implementing game performance analysis similar to KaTrain and AI-Sensei.
+Documentation for the game performance analysis feature in Kaya.
 
 ## Overview
 
 The performance report analyzes a completed (or partially completed) game and provides insights into each player's move quality, accuracy, and key mistakes. This requires AI analysis data for each position in the game.
 
-## Available Data from AI Engine
+## How It Works
 
-From each analyzed position, we have access to:
+Kaya uses **single-pass neural network inference** (no MCTS) for fast analysis. This means:
 
-| Field                           | Type     | Description                                           |
-| ------------------------------- | -------- | ----------------------------------------------------- |
-| `scoreLead`                     | `number` | Score lead from Black's perspective (+ = Black ahead) |
-| `winRate`                       | `number` | Black's win rate (0.0-1.0)                            |
-| `moveSuggestions[]`             | `array`  | Ordered list of move suggestions                      |
-| `moveSuggestions[].move`        | `string` | GTP coordinate (e.g., "Q16")                          |
-| `moveSuggestions[].probability` | `number` | Policy network probability (0.0-1.0)                  |
+- Each position is evaluated once using KataGo's policy and value networks via ONNX Runtime
+- Move quality is determined by **rank** and **relative probability** (not points lost)
+- Score lead values can oscillate between positions, so they're not reliable for move-by-move comparison
 
 ---
 
-## Core Metrics
+## Move Classification
 
-### 1. Points Lost Per Move
+Moves are classified using a **rank + relative probability** system. The classification uses BOTH metrics and picks the **better** (less severe) category:
 
-The fundamental metric comparing score lead before and after each move.
+### Rank-Based Classification
 
-```typescript
-function calculatePointsLost(
-  prevScoreLead: number, // Score lead BEFORE this move
-  currScoreLead: number, // Score lead AFTER this move
-  player: 'B' | 'W'
-): number {
-  // Score is always from Black's perspective
-  // Black wants scoreLead to increase; White wants it to decrease
+| Category       | Rank Threshold | Description                    |
+| -------------- | -------------- | ------------------------------ |
+| **AI Move**    | Rank = 1       | Played AI's top choice         |
+| **Good**       | Rank ≤ 3       | Among AI's top 3 suggestions   |
+| **Inaccuracy** | Rank ≤ 10      | In AI's top 10 suggestions     |
+| **Mistake**    | Rank ≤ 20      | In AI's top 20 suggestions     |
+| **Blunder**    | Rank > 20      | Not in top suggestions or poor |
 
-  if (player === 'B') {
-    // Black played: loss = how much score decreased
-    return Math.max(0, prevScoreLead - currScoreLead);
-  } else {
-    // White played: loss = how much score increased (worse for White)
-    return Math.max(0, currScoreLead - prevScoreLead);
-  }
-}
+### Relative Probability Classification
+
+Relative probability = (move probability) / (top move probability)
+
+| Category       | Relative Probability | Description                            |
+| -------------- | -------------------- | -------------------------------------- |
+| **AI Move**    | ≥ 100%               | Same or better than top (rare)         |
+| **Good**       | ≥ 50%                | At least half as likely as best move   |
+| **Inaccuracy** | ≥ 10%                | Reasonable alternative                 |
+| **Mistake**    | ≥ 2%                 | Low probability move                   |
+| **Blunder**    | < 2%                 | Very unlikely move according to policy |
+
+### Combined Classification
+
+For each move, both rank and relative probability categories are calculated. The **better** (less severe) category is used. This prevents penalizing creative moves that may be ranked lower but have reasonable probability.
+
+**Example**: A move ranked #5 with 40% relative probability:
+
+- Rank-based: Inaccuracy (rank > 3)
+- Probability-based: Good (40% < 50%, so Inaccuracy)
+- Result: Inaccuracy
+
+---
+
+## Key Metrics
+
+### Accuracy (%)
+
+Weighted accuracy based on move categories:
+
+| Category   | Weight |
+| ---------- | ------ |
+| AI Move    | 100%   |
+| Good       | 80%    |
+| Inaccuracy | 50%    |
+| Mistake    | 20%    |
+| Blunder    | 0%     |
+
+```
+Accuracy = (sum of weights for all moves) / (total moves) × 100
 ```
 
-**Note**: A move can also _gain_ points if the opponent previously made a mistake. We track this separately as `pointsGained`.
+### Best Move Percentage (%)
+
+Percentage of moves where the player played AI's #1 suggestion.
+
+### Top 5 Percentage (%)
+
+Percentage of moves where the player's move was among AI's top 5 suggestions. This is a useful metric because:
+
+- It's less strict than "best move %"
+- It captures moves that are strong alternatives
+- More forgiving of style differences between humans and AI
 
 ---
 
-### 2. Move Classification
+## Game Phases
 
-**Recommendation: Points-Lost Based Classification (Option B)**
-
-We recommend using points lost as the primary classification metric because:
-
-- More meaningful for game review ("you lost 5 points here")
-- Consistent with KaTrain's approach
-- Policy probability can be misleading (a 1% move might still be excellent in certain positions)
-
-#### Classification Thresholds
-
-| Category       | Points Lost | Color     | Description                             |
-| -------------- | ----------- | --------- | --------------------------------------- |
-| **AI Move**    | ≤ 0.2       | 🔵 Blue   | Matches or near-matches AI's top choice |
-| **Good**       | ≤ 1.0       | 🟢 Green  | Solid move, minimal loss                |
-| **Inaccuracy** | ≤ 2.0       | 🟡 Yellow | Suboptimal but not critical             |
-| **Mistake**    | ≤ 5.0       | 🟠 Orange | Significant loss, should be reviewed    |
-| **Blunder**    | > 5.0       | 🔴 Red    | Major error, likely game-changing       |
-
-```typescript
-type MoveCategory = 'aiMove' | 'good' | 'inaccuracy' | 'mistake' | 'blunder';
-
-const POINTS_LOST_THRESHOLDS = {
-  aiMove: 0.2,
-  good: 1.0,
-  inaccuracy: 2.0,
-  mistake: 5.0,
-};
-
-function classifyMove(pointsLost: number): MoveCategory {
-  if (pointsLost <= POINTS_LOST_THRESHOLDS.aiMove) return 'aiMove';
-  if (pointsLost <= POINTS_LOST_THRESHOLDS.good) return 'good';
-  if (pointsLost <= POINTS_LOST_THRESHOLDS.inaccuracy) return 'inaccuracy';
-  if (pointsLost <= POINTS_LOST_THRESHOLDS.mistake) return 'mistake';
-  return 'blunder';
-}
-```
-
-#### Alternative: Policy-Based Classification
-
-For reference, policy-based classification uses the neural network's move probability:
-
-| Category   | Criteria                      |
-| ---------- | ----------------------------- |
-| AI Move    | Rank 1 (top suggestion)       |
-| Good       | Rank 2-5 OR probability ≥ 10% |
-| Inaccuracy | Probability ≥ 1%              |
-| Mistake    | Probability ≥ 0.1%            |
-| Blunder    | Probability < 0.1%            |
-
-**Why we don't recommend this as primary**: A low-probability move might still be excellent if it's a creative solution the AI didn't consider highly. Points lost is more objective.
-
----
-
-### 3. Accuracy Calculation
-
-**Recommendation: Weighted Accuracy (Option B)**
-
-Simple "best move percentage" is too binary. A weighted approach gives credit for good (but not perfect) moves.
-
-```typescript
-function calculateAccuracy(moves: MoveStats[]): number {
-  if (moves.length === 0) return 0;
-
-  let totalWeight = 0;
-  let earnedWeight = 0;
-
-  for (const move of moves) {
-    totalWeight += 1;
-
-    const category = classifyMove(move.pointsLost);
-    switch (category) {
-      case 'aiMove':
-        earnedWeight += 1.0;
-        break;
-      case 'good':
-        earnedWeight += 0.8;
-        break;
-      case 'inaccuracy':
-        earnedWeight += 0.5;
-        break;
-      case 'mistake':
-        earnedWeight += 0.2;
-        break;
-      case 'blunder':
-        earnedWeight += 0.0;
-        break;
-    }
-  }
-
-  return (earnedWeight / totalWeight) * 100;
-}
-```
-
-#### Additional Accuracy Metrics
-
-| Metric              | Description                           |
-| ------------------- | ------------------------------------- |
-| **Accuracy %**      | Weighted score (0-100%)               |
-| **Best Move %**     | Percentage of AI top moves played     |
-| **Top 5 %**         | Percentage of moves in AI's top 5     |
-| **Avg Points/Move** | Average points gained/lost per move   |
-| **Mean Loss**       | Average points lost (excluding gains) |
-
----
-
-### 4. Game Phase Detection
-
-**Recommendation: Absolute Move Numbers (Option 1)**
-
-Using percentage of total moves is unreliable because games can end early (resignation, timeout). Instead, use fixed move number thresholds based on board size.
-
-#### Phase Thresholds by Board Size
+Phases are determined by absolute move number based on board size:
 
 | Board Size | Opening    | Middle Game  | Endgame    |
 | ---------- | ---------- | ------------ | ---------- |
@@ -170,39 +96,47 @@ Using percentage of total moves is unreliable because games can end early (resig
 | 13×13      | Moves 1-30 | Moves 31-80  | Moves 81+  |
 | 9×9        | Moves 1-15 | Moves 16-40  | Moves 41+  |
 
-```typescript
-interface PhaseThresholds {
-  openingEnd: number;
-  middleGameEnd: number;
-}
+The UI allows filtering all metrics by phase (Entire Game, Opening, Middle Game, Endgame).
 
-const PHASE_THRESHOLDS: Record<number, PhaseThresholds> = {
-  19: { openingEnd: 50, middleGameEnd: 150 },
-  13: { openingEnd: 30, middleGameEnd: 80 },
-  9: { openingEnd: 15, middleGameEnd: 40 },
-};
+---
 
-function getPhase(moveNumber: number, boardSize: number = 19): GamePhase {
-  const thresholds = PHASE_THRESHOLDS[boardSize] ?? PHASE_THRESHOLDS[19];
+## UI Components
 
-  if (moveNumber <= thresholds.openingEnd) return 'opening';
-  if (moveNumber <= thresholds.middleGameEnd) return 'middleGame';
-  return 'endGame';
-}
-```
+### Tab Location
 
-#### Handling Early Game Endings
+The Performance Report is available in the **Analysis Panel**, accessed via the "Report" tab next to the "Graph" tab.
 
-If a game ends before reaching a phase, that phase is marked as `null`:
+### Summary Section
 
-```typescript
-// Example: 70-move resignation on 19x19
-phases: {
-  opening: { moveRange: [1, 50], moveCount: 50, ... },
-  middleGame: { moveRange: [51, 70], moveCount: 20, ... },
-  endGame: null  // Game ended before endgame
-}
-```
+Side-by-side comparison for Black and White:
+
+- **Accuracy**: Weighted accuracy percentage
+- **Top 5 %**: Percentage of moves in AI's top 5 suggestions
+
+### Move Distribution Chart
+
+Horizontal bar chart showing the count of moves in each category for both players.
+
+### Key Mistakes
+
+List of the most significant mistakes (blunders and mistakes). Each item shows:
+
+- Move number and coordinate
+- Move rank and probability
+- Clickable to navigate to that position
+
+### Phase Filtering
+
+Buttons to filter all displays by game phase:
+
+- Entire Game (default)
+- Opening
+- Middle Game
+- Endgame
+
+### Help Modal
+
+A help button (ⓘ) in the tab bar opens a modal explaining all metrics.
 
 ---
 
@@ -214,28 +148,28 @@ Per-move statistics:
 
 ```typescript
 interface MoveStats {
-  // Identification
   moveNumber: number;
   nodeId: string | number;
   player: 'B' | 'W';
-  move: string; // GTP coordinate (e.g., "Q16")
+  move: string; // GTP coordinate
 
-  // Score metrics
-  scoreLeadBefore: number; // Position before this move
-  scoreLeadAfter: number; // Position after this move
-  pointsLost: number; // Max(0, loss for this player)
-  pointsGained: number; // Max(0, gain for this player)
+  // Score metrics (from Black's perspective)
+  scoreLeadBefore: number;
+  scoreLeadAfter: number;
+  pointsLost: number;
+  pointsGained: number;
 
   // Win rate metrics
   winRateBefore: number;
   winRateAfter: number;
-  winRateSwing: number; // Absolute change
+  winRateSwing: number;
 
-  // Policy metrics
-  moveRank: number; // 1 = AI's top choice, 2 = second, etc.
-  moveProbability: number; // Policy probability of played move
-  topMove: string; // AI's recommended move
+  // Policy metrics (PRIMARY for classification)
+  moveRank: number; // 1 = AI's top choice, 0 = not in suggestions
+  moveProbability: number;
+  topMove: string;
   topMoveProbability: number;
+  wasTopMove: boolean;
 
   // Classification
   category: MoveCategory;
@@ -243,61 +177,21 @@ interface MoveStats {
 }
 ```
 
-### PlayerStats
-
-Per-player aggregate statistics:
-
-```typescript
-interface PlayerStats {
-  player: 'B' | 'W';
-  playerName: string;
-  totalMoves: number;
-
-  // Accuracy metrics
-  accuracy: number; // 0-100%
-  bestMovePercentage: number; // % of AI top moves
-  top5Percentage: number; // % in top 5
-
-  // Points metrics
-  avgPointsPerMove: number; // Can be + or -
-  meanLoss: number; // Average of pointsLost
-  totalPointsLost: number;
-
-  // Move distribution
-  distribution: {
-    aiMove: number;
-    good: number;
-    inaccuracy: number;
-    mistake: number;
-    blunder: number;
-  };
-
-  // Phase breakdown
-  byPhase: {
-    opening: PhaseStats | null;
-    middleGame: PhaseStats | null;
-    endGame: PhaseStats | null;
-  };
-}
-```
-
 ### PhaseStats
+
+Statistics for a game phase:
 
 ```typescript
 interface PhaseStats {
   phase: GamePhase;
-  moveRange: [number, number]; // [start, end] move numbers
+  moveRange: [number, number];
   moveCount: number;
   accuracy: number;
   avgPointsPerMove: number;
   meanLoss: number;
-  distribution: {
-    aiMove: number;
-    good: number;
-    inaccuracy: number;
-    mistake: number;
-    blunder: number;
-  };
+  bestMovePercentage: number;
+  top5Percentage: number;
+  distribution: MoveDistribution;
 }
 ```
 
@@ -308,135 +202,76 @@ Complete report structure:
 ```typescript
 interface GamePerformanceReport {
   // Metadata
-  gameId: string;
-  generatedAt: string; // ISO timestamp
-  analysisComplete: boolean; // All moves analyzed?
+  generatedAt: string;
+  analysisComplete: boolean;
 
   // Game info
   blackPlayer: string;
   whitePlayer: string;
   boardSize: number;
   komi: number;
-  result: string; // e.g., "B+R", "W+2.5"
+  result: string;
   totalMoves: number;
   analyzedMoves: number;
-
-  // Game end info
-  gameEndReason: 'completed' | 'resignation' | 'timeout' | 'unknown';
-  reachedEndGame: boolean;
 
   // Per-player stats
   black: PlayerStats;
   white: PlayerStats;
 
-  // Key moments (sorted by impact)
-  keyMistakes: MistakeInfo[]; // Top N biggest mistakes
-  turningPoints: TurningPoint[]; // Where advantage shifted
+  // Key moments
+  keyMistakes: MistakeInfo[];
+  turningPoints: TurningPoint[];
 
-  // Full move breakdown
+  // Full move data
   moves: MoveStats[];
-}
 
-interface MistakeInfo {
-  moveNumber: number;
-  player: 'B' | 'W';
-  playedMove: string;
-  bestMove: string;
-  pointsLost: number;
-  category: MoveCategory;
-  winRateSwing: number;
-}
-
-interface TurningPoint {
-  moveNumber: number;
-  player: 'B' | 'W';
-  description: string; // e.g., "Advantage shifted to Black"
-  scoreBefore: number;
-  scoreAfter: number;
+  // Configuration
+  classificationThresholds: MoveClassificationThresholds;
 }
 ```
 
 ---
 
-## UI Components
+## Classification Thresholds
 
-### Report Dialog/Panel
-
-Main sections:
-
-1. **Header**: Player names, result, game info
-2. **Summary Cards**: Side-by-side accuracy & mean loss for both players
-3. **Phase Tabs**: Entire Game | Opening | Middle Game | End Game
-4. **Move Distribution Chart**: Bar chart showing category breakdown
-5. **Points Distribution**: Histogram of moves by points lost buckets
-6. **Key Mistakes List**: Clickable list to navigate to positions
-7. **Detailed Move Table**: Sortable/filterable move-by-move data
-
-### Visual Design
-
-Reference the attached screenshots:
-
-- **AI-Sensei style**: Clean, tabbed phases, side-by-side comparison
-- **KaTrain style**: Dense stats, points distribution histogram
-
-Recommended approach: Combine both - clean summary at top, detailed breakdown below.
-
----
-
-## Implementation Plan
-
-### Phase 1: Core Types & Logic (`packages/ai-engine`)
-
-1. Create `src/performance-types.ts` - All TypeScript interfaces
-2. Create `src/performance-report.ts` - Computation logic
-3. Add unit tests in `tests/performance-report.test.ts`
-
-### Phase 2: UI Components (`packages/ui`)
-
-1. Create `src/components/analysis/PerformanceReport.tsx` - Main component
-2. Create `src/components/analysis/PerformanceReport.css` - Styling
-3. Add report button to analysis panel or game info
-4. Implement navigation (click mistake → go to position)
-
-### Phase 3: Integration
-
-1. Add i18n keys for all labels (8 languages)
-2. Add keyboard shortcut to open report
-3. Responsive design for mobile/tablet
-4. Export report as image/PDF (optional)
-
----
-
-## Configuration Options
-
-Allow users to customize thresholds:
+Default thresholds (configurable):
 
 ```typescript
-interface PerformanceReportSettings {
-  // Classification thresholds
-  thresholds: {
-    aiMove: number; // default: 0.2
-    good: number; // default: 1.0
-    inaccuracy: number; // default: 2.0
-    mistake: number; // default: 5.0
-  };
+const DEFAULT_CLASSIFICATION_THRESHOLDS = {
+  // Rank thresholds
+  aiMoveMaxRank: 1,
+  goodMaxRank: 3,
+  inaccuracyMaxRank: 10,
+  mistakeMaxRank: 20,
 
-  // Display options
-  showPhaseBreakdown: boolean;
-  showMoveDistribution: boolean;
-  showKeyMistakes: number; // Top N mistakes to highlight
-
-  // Comparison mode
-  compareMode: 'vsOpponent' | 'vsAI';
-}
+  // Relative probability thresholds
+  goodMinRelativeProb: 0.5,
+  inaccuracyMinRelativeProb: 0.1,
+  mistakeMinRelativeProb: 0.02,
+};
 ```
+
+---
+
+## Why Rank + Relative Probability?
+
+Kaya's AI engine uses **single-pass inference** for speed. This differs from full KataGo analysis with MCTS which provides stable score estimates.
+
+**Why not points lost?**
+
+With single-pass inference, score lead values (`scoreLead`) can oscillate significantly between consecutive positions. This makes "points lost" unreliable for classifying individual moves.
+
+**Why rank + probability?**
+
+- **Rank**: Direct measure of how the move compares to AI's suggestions
+- **Relative Probability**: Captures cases where a move is statistically reasonable even if not ranked first
+- **Combined**: Takes the better of both, avoiding over-penalization
 
 ---
 
 ## Future Enhancements
 
-- **Pattern Recognition**: Identify common mistake patterns (ladder errors, ko fights, etc.)
-- **Historical Tracking**: Compare performance across multiple games
-- **Skill Estimation**: Estimate player rank based on accuracy
-- **Opening Book Comparison**: Compare opening choices to professional games
-- **Export/Share**: Generate shareable performance summary images
+- Pattern recognition for common mistakes
+- Historical performance tracking
+- Skill estimation based on accuracy
+- Export/share performance summaries

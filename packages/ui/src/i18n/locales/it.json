@@ -583,6 +583,8 @@
     "endGame": "Finale",
     "accuracy": "Precisione",
     "meanLoss": "Perdita media",
+    "bestMovePercent": "% Mossa Migliore",
+    "top5Percent": "Top 5 %",
     "points": "pt",
     "moveDistribution": "Distribuzione mosse",
     "aiMove": "Mossa IA",
@@ -591,6 +593,27 @@
     "mistake": "Errore",
     "blunder": "Svista",
     "keyMistakes": "Errori chiave",
-    "moveNumber": "Mossa {{number}}"
+    "moveNumber": "Mossa {{number}}",
+    "rankN": "#{{n}}",
+    "notRanked": "N/D",
+    "help": {
+      "title": "Capire il rapporto",
+      "accuracyTitle": "Precisione",
+      "accuracyDesc": "Punteggio ponderato (0-100%) che misura la qualità del gioco. Mossa IA 100%, Buona 80%, Imprecisione 50%, Errore 20%, Svista 0%.",
+      "top5Title": "Top 5 %",
+      "top5Desc": "Percentuale di mosse tra le prime 5 suggerite dall'IA. Valori più alti indicano un gioco più coerente con le raccomandazioni.",
+      "distributionTitle": "Distribuzione mosse",
+      "distributionDesc": "Classificazione di ogni mossa in base al suo rango nei suggerimenti dell'IA e alla probabilità relativa rispetto alla mossa migliore:",
+      "aiMoveDesc": "Prima scelta dell'IA (suggerimento #1)",
+      "goodDesc": "Tra i primi 3 o ≥50% di probabilità della mossa migliore",
+      "inaccuracyDesc": "Rango 4-10 o ≥10% di probabilità della mossa migliore",
+      "mistakeDesc": "Rango 11-20 o ≥2% di probabilità della mossa migliore",
+      "blunderDesc": "Fuori dalla top 20 e <2% di probabilità della mossa migliore",
+      "keyMistakesTitle": "Errori chiave",
+      "keyMistakesDesc": "Gli errori e le sviste più significativi della partita. Clicca su qualsiasi mossa per navigare a quella posizione.",
+      "phasesTitle": "Fasi della partita",
+      "phasesDesc": "Apertura (mosse 1-50), Medio gioco (51-150), Finale (151+) su tavoliere 19×19. I limiti si adattano per tavolieri più piccoli.",
+      "note": "Nota: L'analisi si basa sui suggerimenti della rete di policy con inferenza singola. I risultati potrebbero differire dai motori di ricerca multi-passaggio."
+    }
   }
 }

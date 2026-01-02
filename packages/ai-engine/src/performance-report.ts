@@ -2,6 +2,9 @@
  * Performance Report Generation
  *
  * Functions for computing game performance metrics from AI analysis data.
+ *
+ * For single-pass inference (no MCTS), move quality is evaluated using
+ * move rank and relative probability (compared to top move).
  */
 
 import type { AnalysisResult } from './types';
@@ -16,13 +19,84 @@ import {
   type TurningPoint,
   type GamePerformanceReport,
   type PerformanceReportOptions,
+  type MoveClassificationThresholds,
   type PointsLostThresholds,
+  DEFAULT_CLASSIFICATION_THRESHOLDS,
   DEFAULT_POINTS_LOST_THRESHOLDS,
   DEFAULT_PHASE_THRESHOLDS,
 } from './performance-types';
 
 /**
- * Classify a move based on points lost
+ * Classify a move based on rank and relative probability.
+ * Uses the better of rank-based or probability-based classification.
+ *
+ * @param rank - Move rank (1 = best, 0 = not in suggestions)
+ * @param relativeProb - Move probability / top move probability
+ * @param thresholds - Classification thresholds
+ */
+export function classifyMoveByRankAndProb(
+  rank: number,
+  relativeProb: number,
+  thresholds: MoveClassificationThresholds = DEFAULT_CLASSIFICATION_THRESHOLDS
+): MoveCategory {
+  // Rank 1 is always AI move
+  if (rank === 1) return 'aiMove';
+
+  // For other moves, use the BETTER of rank-based or probability-based classification
+  // This ensures we don't penalize moves that are good alternatives but ranked lower
+
+  // Determine category by rank (0 means not in suggestions)
+  let rankCategory: MoveCategory;
+  if (rank === 0) {
+    rankCategory = 'blunder';
+  } else if (rank <= thresholds.goodMaxRank) {
+    rankCategory = 'good';
+  } else if (rank <= thresholds.inaccuracyMaxRank) {
+    rankCategory = 'inaccuracy';
+  } else if (rank <= thresholds.mistakeMaxRank) {
+    rankCategory = 'mistake';
+  } else {
+    rankCategory = 'blunder';
+  }
+
+  // Determine category by relative probability
+  let probCategory: MoveCategory;
+  if (relativeProb >= 1.0) {
+    probCategory = 'aiMove'; // Same or better than top move (rare but possible with rounding)
+  } else if (relativeProb >= thresholds.goodMinRelativeProb) {
+    probCategory = 'good';
+  } else if (relativeProb >= thresholds.inaccuracyMinRelativeProb) {
+    probCategory = 'inaccuracy';
+  } else if (relativeProb >= thresholds.mistakeMinRelativeProb) {
+    probCategory = 'mistake';
+  } else {
+    probCategory = 'blunder';
+  }
+
+  // Return the better (less severe) category
+  const categoryOrder: MoveCategory[] = ['aiMove', 'good', 'inaccuracy', 'mistake', 'blunder'];
+  const rankIndex = categoryOrder.indexOf(rankCategory);
+  const probIndex = categoryOrder.indexOf(probCategory);
+
+  return categoryOrder[Math.min(rankIndex, probIndex)];
+}
+
+/**
+ * @deprecated Use classifyMoveByRankAndProb for single-pass inference.
+ */
+export function classifyMoveByPolicy(
+  probability: number,
+  thresholds = { aiMove: 0.5, good: 0.2, inaccuracy: 0.05, mistake: 0.01 }
+): MoveCategory {
+  if (probability >= thresholds.aiMove) return 'aiMove';
+  if (probability >= thresholds.good) return 'good';
+  if (probability >= thresholds.inaccuracy) return 'inaccuracy';
+  if (probability >= thresholds.mistake) return 'mistake';
+  return 'blunder';
+}
+
+/**
+ * @deprecated Use classifyMoveByRankAndProb for single-pass inference.
  */
 export function classifyMove(
   pointsLost: number,
@@ -176,33 +250,34 @@ export interface PositionData {
   player: 'B' | 'W';
   move: string; // GTP coordinate of the move played
   analysisBeforeMove: AnalysisResult | null; // Analysis of position before move
-  analysisAfterMove: AnalysisResult | null; // Analysis of position after move
+  analysisAfterMove: AnalysisResult | null; // Analysis of position after move (optional, for score display)
 }
 
 /**
- * Generate move statistics from position data
+ * Generate move statistics from position data.
+ * Uses rank and relative probability for classification (suitable for single-pass inference).
  */
 export function generateMoveStats(
   position: PositionData,
   boardSize: number,
-  thresholds: PointsLostThresholds
+  classificationThresholds: MoveClassificationThresholds = DEFAULT_CLASSIFICATION_THRESHOLDS
 ): MoveStats | null {
   const { moveNumber, nodeId, player, move, analysisBeforeMove, analysisAfterMove } = position;
 
-  // Need analysis before move to calculate loss
+  // Need analysis before move to get policy
   if (!analysisBeforeMove) {
     return null;
   }
 
-  // Get score leads
+  // Get score leads (for display, not classification)
   const scoreLeadBefore = analysisBeforeMove.scoreLead;
   const scoreLeadAfter = analysisAfterMove?.scoreLead ?? scoreLeadBefore;
 
-  // Calculate points lost/gained
+  // Calculate points lost/gained (for display only - not reliable for single-pass)
   const pointsLost = calculatePointsLost(scoreLeadBefore, scoreLeadAfter, player);
   const pointsGained = calculatePointsGained(scoreLeadBefore, scoreLeadAfter, player);
 
-  // Win rates
+  // Win rates (for display)
   const winRateBefore = scoreLeadToWinRate(scoreLeadBefore);
   const winRateAfter = scoreLeadToWinRate(scoreLeadAfter);
 
@@ -211,10 +286,10 @@ export function generateMoveStats(
   if (player === 'B') {
     winRateSwing = winRateAfter - winRateBefore;
   } else {
-    winRateSwing = winRateBefore - winRateAfter; // White wants Black's win rate to drop
+    winRateSwing = winRateBefore - winRateAfter;
   }
 
-  // Policy metrics
+  // Policy metrics - these are what we use for classification
   const suggestions = analysisBeforeMove.moveSuggestions ?? [];
   const moveRank = findMoveRank(move, suggestions);
   const moveProbability = findMoveProbability(move, suggestions);
@@ -222,8 +297,11 @@ export function generateMoveStats(
   const topMoveProbability = suggestions[0]?.probability ?? 0;
   const wasTopMove = moveRank === 1;
 
-  // Classification
-  const category = classifyMove(pointsLost, thresholds);
+  // Calculate relative probability (move prob / top move prob)
+  const relativeProb = topMoveProbability > 0 ? moveProbability / topMoveProbability : 0;
+
+  // Classification using rank and relative probability
+  const category = classifyMoveByRankAndProb(moveRank, relativeProb, classificationThresholds);
   const phase = getGamePhase(moveNumber, boardSize);
 
   return {
@@ -266,11 +344,15 @@ export function calculatePhaseStats(
   const distribution = createEmptyDistribution();
   let totalPointsLost = 0;
   let totalPointsChange = 0;
+  let topMoveCount = 0;
+  let top5Count = 0;
 
   for (const move of phaseMoves) {
     addToDistribution(distribution, move.category);
     totalPointsLost += move.pointsLost;
     totalPointsChange += move.pointsGained - move.pointsLost;
+    if (move.wasTopMove) topMoveCount++;
+    if (move.moveRank >= 1 && move.moveRank <= 5) top5Count++;
   }
 
   return {
@@ -280,6 +362,8 @@ export function calculatePhaseStats(
     accuracy: calculateAccuracy(phaseMoves),
     avgPointsPerMove: totalPointsChange / phaseMoves.length,
     meanLoss: totalPointsLost / phaseMoves.length,
+    bestMovePercentage: phaseMoves.length > 0 ? (topMoveCount / phaseMoves.length) * 100 : 0,
+    top5Percentage: phaseMoves.length > 0 ? (top5Count / phaseMoves.length) * 100 : 0,
     distribution,
   };
 }
@@ -332,13 +416,29 @@ export function calculatePlayerStats(
 }
 
 /**
- * Find key mistakes in the game
+ * Find key mistakes in the game.
+ * Sorts by category severity (blunders first), then by move rank (lower probability = worse).
  */
 export function findKeyMistakes(moves: MoveStats[], maxCount: number = 10): MistakeInfo[] {
-  // Filter to only mistakes and blunders, sort by points lost
+  // Category severity order (higher = worse)
+  const categorySeverity: Record<MoveCategory, number> = {
+    aiMove: 0,
+    good: 1,
+    inaccuracy: 2,
+    mistake: 3,
+    blunder: 4,
+  };
+
+  // Filter to only mistakes and blunders, sort by severity then by low probability
   const mistakes = moves
     .filter(m => m.category === 'mistake' || m.category === 'blunder')
-    .sort((a, b) => b.pointsLost - a.pointsLost)
+    .sort((a, b) => {
+      // First by category severity (blunders first)
+      const severityDiff = categorySeverity[b.category] - categorySeverity[a.category];
+      if (severityDiff !== 0) return severityDiff;
+      // Then by lower probability (worse moves first)
+      return a.moveProbability - b.moveProbability;
+    })
     .slice(0, maxCount);
 
   return mistakes.map(m => ({
@@ -347,9 +447,12 @@ export function findKeyMistakes(moves: MoveStats[], maxCount: number = 10): Mist
     player: m.player,
     playedMove: m.move,
     bestMove: m.topMove,
-    pointsLost: m.pointsLost,
+    moveRank: m.moveRank,
+    moveProbability: m.moveProbability,
+    topMoveProbability: m.topMoveProbability,
     category: m.category,
-    winRateSwing: m.winRateSwing,
+    pointsLost: m.pointsLost, // Deprecated, kept for compatibility
+    winRateSwing: m.winRateSwing, // Deprecated, kept for compatibility
   }));
 }
 
@@ -418,7 +521,8 @@ export interface GameInfo {
 }
 
 /**
- * Generate a complete performance report
+ * Generate a complete performance report.
+ * Uses rank and relative probability for move classification (suitable for single-pass inference).
  */
 export function generatePerformanceReport(
   positions: PositionData[],
@@ -426,13 +530,13 @@ export function generatePerformanceReport(
   options: PerformanceReportOptions = {}
 ): GamePerformanceReport {
   const {
-    thresholds: customThresholds,
+    classificationThresholds: customThresholds,
     maxKeyMistakes = 10,
     turningPointThreshold = 5.0,
   } = options;
 
-  const thresholds: PointsLostThresholds = {
-    ...DEFAULT_POINTS_LOST_THRESHOLDS,
+  const classificationThresholds: MoveClassificationThresholds = {
+    ...DEFAULT_CLASSIFICATION_THRESHOLDS,
     ...customThresholds,
   };
 
@@ -443,7 +547,7 @@ export function generatePerformanceReport(
   let analyzedCount = 0;
 
   for (const position of positions) {
-    const stats = generateMoveStats(position, boardSize, thresholds);
+    const stats = generateMoveStats(position, boardSize, classificationThresholds);
     if (stats) {
       moves.push(stats);
       analyzedCount++;
@@ -476,6 +580,6 @@ export function generatePerformanceReport(
     keyMistakes,
     turningPoints,
     moves,
-    thresholds,
+    classificationThresholds,
   };
 }

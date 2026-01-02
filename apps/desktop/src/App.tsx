@@ -21,7 +21,7 @@ import {
   StatusBar,
   useGameTree,
   ScoreEstimator,
-  AnalysisGraphPanel,
+  AnalysisPanel,
   type VersionData,
   type ScoreData,
   ToastProvider,
@@ -340,7 +340,7 @@ function AppContent({
             showLibrary={showLibrary}
             onToggleLibrary={toggleLibrary}
             libraryContent={<LibraryPanel />}
-            analysisGraphContent={<AnalysisGraphPanel />}
+            analysisGraphContent={<AnalysisPanel />}
             showSidebar={showSidebar}
             onToggleSidebar={() => setShowSidebar(prev => !prev)}
             activeMobileTab={activeMobileTab}

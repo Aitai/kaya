@@ -2,10 +2,13 @@
  * Performance Report Types
  *
  * Types for analyzing game performance based on AI analysis data.
+ *
+ * For single-pass inference (no MCTS), we classify moves based on
+ * move rank and relative probability (compared to top move).
  */
 
 /**
- * Move classification categories based on points lost
+ * Move classification categories
  */
 export type MoveCategory = 'aiMove' | 'good' | 'inaccuracy' | 'mistake' | 'blunder';
 
@@ -15,18 +18,73 @@ export type MoveCategory = 'aiMove' | 'good' | 'inaccuracy' | 'mistake' | 'blund
 export type GamePhase = 'opening' | 'middleGame' | 'endGame';
 
 /**
- * Thresholds for classifying moves by points lost
+ * Thresholds for classifying moves using rank and relative probability.
+ *
+ * Classification uses BOTH rank thresholds AND relative probability
+ * (move probability / top move probability). A move qualifies for a
+ * category if it meets EITHER the rank OR relative probability threshold.
  */
-export interface PointsLostThresholds {
-  aiMove: number; // <= this = AI move (default: 0.2)
-  good: number; // <= this = good (default: 1.0)
-  inaccuracy: number; // <= this = inaccuracy (default: 2.0)
-  mistake: number; // <= this = mistake (default: 5.0)
-  // > mistake = blunder
+export interface MoveClassificationThresholds {
+  // Rank thresholds (1 = best move)
+  aiMoveMaxRank: number; // Rank <= this = AI move (default: 1)
+  goodMaxRank: number; // Rank <= this = good (default: 3)
+  inaccuracyMaxRank: number; // Rank <= this = inaccuracy (default: 10)
+  mistakeMaxRank: number; // Rank <= this = mistake (default: 20)
+  // Rank > mistakeMaxRank OR not in suggestions = blunder
+
+  // Relative probability thresholds (move prob / top move prob)
+  goodMinRelativeProb: number; // >= this relative prob = good (default: 0.50)
+  inaccuracyMinRelativeProb: number; // >= this = inaccuracy (default: 0.10)
+  mistakeMinRelativeProb: number; // >= this = mistake (default: 0.02)
+  // < mistakeMinRelativeProb = blunder
 }
 
 /**
  * Default thresholds for move classification
+ */
+export const DEFAULT_CLASSIFICATION_THRESHOLDS: MoveClassificationThresholds = {
+  aiMoveMaxRank: 1, // Only rank 1 = AI move
+  goodMaxRank: 3, // Ranks 2-3 = good
+  inaccuracyMaxRank: 10, // Ranks 4-10 = inaccuracy
+  mistakeMaxRank: 20, // Ranks 11-20 = mistake
+
+  goodMinRelativeProb: 0.5, // >= 50% of top move's prob = good
+  inaccuracyMinRelativeProb: 0.1, // >= 10% of top = inaccuracy
+  mistakeMinRelativeProb: 0.02, // >= 2% of top = mistake
+};
+
+/**
+ * @deprecated Use MoveClassificationThresholds instead.
+ */
+export interface PolicyThresholds {
+  aiMove: number;
+  good: number;
+  inaccuracy: number;
+  mistake: number;
+}
+
+/**
+ * @deprecated Use DEFAULT_CLASSIFICATION_THRESHOLDS instead.
+ */
+export const DEFAULT_POLICY_THRESHOLDS: PolicyThresholds = {
+  aiMove: 0.5,
+  good: 0.2,
+  inaccuracy: 0.05,
+  mistake: 0.01,
+};
+
+/**
+ * @deprecated Use MoveClassificationThresholds instead.
+ */
+export interface PointsLostThresholds {
+  aiMove: number;
+  good: number;
+  inaccuracy: number;
+  mistake: number;
+}
+
+/**
+ * @deprecated Use DEFAULT_CLASSIFICATION_THRESHOLDS instead.
  */
 export const DEFAULT_POINTS_LOST_THRESHOLDS: PointsLostThresholds = {
   aiMove: 0.2,
@@ -107,6 +165,8 @@ export interface PhaseStats {
   accuracy: number;
   avgPointsPerMove: number;
   meanLoss: number;
+  bestMovePercentage: number; // % of AI top moves in this phase
+  top5Percentage: number; // % of moves in top 5 suggestions
   distribution: MoveDistribution;
 }
 
@@ -148,8 +208,16 @@ export interface MistakeInfo {
   player: 'B' | 'W';
   playedMove: string;
   bestMove: string;
-  pointsLost: number;
+  /** Move rank in policy (1 = best, 0 = not in suggestions) */
+  moveRank: number;
+  /** Policy probability of the played move */
+  moveProbability: number;
+  /** Policy probability of the best move */
+  topMoveProbability: number;
   category: MoveCategory;
+  /** @deprecated Use moveRank/moveProbability instead */
+  pointsLost: number;
+  /** @deprecated Not reliable for single-pass inference */
   winRateSwing: number;
 }
 
@@ -198,17 +266,17 @@ export interface GamePerformanceReport {
   moves: MoveStats[];
 
   // Configuration used
-  thresholds: PointsLostThresholds;
+  classificationThresholds: MoveClassificationThresholds;
 }
 
 /**
  * Options for generating a performance report
  */
 export interface PerformanceReportOptions {
-  /** Custom thresholds for move classification */
-  thresholds?: Partial<PointsLostThresholds>;
+  /** Custom thresholds for move classification (rank + relative probability) */
+  classificationThresholds?: Partial<MoveClassificationThresholds>;
   /** Maximum number of key mistakes to include */
   maxKeyMistakes?: number;
-  /** Minimum points lost to be considered a turning point */
+  /** Minimum score swing to be considered a turning point */
   turningPointThreshold?: number;
 }

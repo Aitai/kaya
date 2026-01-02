@@ -582,6 +582,8 @@
     "middleGame": "Medio juego",
     "endGame": "Final",
     "accuracy": "Precisión",
+    "bestMovePercent": "% mejor jugada",
+    "top5Percent": "Top 5 %",
     "meanLoss": "Pérdida media",
     "points": "pts",
     "moveDistribution": "Distribución de movimientos",
@@ -591,6 +593,27 @@
     "mistake": "Error",
     "blunder": "Pifia",
     "keyMistakes": "Errores clave",
-    "moveNumber": "Movimiento {{number}}"
+    "moveNumber": "Movimiento {{number}}",
+    "rankN": "#{{n}}",
+    "notRanked": "N/A",
+    "help": {
+      "title": "Entender el informe",
+      "accuracyTitle": "Precisión",
+      "accuracyDesc": "Puntuación ponderada (0-100%) que mide la calidad del juego. Jugada IA 100%, Buena 80%, Imprecisión 50%, Error 20%, Pifia 0%.",
+      "top5Title": "Top 5 %",
+      "top5Desc": "Porcentaje de jugadas entre las 5 mejores sugerencias de la IA. Mayor valor indica juego más consistente con las recomendaciones.",
+      "distributionTitle": "Distribución de jugadas",
+      "distributionDesc": "Clasificación de cada jugada según su rango en las sugerencias de la IA y probabilidad relativa respecto a la mejor jugada:",
+      "aiMoveDesc": "Primera elección de la IA (sugerencia #1)",
+      "goodDesc": "Entre las 3 mejores o ≥50% probabilidad de la mejor jugada",
+      "inaccuracyDesc": "Rango 4-10 o ≥10% probabilidad de la mejor jugada",
+      "mistakeDesc": "Rango 11-20 o ≥2% probabilidad de la mejor jugada",
+      "blunderDesc": "Fuera del top 20 y <2% probabilidad de la mejor jugada",
+      "keyMistakesTitle": "Errores clave",
+      "keyMistakesDesc": "Los errores y pifias más significativos de la partida. Haz clic en cualquier jugada para navegar a esa posición.",
+      "phasesTitle": "Fases del juego",
+      "phasesDesc": "Apertura (jugadas 1-50), Medio juego (51-150), Final (151+) en tablero 19×19. Los límites se ajustan para tableros más pequeños.",
+      "note": "Nota: El análisis se basa en sugerencias de la red de políticas con inferencia simple. Los resultados pueden diferir de motores de búsqueda multi-paso."
+    }
   }
 }

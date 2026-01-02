@@ -586,6 +586,8 @@
     "middleGame": "Middle Game",
     "endGame": "End Game",
     "accuracy": "Accuracy",
+    "bestMovePercent": "Best Move %",
+    "top5Percent": "Top 5 %",
     "meanLoss": "Mean Loss",
     "points": "pts",
     "moveDistribution": "Move Distribution",
@@ -595,6 +597,27 @@
     "mistake": "Mistake",
     "blunder": "Blunder",
     "keyMistakes": "Key Mistakes",
-    "moveNumber": "Move {{number}}"
+    "moveNumber": "Move {{number}}",
+    "rankN": "#{{n}}",
+    "notRanked": "N/A",
+    "help": {
+      "title": "Understanding the Report",
+      "accuracyTitle": "Accuracy",
+      "accuracyDesc": "A weighted score (0-100%) measuring overall play quality. AI moves score 100%, Good moves 80%, Inaccuracies 50%, Mistakes 20%, and Blunders 0%.",
+      "top5Title": "Top 5 %",
+      "top5Desc": "Percentage of moves that were among the AI's top 5 suggestions. Higher values indicate more consistent play with the AI's recommendations.",
+      "distributionTitle": "Move Distribution",
+      "distributionDesc": "Classification of each move based on its rank in the AI's suggestions and relative probability compared to the best move:",
+      "aiMoveDesc": "The AI's top choice (#1 suggestion)",
+      "goodDesc": "Among top 3 suggestions or ≥50% probability of best move",
+      "inaccuracyDesc": "Ranked 4-10 or ≥10% probability of best move",
+      "mistakeDesc": "Ranked 11-20 or ≥2% probability of best move",
+      "blunderDesc": "Not in top 20 suggestions and <2% probability of best move",
+      "keyMistakesTitle": "Key Mistakes",
+      "keyMistakesDesc": "The most significant mistakes and blunders in the game. Click on any move to navigate to that position on the board.",
+      "phasesTitle": "Game Phases",
+      "phasesDesc": "Opening (moves 1-50), Middle Game (51-150), and End Game (151+) on a 19×19 board. Phase boundaries adjust for smaller boards.",
+      "note": "Note: Analysis is based on policy network suggestions from single-pass inference. Results may differ from multi-pass search engines."
+    }
   }
 }

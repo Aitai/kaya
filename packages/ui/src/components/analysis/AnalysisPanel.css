@@ -15,6 +15,7 @@
   background-color: var(--bg-tertiary, rgba(128, 128, 128, 0.1));
   border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.2));
   flex-shrink: 0;
+  align-items: stretch;
 }
 
 .analysis-panel-tab {
@@ -47,6 +48,28 @@
 
 .analysis-panel-tab svg {
   flex-shrink: 0;
+}
+
+/* Help button in tab bar */
+.analysis-panel-help-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.analysis-panel-help-button:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover, rgba(128, 128, 128, 0.1));
 }
 
 .analysis-panel-content {

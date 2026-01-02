@@ -25,6 +25,7 @@ import {
   type GamePhase,
   type MistakeInfo,
   type MoveDistribution,
+  DEFAULT_PHASE_THRESHOLDS,
 } from '@kaya/ai-engine';
 import './PerformanceReportTab.css';
 
@@ -33,7 +34,7 @@ type PhaseFilter = 'entireGame' | GamePhase;
 /**
  * Get the display color for a move category
  */
-function getCategoryColor(category: MoveCategory): string {
+export function getCategoryColor(category: MoveCategory): string {
   switch (category) {
     case 'aiMove':
       return 'var(--category-ai-move, #4a9eff)';
@@ -110,7 +111,8 @@ export const PerformanceReportTab: React.FC = () => {
         analysisState.history
       );
 
-      analysisResults.push(analysisCache.current.get(cacheKey) ?? null);
+      const result = analysisCache.current.get(cacheKey) ?? null;
+      analysisResults.push(result);
     }
 
     // Now build position data for each move (starting from move 1)
@@ -210,6 +212,34 @@ export const PerformanceReportTab: React.FC = () => {
     };
   }, [report, phaseFilter]);
 
+  // Get filtered key mistakes based on phase
+  const filteredKeyMistakes = useMemo(() => {
+    if (!report) return [];
+
+    if (phaseFilter === 'entireGame') {
+      return report.keyMistakes;
+    }
+
+    // Get phase thresholds
+    const boardSize = gameInfo.boardSize ?? 19;
+    const thresholds = DEFAULT_PHASE_THRESHOLDS[boardSize] ?? DEFAULT_PHASE_THRESHOLDS[19];
+
+    // Filter mistakes by phase based on move number
+    return report.keyMistakes.filter(mistake => {
+      const moveNum = mistake.moveNumber;
+      switch (phaseFilter) {
+        case 'opening':
+          return moveNum <= thresholds.openingEnd;
+        case 'middleGame':
+          return moveNum > thresholds.openingEnd && moveNum <= thresholds.middleGameEnd;
+        case 'endGame':
+          return moveNum > thresholds.middleGameEnd;
+        default:
+          return true;
+      }
+    });
+  }, [report, phaseFilter, gameInfo.boardSize]);
+
   // Handle clicking on a mistake to navigate
   const handleMistakeClick = useCallback(
     (nodeId: string | number) => {
@@ -285,6 +315,7 @@ export const PerformanceReportTab: React.FC = () => {
         <button
           className={`phase-tab ${phaseFilter === 'entireGame' ? 'active' : ''}`}
           onClick={() => setPhaseFilter('entireGame')}
+          tabIndex={-1}
         >
           {t('performanceReport.entireGame')}
         </button>
@@ -292,6 +323,7 @@ export const PerformanceReportTab: React.FC = () => {
           className={`phase-tab ${phaseFilter === 'opening' ? 'active' : ''}`}
           onClick={() => setPhaseFilter('opening')}
           disabled={!report.black.byPhase.opening && !report.white.byPhase.opening}
+          tabIndex={-1}
         >
           {t('performanceReport.opening')}
         </button>
@@ -299,6 +331,7 @@ export const PerformanceReportTab: React.FC = () => {
           className={`phase-tab ${phaseFilter === 'middleGame' ? 'active' : ''}`}
           onClick={() => setPhaseFilter('middleGame')}
           disabled={!report.black.byPhase.middleGame && !report.white.byPhase.middleGame}
+          tabIndex={-1}
         >
           {t('performanceReport.middleGame')}
         </button>
@@ -306,6 +339,7 @@ export const PerformanceReportTab: React.FC = () => {
           className={`phase-tab ${phaseFilter === 'endGame' ? 'active' : ''}`}
           onClick={() => setPhaseFilter('endGame')}
           disabled={!report.black.byPhase.endGame && !report.white.byPhase.endGame}
+          tabIndex={-1}
         >
           {t('performanceReport.endGame')}
         </button>
@@ -328,10 +362,8 @@ export const PerformanceReportTab: React.FC = () => {
                 </span>
               </div>
               <div className="stat-row">
-                <span className="stat-label">{t('performanceReport.meanLoss')}</span>
-                <span className="stat-value">
-                  {filteredStats.black.meanLoss.toFixed(1)} {t('performanceReport.points')}
-                </span>
+                <span className="stat-label">{t('performanceReport.top5Percent')}</span>
+                <span className="stat-value">{filteredStats.black.top5Percentage.toFixed(1)}%</span>
               </div>
             </>
           )}
@@ -352,10 +384,8 @@ export const PerformanceReportTab: React.FC = () => {
                 </span>
               </div>
               <div className="stat-row">
-                <span className="stat-label">{t('performanceReport.meanLoss')}</span>
-                <span className="stat-value">
-                  {filteredStats.white.meanLoss.toFixed(1)} {t('performanceReport.points')}
-                </span>
+                <span className="stat-label">{t('performanceReport.top5Percent')}</span>
+                <span className="stat-value">{filteredStats.white.top5Percentage.toFixed(1)}%</span>
               </div>
             </>
           )}
@@ -363,13 +393,13 @@ export const PerformanceReportTab: React.FC = () => {
       </div>
 
       {/* Move distribution */}
-      {phaseFilter === 'entireGame' && (
+      {filteredStats?.black?.distribution && filteredStats?.white?.distribution && (
         <div className="performance-report-distribution">
           <h4 className="distribution-title">{t('performanceReport.moveDistribution')}</h4>
           <div className="distribution-comparison">
             {/* Black distribution */}
             <div className="distribution-column">
-              <DistributionBars distribution={report.black.distribution} align="right" />
+              <DistributionBars distribution={filteredStats.black.distribution} align="right" />
             </div>
             {/* Labels */}
             <div className="distribution-labels">
@@ -391,18 +421,18 @@ export const PerformanceReportTab: React.FC = () => {
             </div>
             {/* White distribution */}
             <div className="distribution-column">
-              <DistributionBars distribution={report.white.distribution} align="left" />
+              <DistributionBars distribution={filteredStats.white.distribution} align="left" />
             </div>
           </div>
         </div>
       )}
 
       {/* Key mistakes */}
-      {report.keyMistakes.length > 0 && (
+      {filteredKeyMistakes.length > 0 && (
         <div className="performance-report-mistakes">
           <h4 className="mistakes-title">{t('performanceReport.keyMistakes')}</h4>
           <div className="mistakes-list">
-            {report.keyMistakes.slice(0, 5).map((mistake: MistakeInfo, index: number) => (
+            {filteredKeyMistakes.slice(0, 5).map((mistake: MistakeInfo, index: number) => (
               <button
                 key={index}
                 className="mistake-item"
@@ -422,7 +452,9 @@ export const PerformanceReportTab: React.FC = () => {
                   className="mistake-category"
                   style={{ color: getCategoryColor(mistake.category) }}
                 >
-                  -{mistake.pointsLost.toFixed(1)}
+                  {mistake.moveRank > 0
+                    ? t('performanceReport.rankN', { n: mistake.moveRank })
+                    : t(`performanceReport.${mistake.category}`)}
                 </span>
                 <span className="mistake-moves">
                   {mistake.playedMove} → {mistake.bestMove}

@@ -585,6 +585,8 @@
     "middleGame": "중반",
     "endGame": "끝내기",
     "accuracy": "정확도",
+    "bestMovePercent": "최선수 비율",
+    "top5Percent": "상위 5수 %",
     "meanLoss": "평균 손실",
     "points": "점",
     "moveDistribution": "수 분포",
@@ -594,6 +596,27 @@
     "mistake": "실수",
     "blunder": "대악수",
     "keyMistakes": "주요 실수",
-    "moveNumber": "{{number}}번째 수"
+    "moveNumber": "{{number}}번째 수",
+    "rankN": "#{{n}}",
+    "notRanked": "미순위",
+    "help": {
+      "title": "보고서 이해하기",
+      "accuracyTitle": "정확도",
+      "accuracyDesc": "전체 기력을 측정하는 가중 점수(0-100%). AI수 100%, 좋은 수 80%, 부정확 50%, 실수 20%, 대악수 0%.",
+      "top5Title": "상위 5수 %",
+      "top5Desc": "AI 상위 5개 추천 중에 있는 수의 비율. 높을수록 AI 추천과 일치합니다.",
+      "distributionTitle": "수 분포",
+      "distributionDesc": "AI 추천 순위와 최선수 대비 상대 확률에 따른 각 수의 분류:",
+      "aiMoveDesc": "AI의 첫 번째 선택 (#1 추천)",
+      "goodDesc": "상위 3개 추천 또는 최선수 확률의 50% 이상",
+      "inaccuracyDesc": "순위 4-10 또는 최선수 확률의 10% 이상",
+      "mistakeDesc": "순위 11-20 또는 최선수 확률의 2% 이상",
+      "blunderDesc": "상위 20에 없고 최선수 확률의 2% 미만",
+      "keyMistakesTitle": "주요 실수",
+      "keyMistakesDesc": "대국에서 가장 중요한 실수와 대악수. 수를 클릭하면 해당 위치로 이동합니다.",
+      "phasesTitle": "대국 단계",
+      "phasesDesc": "19×19 바둑판: 포석(1-50수), 중반(51-150수), 끝내기(151수 이후). 작은 판에서는 경계가 조정됩니다.",
+      "note": "참고: 분석은 단일 패스 추론의 정책 네트워크 제안을 기반으로 합니다. 결과는 다중 패스 탐색 엔진과 다를 수 있습니다."
+    }
   }
 }

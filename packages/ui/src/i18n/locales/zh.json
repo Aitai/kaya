@@ -585,6 +585,8 @@
     "middleGame": "中盘",
     "endGame": "官子",
     "accuracy": "精确度",
+    "bestMovePercent": "最佳手率",
+    "top5Percent": "前五手率",
     "meanLoss": "平均损失",
     "points": "目",
     "moveDistribution": "落子分布",
@@ -594,6 +596,27 @@
     "mistake": "失误",
     "blunder": "恶手",
     "keyMistakes": "关键失误",
-    "moveNumber": "第 {{number}} 手"
+    "moveNumber": "第 {{number}} 手",
+    "rankN": "#{{n}}",
+    "notRanked": "未排名",
+    "help": {
+      "title": "报告说明",
+      "accuracyTitle": "精确度",
+      "accuracyDesc": "加权评分(0-100%)，衡量整体棋力。AI着法得100%，好棋得80%，不精确50%，失误20%，恶手0%。",
+      "top5Title": "前五手率",
+      "top5Desc": "AI前5优选着法的比例。数值越高，说明棋路与AI建议越一致。",
+      "distributionTitle": "着法分布",
+      "distributionDesc": "根据AI建议排名和相对概率对每手棋进行分类:",
+      "aiMoveDesc": "AI的第一选择(第1建议)",
+      "goodDesc": "前3建议之内或≥最佳着法50%概率",
+      "inaccuracyDesc": "排名4-10或≥最佳着法10%概率",
+      "mistakeDesc": "排名11-20或≥最佳着法2%概率",
+      "blunderDesc": "未进前20且<最佳着法2%概率",
+      "keyMistakesTitle": "关键失误",
+      "keyMistakesDesc": "对局中最显著的失误和恶手。点击任意着法可跳转到棋盘上的该位置。",
+      "phasesTitle": "对局阶段",
+      "phasesDesc": "在19×19棋盘上:布局(1-50手)、中盘(51-150手)、官子(151手以后)。小棋盘边界会相应调整。",
+      "note": "注意:分析基于策略网络的单次推理建议。结果可能与多次搜索引擎有所不同。"
+    }
   }
 }
