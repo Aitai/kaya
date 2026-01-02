@@ -90,6 +90,10 @@ export default defineConfig({
         // CRITICAL: Force ALL React imports (including from React Flow) to use single instance
         alias: {
           // Map packages to source for HMR and live reloading
+          '@kaya/ai-engine/tauri-engine': path.resolve(
+            __dirname,
+            '../../packages/ai-engine/src/tauri-engine.ts'
+          ),
           '@kaya/ai-engine': path.resolve(__dirname, '../../packages/ai-engine/src'),
           '@kaya/boardmatcher': path.resolve(__dirname, '../../packages/boardmatcher/src'),
           '@kaya/deadstones': path.resolve(__dirname, '../../packages/deadstones/src'),

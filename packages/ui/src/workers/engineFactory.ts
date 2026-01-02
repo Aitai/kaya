@@ -9,6 +9,7 @@
  */
 
 import { type Engine, type OnnxEngineConfig } from '@kaya/ai-engine';
+import { TauriEngine } from '@kaya/ai-engine/tauri-engine';
 import { WorkerEngine } from './WorkerEngine';
 
 /**
@@ -93,9 +94,6 @@ export async function createEngine(
     }
 
     console.log('[createEngine] Using native TauriEngine');
-
-    // Dynamic import to avoid loading Tauri deps at module load time
-    const { TauriEngine } = await import('@kaya/ai-engine/tauri-engine');
 
     const engine = new TauriEngine({
       modelBuffer: options.modelBuffer,

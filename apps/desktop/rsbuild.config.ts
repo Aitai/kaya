@@ -74,8 +74,28 @@ export default defineConfig({
   tools: {
     rspack: {
       resolve: {
+        symlinks: true,
         // Force single instance of React to prevent "Invalid hook call" errors
         alias: {
+          // Map packages to source for HMR and proper worker bundling
+          '@kaya/ai-engine/tauri-engine': path.resolve(
+            __dirname,
+            '../../packages/ai-engine/src/tauri-engine.ts'
+          ),
+          '@kaya/ai-engine': path.resolve(__dirname, '../../packages/ai-engine/src'),
+          '@kaya/boardmatcher': path.resolve(__dirname, '../../packages/boardmatcher/src'),
+          '@kaya/deadstones': path.resolve(__dirname, '../../packages/deadstones/src'),
+          '@kaya/gametree': path.resolve(__dirname, '../../packages/gametree/src'),
+          '@kaya/goboard': path.resolve(__dirname, '../../packages/goboard/src'),
+          '@kaya/gtp': path.resolve(__dirname, '../../packages/gtp/src'),
+          '@kaya/sgf': path.resolve(__dirname, '../../packages/sgf/src'),
+          '@kaya/shudan': path.resolve(__dirname, '../../packages/shudan/src'),
+          '@kaya/ui/dist/styles/ui.css': path.resolve(
+            __dirname,
+            '../../packages/ui/src/styles/ui.css'
+          ),
+          '@kaya/ui': path.resolve(__dirname, '../../packages/ui/src'),
+
           react: require.resolve('react'),
           'react-dom': require.resolve('react-dom'),
           'react/jsx-runtime': require.resolve('react/jsx-runtime'),
