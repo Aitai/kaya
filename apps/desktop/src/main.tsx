@@ -1,8 +1,15 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ThemeProvider, BoardThemeProvider, I18nProvider, setTauriSaveAPI } from '@kaya/ui';
+import {
+  ThemeProvider,
+  BoardThemeProvider,
+  I18nProvider,
+  setTauriSaveAPI,
+  setTauriClipboardAPI,
+} from '@kaya/ui';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
+import { readText, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import App from './App.tsx';
 import '@kaya/ui/dist/styles/ui.css';
 
@@ -41,6 +48,12 @@ window.onunhandledrejection = event => {
 setTauriSaveAPI({
   save,
   writeTextFile,
+});
+
+// Inject Tauri clipboard API
+setTauriClipboardAPI({
+  readText,
+  writeText,
 });
 
 // Suppress benign ResizeObserver warning from react-resizable-panels

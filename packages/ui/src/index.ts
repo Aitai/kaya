@@ -117,6 +117,7 @@ export type { VersionData } from './components/layout/StatusBar';
 
 // File utilities
 export { saveFile, isTauriApp, setTauriSaveAPI } from './services/fileSave';
+export { setTauriClipboardAPI } from './services/clipboard';
 export type { TauriSaveAPI } from './services/fileSave';
 export { readClipboardText, writeClipboardText } from './services/clipboard';
 

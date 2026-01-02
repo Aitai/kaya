@@ -2,25 +2,43 @@
  * Clipboard utility that works in both browser and Tauri environments.
  * In Tauri, uses the clipboard-manager plugin to avoid permission popups.
  * Falls back to navigator.clipboard API for web browsers.
+ *
+ * Desktop app must call setTauriClipboardAPI() to inject the Tauri clipboard functions.
  */
 
-import { isTauriApp } from './fileSave';
+/**
+ * Tauri clipboard API interface
+ */
+interface TauriClipboardAPI {
+  readText: () => Promise<string>;
+  writeText: (text: string) => Promise<void>;
+}
+
+// Injected Tauri clipboard API (set by desktop app)
+let tauriClipboardAPI: TauriClipboardAPI | null = null;
+
+/**
+ * Set the Tauri clipboard API. Called by desktop app on startup.
+ */
+export function setTauriClipboardAPI(api: TauriClipboardAPI): void {
+  tauriClipboardAPI = api;
+}
+
+/**
+ * Check if Tauri clipboard is available
+ */
+function hasTauriClipboard(): boolean {
+  return tauriClipboardAPI !== null;
+}
 
 /**
  * Read text from the clipboard.
  * Uses Tauri's clipboard plugin in desktop app to avoid permission popups.
  */
 export async function readClipboardText(): Promise<string> {
-  if (isTauriApp()) {
-    try {
-      // Dynamically import Tauri clipboard plugin
-      const { readText } = await import('@tauri-apps/plugin-clipboard-manager');
-      const text = await readText();
-      return text ?? '';
-    } catch (error) {
-      console.warn('Tauri clipboard read failed, falling back to browser API:', error);
-      // Fall through to browser API
-    }
+  if (hasTauriClipboard()) {
+    const text = await tauriClipboardAPI!.readText();
+    return text ?? '';
   }
 
   // Browser API fallback
@@ -32,16 +50,9 @@ export async function readClipboardText(): Promise<string> {
  * Uses Tauri's clipboard plugin in desktop app for consistency.
  */
 export async function writeClipboardText(text: string): Promise<void> {
-  if (isTauriApp()) {
-    try {
-      // Dynamically import Tauri clipboard plugin
-      const { writeText } = await import('@tauri-apps/plugin-clipboard-manager');
-      await writeText(text);
-      return;
-    } catch (error) {
-      console.warn('Tauri clipboard write failed, falling back to browser API:', error);
-      // Fall through to browser API
-    }
+  if (hasTauriClipboard()) {
+    await tauriClipboardAPI!.writeText(text);
+    return;
   }
 
   // Browser API fallback

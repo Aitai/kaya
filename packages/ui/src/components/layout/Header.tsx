@@ -371,6 +371,7 @@ export const Header: React.FC<HeaderProps> = ({
     try {
       const content = await readClipboardText();
       if (!content.trim()) {
+        showToast('Clipboard is empty', 'error');
         return;
       }
 
@@ -387,8 +388,9 @@ export const Header: React.FC<HeaderProps> = ({
       clearLoadedFile(); // Clear library loaded indicator
     } catch (error) {
       console.error('Failed to paste:', error);
+      showToast(`Failed to paste: ${error}`, 'error');
     }
-  }, [loadSGFAsync, setFileName, clearLoadedFile, checkUnsavedChanges]);
+  }, [loadSGFAsync, setFileName, clearLoadedFile, checkUnsavedChanges, showToast]);
 
   const toggleFullscreen = useCallback(async () => {
     // Robust check for Tauri environment
