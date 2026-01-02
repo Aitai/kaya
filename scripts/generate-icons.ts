@@ -8,12 +8,14 @@
  */
 
 import sharp from 'sharp';
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { execSync } from 'child_process';
 
 const SVG_LOGO = join(process.cwd(), 'public/logo.svg');
 const SVG_DARK = join(process.cwd(), 'public/logo-dark.svg');
 const SVG_FAVICON = join(process.cwd(), 'public/favicon.svg');
+const SVG_APP_ICON = join(process.cwd(), 'public/app-icon.svg'); // Scaled version for app icons
 const ICONS_DIR = join(process.cwd(), 'apps/desktop/src-tauri/icons');
 const WEB_PUBLIC_DIR = join(process.cwd(), 'apps/web/public');
 const DESKTOP_PUBLIC_DIR = join(process.cwd(), 'apps/desktop/public');
@@ -36,9 +38,11 @@ async function generateIcons() {
     mkdirSync(WEB_PUBLIC_DIR, { recursive: true });
     mkdirSync(DESKTOP_PUBLIC_DIR, { recursive: true });
 
-    // Read SVG logos
+    // Read SVG logos - use app-icon.svg for desktop icons (scaled to fill canvas)
+    const appIconBuffer = readFileSync(SVG_APP_ICON);
     const svgBuffer = readFileSync(SVG_LOGO);
-    console.log(`📄 Source: ${SVG_LOGO}\n`);
+    console.log(`📄 App Icon Source: ${SVG_APP_ICON}`);
+    console.log(`📄 Logo Source: ${SVG_LOGO}\n`);
 
     // === COPY SVG LOGOS TO APPS ===
     console.log('📋 Copying SVG logos to apps:');
@@ -60,7 +64,7 @@ async function generateIcons() {
     for (const { name, size } of SIZES) {
       const outputPath = join(ICONS_DIR, name);
 
-      await sharp(svgBuffer)
+      await sharp(appIconBuffer)
         .resize(size, size, {
           fit: 'contain',
           background: { r: 0, g: 0, b: 0, alpha: 0 }, // transparent
@@ -71,19 +75,69 @@ async function generateIcons() {
       console.log(`   ✓ ${name} (${size}×${size})`);
     }
 
-    // Generate ICNS for macOS
+    // Generate ICNS for macOS using iconutil (macOS only) or PNG fallback
     console.log('\n🍎 Generating macOS icon (ICNS):');
     const icnsPath = join(ICONS_DIR, 'icon.icns');
-    const icon512Buffer = await sharp(svgBuffer)
-      .resize(512, 512, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
+    const isMacOS = process.platform === 'darwin';
 
-    writeFileSync(icnsPath, icon512Buffer);
-    console.log(`   ✓ icon.icns (512×512 base)`);
+    if (isMacOS) {
+      // Use iconutil to create proper ICNS file
+      const iconsetPath = join(ICONS_DIR, 'icon.iconset');
+      mkdirSync(iconsetPath, { recursive: true });
+
+      // macOS iconset requires specific sizes
+      const iconsetSizes = [
+        { name: 'icon_16x16.png', size: 16 },
+        { name: 'icon_16x16@2x.png', size: 32 },
+        { name: 'icon_32x32.png', size: 32 },
+        { name: 'icon_32x32@2x.png', size: 64 },
+        { name: 'icon_128x128.png', size: 128 },
+        { name: 'icon_128x128@2x.png', size: 256 },
+        { name: 'icon_256x256.png', size: 256 },
+        { name: 'icon_256x256@2x.png', size: 512 },
+        { name: 'icon_512x512.png', size: 512 },
+        { name: 'icon_512x512@2x.png', size: 1024 },
+      ];
+
+      for (const { name, size } of iconsetSizes) {
+        await sharp(appIconBuffer)
+          .resize(size, size, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+          })
+          .png()
+          .toFile(join(iconsetPath, name));
+      }
+
+      // Use iconutil to create ICNS
+      try {
+        execSync(`iconutil -c icns "${iconsetPath}" -o "${icnsPath}"`, { stdio: 'pipe' });
+        console.log(`   ✓ icon.icns (created with iconutil)`);
+        // Clean up iconset folder
+        execSync(`rm -rf "${iconsetPath}"`, { stdio: 'pipe' });
+      } catch {
+        console.log(`   ⚠ iconutil failed, using PNG fallback for icon.icns`);
+        const icon512Buffer = await sharp(appIconBuffer)
+          .resize(512, 512, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+          })
+          .png()
+          .toBuffer();
+        writeFileSync(icnsPath, icon512Buffer);
+      }
+    } else {
+      // Non-macOS: write PNG as fallback (Tauri handles conversion)
+      const icon512Buffer = await sharp(appIconBuffer)
+        .resize(512, 512, {
+          fit: 'contain',
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer();
+      writeFileSync(icnsPath, icon512Buffer);
+      console.log(`   ✓ icon.icns (PNG fallback - run on macOS for proper ICNS)`);
+    }
 
     // Generate ICO for Windows (multiple sizes)
     console.log('\n🪟 Generating Windows icon (ICO):');
@@ -93,7 +147,7 @@ async function generateIcons() {
     const icoBuffers: Buffer[] = [];
 
     for (const size of icoSizes) {
-      const buf = await sharp(svgBuffer)
+      const buf = await sharp(appIconBuffer)
         .resize(size, size, {
           fit: 'contain',
           background: { r: 0, g: 0, b: 0, alpha: 0 },
