@@ -815,6 +815,10 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
         toggleShowAnalysisBar();
         return;
       }
+      if (matchesShortcut(e, 'board.toggleNextMove')) {
+        setShowNextMove(prev => !prev);
+        return;
+      }
 
       // AI shortcuts
       if (matchesShortcut(e, 'ai.suggestMove')) {
@@ -842,6 +846,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     toggleNavigationMode,
     toggleScoringMode,
     toggleShowAnalysisBar,
+    setShowNextMove,
     currentBoard.signMap.length,
     isModelLoaded,
     scoringMode,
@@ -1046,7 +1051,9 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
           onClick={() => setShowNextMove(!showNextMove)}
           className={`gameboard-action-button gameboard-next-move-button ${showNextMove ? 'active' : ''}`}
           title={
-            showNextMove ? t('gameboardActions.hideNextMove') : t('gameboardActions.showNextMove')
+            showNextMove
+              ? `${t('gameboardActions.hideNextMove')} (${bindingToDisplayString(getBinding('board.toggleNextMove'))})`
+              : `${t('gameboardActions.showNextMove')} (${bindingToDisplayString(getBinding('board.toggleNextMove'))})`
           }
         >
           {showNextMove ? <LuEyeOff size={16} /> : <LuEye size={16} />}

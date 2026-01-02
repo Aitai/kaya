@@ -64,6 +64,7 @@ export type ShortcutId =
   | 'board.toggleScoringMode'
   | 'board.toggleAnalysis'
   | 'board.toggleSound'
+  | 'board.toggleNextMove'
   // AI shortcuts
   | 'ai.suggestMove'
   | 'ai.toggleTopMoves'
@@ -185,6 +186,10 @@ const DEFAULT_SHORTCUTS: Record<ShortcutId, Omit<ShortcutDefinition, 'id'>> = {
   'board.toggleSound': {
     category: 'board',
     defaultBinding: createBinding('s', { shift: true }),
+  },
+  'board.toggleNextMove': {
+    category: 'board',
+    defaultBinding: createBinding('x'),
   },
 
   // AI shortcuts

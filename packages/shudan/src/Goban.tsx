@@ -259,44 +259,76 @@ const Vertex = React.memo<VertexProps>(
           />
         )}
 
-        {/* Next move preview (filled circle on empty intersection) */}
+        {/* Next move preview (on empty intersection) */}
         {showNextMovePreview && (
           <div
             className="shudan-next-move-preview"
             style={{
               width: '100%',
               height: '100%',
-              position: 'relative',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              zIndex: 30 /* Above heat map */,
+              pointerEvents: 'none',
             }}
           >
-            {/* Outer ring for visibility */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '50%',
-                height: '50%',
-                borderRadius: '50%',
-                border: `2px solid ${nextMovePlayer === 1 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)'}`,
-                backgroundColor: 'transparent',
-              }}
-            />
-            {/* Inner filled circle */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '30%',
-                height: '30%',
-                borderRadius: '50%',
-                backgroundColor: nextMoveColor,
-                opacity: 0.6,
-              }}
-            />
+            {heat && heat.strength >= 0 ? (
+              /* When top moves are visible: show outline around the heat circle */
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '94%',
+                  height: '94%',
+                  borderRadius: '50%',
+                  border: `2px solid ${nextMovePlayer === 1 ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.7)'}`,
+                  backgroundColor: 'transparent',
+                  boxShadow:
+                    nextMovePlayer === 1
+                      ? 'inset 0 0 2px rgba(0, 0, 0, 0.3)'
+                      : 'inset 0 0 2px rgba(255, 255, 255, 0.3)',
+                }}
+              />
+            ) : (
+              /* When no top moves: show filled circle marker */
+              <>
+                {/* Outer ring for visibility */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '55%',
+                    height: '55%',
+                    borderRadius: '50%',
+                    border: `2px solid ${nextMovePlayer === 1 ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}`,
+                    backgroundColor: 'transparent',
+                    boxShadow:
+                      nextMovePlayer === 1
+                        ? '0 0 3px rgba(0, 0, 0, 0.5)'
+                        : '0 0 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                />
+                {/* Inner filled circle */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '35%',
+                    height: '35%',
+                    borderRadius: '50%',
+                    backgroundColor: nextMoveColor,
+                    opacity: 0.8,
+                  }}
+                />
+              </>
+            )}
           </div>
         )}
 
@@ -354,24 +386,6 @@ const Vertex = React.memo<VertexProps>(
               />
             )}
 
-            {/* Next move marker (filled circle) - hidden if there's a marker */}
-            {isNextMove && !marker && (
-              <div
-                className="shudan-next-move-marker"
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '30%',
-                  height: '30%',
-                  borderRadius: '50%',
-                  backgroundColor: sign === 1 ? '#fff' : '#000',
-                  opacity: 0.7,
-                }}
-              />
-            )}
-
             {/* SGF Marker rendering on stones - always perfectly centered */}
             {marker && renderMarker(marker, sign === 1 ? '#000' : '#fff', vertexSize, true)}
           </div>
@@ -415,6 +429,30 @@ const Vertex = React.memo<VertexProps>(
               </div>
             )}
           </>
+        )}
+
+        {/* Next move marker (filled circle) - rendered on top of heat map */}
+        {sign !== 0 && isNextMove && !marker && (
+          <div
+            className="shudan-next-move-marker"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '35%',
+              height: '35%',
+              borderRadius: '50%',
+              backgroundColor: sign === 1 ? '#fff' : '#000',
+              opacity: 1,
+              zIndex: 30 /* Above heat map and text */,
+              pointerEvents: 'none',
+              boxShadow:
+                sign === 1
+                  ? '0 0 2px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.4)'
+                  : '0 0 2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.4)',
+            }}
+          />
         )}
       </div>
     );
