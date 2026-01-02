@@ -65,6 +65,7 @@
 /* Actions bar */
 .gameboard-actions-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.5rem;
   background-color: var(--background);
@@ -73,7 +74,8 @@
 }
 
 .gameboard-actions-spacer {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 /* GameBoard action buttons */
@@ -383,26 +385,13 @@
  * Mobile Action Toolbar
  * ========================= */
 @media (max-width: 767px), (max-height: 500px) {
-  /* Action buttons container - horizontal scrollable */
+  /* Action buttons container - wrap to multiple lines */
   .gameboard-actions-bar {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.25rem;
     padding: 0.375rem 0.5rem;
-    /* Ensure left side is not cut off */
-    padding-left: 0.5rem;
-    margin-left: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    /* Firefox */
     flex-shrink: 0;
-    /* Ensure scrollbar starts from the left */
-    scroll-padding-left: 0.5rem;
-  }
-
-  .gameboard-actions-bar::-webkit-scrollbar {
-    display: none;
   }
 
   /* Compact action buttons on mobile - icons only but with larger touch target */
