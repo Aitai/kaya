@@ -13,7 +13,10 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "tauri:check": "cargo check --manifest-path src-tauri/Cargo.toml"
+    "tauri:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "android:setup": "./src-tauri/scripts/download-onnxruntime-android.sh",
+    "android:dev": "bun run android:setup && ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$(ls $ANDROID_HOME/ndk | head -1) tauri android dev",
+    "android:build": "bun run android:setup && ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$(ls $ANDROID_HOME/ndk | head -1) tauri android build"
   },
   "dependencies": {
     "@dagrejs/dagre": "^2.0.0",

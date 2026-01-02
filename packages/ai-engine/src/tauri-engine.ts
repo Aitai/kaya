@@ -32,7 +32,7 @@ export interface UploadProgress {
 /**
  * Execution provider preference for native ONNX Runtime
  */
-export type ExecutionProviderPreference = 'auto' | 'cuda' | 'coreml' | 'directml' | 'cpu';
+export type ExecutionProviderPreference = 'auto' | 'cuda' | 'coreml' | 'directml' | 'nnapi' | 'cpu';
 
 /**
  * Information about an execution provider
@@ -68,6 +68,7 @@ export interface TauriEngineConfig extends BaseEngineConfig {
    * - 'cuda': NVIDIA CUDA (requires CUDA toolkit)
    * - 'coreml': Apple CoreML (macOS/iOS)
    * - 'directml': Windows DirectML
+   * - 'nnapi': Android NNAPI (Android Neural Networks API)
    * - 'cpu': CPU only
    */
   executionProvider?: ExecutionProviderPreference;

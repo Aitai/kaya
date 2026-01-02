@@ -7,6 +7,13 @@ license = "AGPL-3.0"
 repository = "https://github.com/kaya-go/kaya"
 edition = "2021"
 
+[lib]
+name = "kaya"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = []
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -15,24 +22,36 @@ tauri = { version = "2", features = ["devtools"] }
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
-tauri-plugin-http = "2"
-tauri-plugin-process = "2"
 tauri-plugin-shell = "2"
-tauri-plugin-updater = "2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.13", features = ["stream"] }
 futures = "0.3"
-tauri-plugin-window-state = "2.4.1"
+base64 = "0.22"
 
-# ONNX Runtime for native AI inference
-# The "half" feature enables fp16 tensor support for models with internal float16 computations
-ort = { version = "2.0.0-rc.10", features = ["download-binaries", "half"] }
+# ONNX Runtime - shared dependencies
 # Must match ndarray version used by ort (0.16.x)
 ndarray = "0.16"
-base64 = "0.22"
 half = "2.4"
+
+# Desktop-only dependencies
+[target.'cfg(not(target_os = "android"))'.dependencies]
+# ONNX Runtime - static linking with download-binaries for desktop
+ort = { version = "2.0.0-rc.10", features = ["download-binaries", "half"] }
+# Reqwest with rustls (default) - uses ring/aws-lc
+reqwest = { version = "0.13", features = ["stream"] }
+# Desktop-only Tauri plugins
+tauri-plugin-http = "2"
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2.4.1"
+
+# Android: dynamic loading at runtime (we bundle libonnxruntime.so in the APK)
+[target.'cfg(target_os = "android")'.dependencies]
+# default-features = false to disable download-binaries which doesn't work for Android
+ort = { version = "2.0.0-rc.10", default-features = false, features = ["load-dynamic", "ndarray", "half"] }
+# Note: reqwest is NOT included for Android to avoid OpenSSL/ring compilation issues
+# HTTP requests on Android should be done via the frontend/WebView
 
 # Optimize release builds for smaller binary and faster CI
 [profile.release]

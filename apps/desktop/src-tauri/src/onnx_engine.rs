@@ -1,7 +1,7 @@
 //! Native ONNX Runtime engine for KataGo inference
 //!
 //! This module provides AI analysis using native ONNX Runtime
-//! with GPU acceleration via CUDA, CoreML, or DirectML.
+//! with GPU acceleration via CUDA, CoreML, DirectML, or NNAPI (Android).
 
 use half::f16;
 use ndarray::{Array2, Array4};
@@ -12,9 +12,13 @@ use ort::{
     session::{builder::GraphOptimizationLevel, Session},
     value::Tensor,
 };
+#[cfg(target_os = "android")]
+use ort::execution_providers::NNAPIExecutionProvider;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::sync::Mutex;
+#[cfg(target_os = "android")]
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Execution provider preference for ONNX Runtime
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -29,6 +33,8 @@ pub enum ExecutionProviderPreference {
     CoreMl,
     /// Force DirectML (Windows GPU)
     DirectMl,
+    /// Force NNAPI (Android Neural Networks API)
+    Nnapi,
     /// Force CPU only
     Cpu,
 }
@@ -65,7 +71,158 @@ fn preference_to_name(pref: ExecutionProviderPreference) -> String {
         ExecutionProviderPreference::Cuda => "cuda".to_string(),
         ExecutionProviderPreference::CoreMl => "coreml".to_string(),
         ExecutionProviderPreference::DirectMl => "directml".to_string(),
+        ExecutionProviderPreference::Nnapi => "nnapi".to_string(),
         ExecutionProviderPreference::Cpu => "cpu".to_string(),
+    }
+}
+
+/// Track if ONNX Runtime has been initialized (for load-dynamic on Android)
+#[cfg(target_os = "android")]
+static ORT_INITIALIZED: AtomicBool = AtomicBool::new(false);
+
+/// Initialize ONNX Runtime library (required on Android with load-dynamic)
+#[cfg(target_os = "android")]
+fn ensure_ort_initialized() -> Result<(), String> {
+    if ORT_INITIALIZED.swap(true, Ordering::SeqCst) {
+        return Ok(()); // Already initialized
+    }
+
+    // On Android, native libraries from jniLibs are loaded into the app's native library directory.
+    // The exact path varies by Android version and installation type.
+    // We try multiple common paths.
+    
+    let package_name = "com.kaya.desktop";
+    
+    // Common paths where Android places native libraries
+    let paths_to_try = [
+        // Modern Android (API 24+) with split APKs
+        format!("/data/app/~~*/{}*/lib/arm64/libonnxruntime.so", package_name),
+        // Standard app data path
+        format!("/data/data/{}/lib/libonnxruntime.so", package_name),
+        // Alternative app installation path  
+        format!("/data/app/{}-*/lib/arm64-v8a/libonnxruntime.so", package_name),
+        // Direct library name (let the system find it)
+        "libonnxruntime.so".to_string(),
+    ];
+    
+    // First, try to find the library in known locations
+    for path_pattern in &paths_to_try {
+        // For patterns with wildcards, we need to use glob or skip
+        if path_pattern.contains('*') {
+            continue; // Skip glob patterns for now
+        }
+        
+        let path = std::path::Path::new(path_pattern);
+        if path.exists() {
+            eprintln!("[OnnxEngine] Loading ONNX Runtime from: {}", path_pattern);
+            match ort::init_from(path_pattern).commit() {
+                Ok(_) => return Ok(()),
+                Err(e) => {
+                    eprintln!("[OnnxEngine] Failed to load from {}: {}", path_pattern, e);
+                    continue;
+                }
+            }
+        }
+    }
+    
+    // If no explicit path works, try the library name directly.
+    // This relies on the JNI loader having already loaded the library or it being in LD_LIBRARY_PATH.
+    eprintln!("[OnnxEngine] Attempting to load ONNX Runtime via system loader (libonnxruntime.so)");
+    match ort::init_from("libonnxruntime.so").commit() {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            eprintln!("[OnnxEngine] Failed to load libonnxruntime.so: {}", e);
+        }
+    }
+    
+    // Last resort: initialize without specifying a path
+    eprintln!("[OnnxEngine] Attempting default ONNX Runtime initialization");
+    ort::init()
+        .commit()
+        .map_err(|e| format!("Failed to initialize ONNX Runtime: {}", e))?;
+    
+    Ok(())
+}
+
+#[cfg(not(target_os = "android"))]
+fn ensure_ort_initialized() -> Result<(), String> {
+    // On desktop, ort handles initialization automatically with static linking
+    Ok(())
+}
+
+use ort::session::builder::SessionBuilder;
+
+/// Configure execution providers based on preference and platform
+fn configure_execution_providers(
+    builder: SessionBuilder,
+    preference: ExecutionProviderPreference,
+) -> Result<SessionBuilder, String> {
+    match preference {
+        ExecutionProviderPreference::Auto => {
+            // Platform-specific auto configuration
+            #[cfg(target_os = "android")]
+            {
+                builder
+                    .with_execution_providers([NNAPIExecutionProvider::default().build()])
+                    .map_err(|e| format!("Failed to set NNAPI execution provider: {}", e))
+            }
+            #[cfg(target_os = "macos")]
+            {
+                builder
+                    .with_execution_providers([CoreMLExecutionProvider::default().build()])
+                    .map_err(|e| format!("Failed to set CoreML execution provider: {}", e))
+            }
+            #[cfg(target_os = "windows")]
+            {
+                builder
+                    .with_execution_providers([
+                        DirectMLExecutionProvider::default().build(),
+                        CUDAExecutionProvider::default().build(),
+                    ])
+                    .map_err(|e| format!("Failed to set execution providers: {}", e))
+            }
+            #[cfg(target_os = "linux")]
+            {
+                builder
+                    .with_execution_providers([CUDAExecutionProvider::default().build()])
+                    .map_err(|e| format!("Failed to set CUDA execution provider: {}", e))
+            }
+            #[cfg(not(any(target_os = "android", target_os = "macos", target_os = "windows", target_os = "linux")))]
+            {
+                Ok(builder)
+            }
+        }
+        ExecutionProviderPreference::Cuda => {
+            builder
+                .with_execution_providers([CUDAExecutionProvider::default().build()])
+                .map_err(|e| format!("Failed to set CUDA execution provider: {}", e))
+        }
+        ExecutionProviderPreference::CoreMl => {
+            builder
+                .with_execution_providers([CoreMLExecutionProvider::default().build()])
+                .map_err(|e| format!("Failed to set CoreML execution provider: {}", e))
+        }
+        ExecutionProviderPreference::DirectMl => {
+            builder
+                .with_execution_providers([DirectMLExecutionProvider::default().build()])
+                .map_err(|e| format!("Failed to set DirectML execution provider: {}", e))
+        }
+        #[cfg(target_os = "android")]
+        ExecutionProviderPreference::Nnapi => {
+            builder
+                .with_execution_providers([NNAPIExecutionProvider::default().build()])
+                .map_err(|e| format!("Failed to set NNAPI execution provider: {}", e))
+        }
+        #[cfg(not(target_os = "android"))]
+        ExecutionProviderPreference::Nnapi => {
+            // NNAPI is only available on Android, fall back to CPU
+            eprintln!("[OnnxEngine] NNAPI is only available on Android, using CPU");
+            Ok(builder)
+        }
+        ExecutionProviderPreference::Cpu => {
+            // No GPU providers, CPU is the default fallback
+            Ok(builder)
+        }
     }
 }
 
@@ -151,49 +308,29 @@ static ENGINE: Mutex<Option<OnnxEngine>> = Mutex::new(None);
 impl OnnxEngine {
     /// Create a new ONNX engine from a model file
     pub fn new(model_path: &Path) -> Result<Self, String> {
+        // Ensure ONNX Runtime is initialized (required for load-dynamic on Android)
+        ensure_ort_initialized()?;
+        
         let preference = get_execution_provider_preference();
         let provider_name = preference_to_name(preference);
         
         let builder = Session::builder()
             .map_err(|e| format!("Failed to create session builder: {}", e))?;
         
-        // Configure execution providers based on preference
-        let builder = match preference {
-            ExecutionProviderPreference::Auto => {
-                builder
-                    .with_execution_providers([
-                        CUDAExecutionProvider::default().build(),
-                        CoreMLExecutionProvider::default().build(),
-                        DirectMLExecutionProvider::default().build(),
-                    ])
-                    .map_err(|e| format!("Failed to set execution providers: {}", e))?
-            }
-            ExecutionProviderPreference::Cuda => {
-                builder
-                    .with_execution_providers([CUDAExecutionProvider::default().build()])
-                    .map_err(|e| format!("Failed to set CUDA execution provider: {}", e))?
-            }
-            ExecutionProviderPreference::CoreMl => {
-                builder
-                    .with_execution_providers([CoreMLExecutionProvider::default().build()])
-                    .map_err(|e| format!("Failed to set CoreML execution provider: {}", e))?
-            }
-            ExecutionProviderPreference::DirectMl => {
-                builder
-                    .with_execution_providers([DirectMLExecutionProvider::default().build()])
-                    .map_err(|e| format!("Failed to set DirectML execution provider: {}", e))?
-            }
-            ExecutionProviderPreference::Cpu => {
-                // No GPU providers, CPU is the default fallback
-                builder
-            }
-        };
+        // Configure execution providers based on preference and platform
+        let builder = configure_execution_providers(builder, preference)?;
         
         // Common optimizations
+        // Note: On Android, we use fewer threads to be more battery-friendly
+        #[cfg(target_os = "android")]
+        let num_threads = 2;
+        #[cfg(not(target_os = "android"))]
+        let num_threads = 4;
+        
         let session = builder
             .with_optimization_level(GraphOptimizationLevel::Level3)
             .map_err(|e| format!("Failed to set optimization level: {}", e))?
-            .with_intra_threads(4)
+            .with_intra_threads(num_threads)
             .map_err(|e| format!("Failed to set intra threads: {}", e))?
             .commit_from_file(model_path)
             .map_err(|e| format!("Failed to load model from {:?}: {}", model_path, e))?;
@@ -216,49 +353,28 @@ impl OnnxEngine {
 
     /// Create a new ONNX engine from model bytes
     pub fn from_bytes(model_bytes: &[u8]) -> Result<Self, String> {
+        // Ensure ONNX Runtime is initialized (required for load-dynamic on Android)
+        ensure_ort_initialized()?;
+        
         let preference = get_execution_provider_preference();
         let provider_name = preference_to_name(preference);
         
         let builder = Session::builder()
             .map_err(|e| format!("Failed to create session builder: {}", e))?;
         
-        // Configure execution providers based on preference
-        let builder = match preference {
-            ExecutionProviderPreference::Auto => {
-                builder
-                    .with_execution_providers([
-                        CUDAExecutionProvider::default().build(),
-                        CoreMLExecutionProvider::default().build(),
-                        DirectMLExecutionProvider::default().build(),
-                    ])
-                    .map_err(|e| format!("Failed to set execution providers: {}", e))?
-            }
-            ExecutionProviderPreference::Cuda => {
-                builder
-                    .with_execution_providers([CUDAExecutionProvider::default().build()])
-                    .map_err(|e| format!("Failed to set CUDA execution provider: {}", e))?
-            }
-            ExecutionProviderPreference::CoreMl => {
-                builder
-                    .with_execution_providers([CoreMLExecutionProvider::default().build()])
-                    .map_err(|e| format!("Failed to set CoreML execution provider: {}", e))?
-            }
-            ExecutionProviderPreference::DirectMl => {
-                builder
-                    .with_execution_providers([DirectMLExecutionProvider::default().build()])
-                    .map_err(|e| format!("Failed to set DirectML execution provider: {}", e))?
-            }
-            ExecutionProviderPreference::Cpu => {
-                // No GPU providers, CPU is the default fallback
-                builder
-            }
-        };
+        // Configure execution providers based on preference and platform
+        let builder = configure_execution_providers(builder, preference)?;
         
         // Common optimizations
+        #[cfg(target_os = "android")]
+        let num_threads = 2;
+        #[cfg(not(target_os = "android"))]
+        let num_threads = 4;
+        
         let session = builder
             .with_optimization_level(GraphOptimizationLevel::Level3)
             .map_err(|e| format!("Failed to set optimization level: {}", e))?
-            .with_intra_threads(4)
+            .with_intra_threads(num_threads)
             .map_err(|e| format!("Failed to set intra threads: {}", e))?
             .commit_from_memory(model_bytes)
             .map_err(|e| format!("Failed to load model from bytes: {}", e))?;
@@ -839,6 +955,7 @@ pub fn get_provider_info() -> Option<ExecutionProviderInfo> {
         "cuda" => (true, "NVIDIA CUDA GPU acceleration"),
         "coreml" => (true, "Apple CoreML (Metal/Neural Engine)"),
         "directml" => (true, "Windows DirectML GPU acceleration"),
+        "nnapi" => (true, "Android NNAPI (Neural Networks API)"),
         "cpu" => (false, "CPU (multi-threaded)"),
         "auto" => {
             // When auto is selected, we can't easily know which one is actually used
@@ -868,6 +985,13 @@ pub fn get_available_providers() -> Vec<ExecutionProviderInfo> {
     });
     
     // Platform-specific GPU providers
+    #[cfg(target_os = "android")]
+    providers.push(ExecutionProviderInfo {
+        name: "nnapi".to_string(),
+        is_gpu: true,
+        description: "Android NNAPI (Neural Networks API)".to_string(),
+    });
+    
     #[cfg(target_os = "macos")]
     providers.push(ExecutionProviderInfo {
         name: "coreml".to_string(),

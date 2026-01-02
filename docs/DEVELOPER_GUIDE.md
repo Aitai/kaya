@@ -30,6 +30,16 @@ bun run build:packages    # Build all library packages
 bun run tauri:build       # Build complete Tauri app with installer
 ```
 
+### Android (Experimental)
+
+```bash
+bun run android:setup     # Download ONNX Runtime Android libraries
+bun run android:dev       # Run on connected device/emulator
+bun run android:build     # Build release APK
+```
+
+> See [apps/desktop/src-tauri/ANDROID.md](../apps/desktop/src-tauri/ANDROID.md) for detailed setup instructions.
+
 ### Quality
 
 ```bash

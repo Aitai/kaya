@@ -9,7 +9,8 @@ Kaya is a desktop and web Go (Baduk/Weiqi) application with AI analysis. It feat
 - **Runtime**: Bun + TypeScript 5.9
 - **Frontend**: React 18 + Rsbuild
 - **Desktop**: Tauri v2 (Rust backend)
-- **AI**: ONNX Runtime (Native on Desktop, WebGPU/WASM on Web)
+- **Mobile**: Android (experimental, via Tauri v2)
+- **AI**: ONNX Runtime (Native on Desktop, NNAPI on Android, WebGPU/WASM on Web)
 
 ## Package Structure
 
@@ -81,6 +82,11 @@ bun run dev:web        # Web app at localhost:3000
 # Building
 bun run build          # Desktop production build
 bun run build:web      # Web production build
+
+# Android (Experimental)
+bun run android:setup  # Download ONNX Runtime libraries
+bun run android:dev    # Run on device/emulator
+bun run android:build  # Build release APK
 
 # Quality
 bun run format         # Prettier + markdownlint

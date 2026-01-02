@@ -239,6 +239,7 @@ pub fn onnx_set_provider_preference(preference: String) -> Result<(), String> {
         "cuda" => ExecutionProviderPreference::Cuda,
         "coreml" => ExecutionProviderPreference::CoreMl,
         "directml" => ExecutionProviderPreference::DirectMl,
+        "nnapi" => ExecutionProviderPreference::Nnapi,
         "cpu" => ExecutionProviderPreference::Cpu,
         _ => return Err(format!("Unknown execution provider: {}", preference)),
     };
@@ -254,6 +255,7 @@ pub fn onnx_get_provider_preference() -> String {
         ExecutionProviderPreference::Cuda => "cuda",
         ExecutionProviderPreference::CoreMl => "coreml",
         ExecutionProviderPreference::DirectMl => "directml",
+        ExecutionProviderPreference::Nnapi => "nnapi",
         ExecutionProviderPreference::Cpu => "cpu",
     }.to_string()
 }
