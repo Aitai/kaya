@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2026-01-03
+
+### <!-- 0 -->🚀 Features
+
+- *(android)* Add android compilation support with ONNX Runtime NNAPI ([06a068c](https://github.com/kaya-go/kaya/commit/06a068c7e68afeeed772661b68bf30e1267b31a7)) by @hadim
+
+- *(ai-engine)* Add game performance report system ([94063a1](https://github.com/kaya-go/kaya/commit/94063a12346600819e2e9f58299a19c22d0db0cd)) by @hadim
+
+- *(ui)* Add performance report with rank+probability classification ([da91646](https://github.com/kaya-go/kaya/commit/da91646f00194a1872789879adc86913e70bd8a5)) by @hadim
+
+- *(ui)* Improve next move marker visibility and add keyboard shortcut ([b714776](https://github.com/kaya-go/kaya/commit/b714776d53e33f01e2175847d602b27075dd8a27)) by @hadim
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(clipboard)* Use injected tauri API for desktop clipboard ([c1ec858](https://github.com/kaya-go/kaya/commit/c1ec858e1fdd00ddc92f3bc18bb85bf9664bb42f)) by @hadim
+
+### <!-- 6 -->🧪 Testing
+
+- Add e2e tests for desktop app ([f7ccfe9](https://github.com/kaya-go/kaya/commit/f7ccfe9df22448c55340265d9f325e5da55b488c)) by @hadim
+
+### 🙏 Contributors
+
+- @hadim
+- @github-actions[bot]
+
 ## [0.2.3] - 2026-01-02
 
 ### <!-- 0 -->🚀 Features
@@ -24,10 +49,14 @@ All notable changes to this project will be documented in this file.
 
 - Update documentation with new features and fixes ([b35294c](https://github.com/kaya-go/kaya/commit/b35294ccaf1349f3972e0ad3b1d7651051357a8a)) by @hadim
 
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.2.3 ([94de82f](https://github.com/kaya-go/kaya/commit/94de82fa3c815a3a7e2314054d864674f405f5ca)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
-- @hadim
 - @github-actions[bot]
+- @hadim
 
 ## [0.2.2] - 2026-01-01
 
