@@ -96,3 +96,7 @@ sort_commits = "oldest"
 [remote.github]
 owner = "kaya-go"
 repo = "kaya"
+
+# Exclude bots from the contributors list
+[remote.github.ignore]
+usernames = ["github-actions[bot]"]
