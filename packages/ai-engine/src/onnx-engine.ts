@@ -22,6 +22,7 @@ interface MCTSNode {
   P: number; // prior probability (from parent's NN policy)
   children: Map<string, MCTSNode> | null;
   expanded: boolean;
+  virtualLoss: number; // in-flight evaluations passing through this node
 }
 
 export interface OnnxEngineConfig extends BaseEngineConfig {
@@ -672,80 +673,8 @@ export class OnnxEngine extends Engine {
   }
 
   /**
-   * Same as _evaluateSingle but reuses pre-allocated buffers to avoid GC pressure.
-   * Used in the MCTS hot loop where we do many sequential evaluations.
-   */
-  private async _evaluateSingleBuffered(
-    board: GoBoard,
-    nextPla: Sign,
-    komi: number,
-    history: { color: Sign; x: number; y: number }[],
-    size: number,
-    bin_input: Float32Array,
-    global_input: Float32Array
-  ): Promise<AnalysisResult> {
-    // Zero out buffers and fill in-place
-    bin_input.fill(0);
-    global_input.fill(0);
-    this.featurizeToBuffer(board, nextPla, komi, history, bin_input, global_input, 0, size);
-
-    let binTensor: ort.Tensor;
-    let globalTensor: ort.Tensor;
-    let usingGpuBuffers = false;
-
-    if (this.useGpuInputs && this.gpuDevice) {
-      // Pad to full batch size for graph capture
-      const batchBin = new Float32Array(this.maxInferenceBatch * 22 * size * size);
-      batchBin.set(bin_input);
-      const batchGlobal = new Float32Array(this.maxInferenceBatch * 19);
-      batchGlobal.set(global_input);
-      const binData = this.inputDataType === 'float16' ? this.float32ToFloat16(batchBin) : batchBin;
-      const globalData =
-        this.inputDataType === 'float16' ? this.float32ToFloat16(batchGlobal) : batchGlobal;
-      const gpuTensors = this.uploadToGpu(binData, globalData);
-      binTensor = gpuTensors.binTensor;
-      globalTensor = gpuTensors.globalTensor;
-      usingGpuBuffers = true;
-    } else {
-      binTensor = this.createTensor(bin_input, [1, 22, size, size]);
-      globalTensor = this.createTensor(global_input, [1, 19]);
-    }
-
-    const inferenceStart = performance.now();
-    let results: ort.InferenceSession.OnnxValueMapType;
-
-    try {
-      results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
-    } catch (error) {
-      const errorMsg = String(error);
-      if (errorMsg.includes('expected: (tensor(float16))') && this.inputDataType === 'float32') {
-        this.inputDataType = 'float16';
-        if (!usingGpuBuffers) {
-          binTensor.dispose();
-          globalTensor.dispose();
-        }
-        binTensor = this.createTensor(bin_input, [1, 22, size, size]);
-        globalTensor = this.createTensor(global_input, [1, 19]);
-        usingGpuBuffers = false;
-        results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
-      } else {
-        throw error;
-      }
-    }
-
-    this.debugLog('NN inference', { ms: performance.now() - inferenceStart });
-    if (!usingGpuBuffers) {
-      binTensor.dispose();
-      globalTensor.dispose();
-    }
-
-    const analysisResult = await this.processResults(results, nextPla, size);
-    return this._filterKoMoves(analysisResult, board, nextPla, size);
-  }
-
-  /**
    * Run PUCT MCTS search from the given position.
-   * Each visit expands a leaf node using NN evaluation and backs up the value.
+   * Uses batch evaluation with virtual loss to amortize GPU sync overhead.
    */
   private async _runMCTS(
     rootBoard: GoBoard,
@@ -756,100 +685,151 @@ export class OnnxEngine extends Engine {
     size: number
   ): Promise<AnalysisResult> {
     const CPUCT = 1.5;
+    const numPlanes = 22;
+    const perPosBinSize = numPlanes * size * size;
 
-    // Pre-allocate reusable buffers for featurization (avoids GC pressure in hot loop)
-    const reuseBin = new Float32Array(22 * size * size);
-    const reuseGlobal = new Float32Array(19);
-
-    const root: MCTSNode = { N: 0, W: 0, P: 1, children: null, expanded: false };
+    const root: MCTSNode = {
+      N: 0,
+      W: 0,
+      P: 1,
+      children: null,
+      expanded: false,
+      virtualLoss: 0,
+    };
     let rootEval: AnalysisResult | null = null;
 
-    for (let v = 0; v < numVisits; v++) {
-      // Selection: descend tree by PUCT until reaching an unexpanded leaf
-      type Step = { node: MCTSNode; board: GoBoard; pla: Sign; hist: typeof history };
-      const path: Step[] = [{ node: root, board: rootBoard, pla: nextPla, hist: history }];
+    type Step = { node: MCTSNode; board: GoBoard; pla: Sign; hist: typeof history };
 
-      while (true) {
-        const { node, board, pla, hist } = path[path.length - 1];
-        if (!node.expanded || !node.children || node.children.size === 0) break;
+    let completed = 0;
+    while (completed < numVisits) {
+      const batchSize = Math.min(this.maxInferenceBatch, numVisits - completed);
 
-        // Check for game-end (2 consecutive passes)
-        const len = hist.length;
-        if (len >= 2 && hist[len - 1].x < 0 && hist[len - 2].x < 0) break;
+      // Phase 1: Select up to batchSize leaves using PUCT with virtual loss
+      const pending: { path: Step[]; needsEval: boolean }[] = [];
 
-        // PUCT selection
-        let bestScore = -Infinity;
-        let bestMove = '';
-        let bestChild: MCTSNode | null = null;
+      for (let b = 0; b < batchSize; b++) {
+        const path: Step[] = [{ node: root, board: rootBoard, pla: nextPla, hist: history }];
 
-        for (const [move, child] of node.children) {
-          // Q from current player's perspective (all W values stored as Black's winrate)
-          const q = child.N > 0 ? (pla === 1 ? child.W / child.N : 1 - child.W / child.N) : 0;
-          const u = (CPUCT * child.P * Math.sqrt(Math.max(node.N, 1))) / (1 + child.N);
-          if (q + u > bestScore) {
-            bestScore = q + u;
-            bestMove = move;
-            bestChild = child;
+        while (true) {
+          const { node, board, pla, hist } = path[path.length - 1];
+          if (!node.expanded || !node.children || node.children.size === 0) break;
+
+          const len = hist.length;
+          if (len >= 2 && hist[len - 1].x < 0 && hist[len - 2].x < 0) break;
+
+          // PUCT selection with virtual loss for path diversification
+          let bestScore = -Infinity;
+          let bestMove = '';
+          let bestChild: MCTSNode | null = null;
+
+          const parentN = node.N + node.virtualLoss;
+          for (const [move, child] of node.children) {
+            const effectiveN = child.N + child.virtualLoss;
+            // Virtual visits treated as losses for current player
+            const virtualW = pla === 1 ? 0 : child.virtualLoss;
+            const effectiveW = child.W + virtualW;
+            const q =
+              effectiveN > 0
+                ? pla === 1
+                  ? effectiveW / effectiveN
+                  : 1 - effectiveW / effectiveN
+                : 0;
+            const u = (CPUCT * child.P * Math.sqrt(Math.max(parentN, 1))) / (1 + effectiveN);
+            if (q + u > bestScore) {
+              bestScore = q + u;
+              bestMove = move;
+              bestChild = child;
+            }
           }
-        }
-        if (!bestChild) break;
+          if (!bestChild) break;
 
-        // Apply the selected move
-        let newBoard: GoBoard;
-        let newHist: typeof history;
-        if (bestMove === 'PASS') {
-          // Pass: create new board object to reset ko state
-          newBoard = new GoBoard(board.signMap.map(row => [...row] as Sign[]));
-          newHist = [...hist.slice(-4), { color: pla, x: -1, y: -1 }];
-        } else {
-          const parsed = this._parseMoveStr(bestMove, size);
-          if (!parsed) break;
-          try {
-            newBoard = board.makeMove(pla, parsed, {});
-          } catch {
-            break;
+          let newBoard: GoBoard;
+          let newHist: typeof history;
+          if (bestMove === 'PASS') {
+            newBoard = new GoBoard(board.signMap.map(row => [...row] as Sign[]));
+            newHist = [...hist.slice(-4), { color: pla, x: -1, y: -1 }];
+          } else {
+            const parsed = this._parseMoveStr(bestMove, size);
+            if (!parsed) break;
+            try {
+              newBoard = board.makeMove(pla, parsed, {});
+            } catch {
+              break;
+            }
+            newHist = [...hist.slice(-4), { color: pla, x: parsed[0], y: parsed[1] }];
           }
-          newHist = [...hist.slice(-4), { color: pla, x: parsed[0], y: parsed[1] }];
+
+          path.push({
+            node: bestChild,
+            board: newBoard,
+            pla: (pla === 1 ? -1 : 1) as Sign,
+            hist: newHist,
+          });
         }
 
-        path.push({
-          node: bestChild,
-          board: newBoard,
-          pla: (pla === 1 ? -1 : 1) as Sign,
-          hist: newHist,
-        });
+        // Apply virtual loss along path to diversify subsequent selections
+        for (const step of path) step.node.virtualLoss++;
+
+        const leaf = path[path.length - 1];
+        pending.push({ path, needsEval: !leaf.node.expanded });
       }
 
-      // Expansion + evaluation of the leaf node
-      const leaf = path[path.length - 1];
-      let value: number;
+      // Phase 2: Batch evaluate unexpanded leaves in a single GPU call
+      const toEvaluate = pending.filter(p => p.needsEval);
+      const evalResults: AnalysisResult[] = [];
 
-      if (!leaf.node.expanded) {
-        const leafEval = await this._evaluateSingleBuffered(
-          leaf.board,
-          leaf.pla,
-          komi,
-          leaf.hist,
-          size,
-          reuseBin,
-          reuseGlobal
+      if (toEvaluate.length > 0) {
+        const batchBin = new Float32Array(toEvaluate.length * perPosBinSize);
+        const batchGlobal = new Float32Array(toEvaluate.length * 19);
+        const batchPlas: Sign[] = [];
+
+        for (let i = 0; i < toEvaluate.length; i++) {
+          const leaf = toEvaluate[i].path[toEvaluate[i].path.length - 1];
+          batchPlas.push(leaf.pla);
+          this.featurizeToBuffer(
+            leaf.board,
+            leaf.pla,
+            komi,
+            leaf.hist,
+            batchBin,
+            batchGlobal,
+            i,
+            size
+          );
+        }
+
+        evalResults.push(
+          ...(await this._runBatchInference(batchBin, batchGlobal, batchPlas, size))
         );
-        this._expandNode(leaf.node, leafEval, leaf.board, leaf.pla, size);
-        value = leafEval.winRate;
-        if (leaf.node === root) rootEval = leafEval;
-      } else {
-        // Terminal or childless: use running average as value estimate
-        value = leaf.node.N > 0 ? leaf.node.W / leaf.node.N : 0.5;
       }
 
-      // Backup: propagate value (Black's winrate) up to root
-      for (const { node } of path) {
-        node.N++;
-        node.W += value;
+      // Phase 3: Remove virtual loss, expand leaves, backup values
+      let evalIdx = 0;
+      for (const item of pending) {
+        for (const step of item.path) step.node.virtualLoss--;
+
+        const leaf = item.path[item.path.length - 1];
+        let value: number;
+
+        if (item.needsEval && evalIdx < evalResults.length) {
+          const result = evalResults[evalIdx++];
+          const filtered = this._filterKoMoves(result, leaf.board, leaf.pla, size);
+          this._expandNode(leaf.node, filtered, leaf.board, leaf.pla, size);
+          value = filtered.winRate;
+          if (leaf.node === root) rootEval = filtered;
+        } else {
+          value = leaf.node.N > 0 ? leaf.node.W / leaf.node.N : 0.5;
+        }
+
+        for (const step of item.path) {
+          step.node.N++;
+          step.node.W += value;
+        }
       }
+
+      completed += pending.length;
     }
 
-    // Ensure we have a root evaluation (should always be set after ≥1 visit)
     if (!rootEval) {
       rootEval = await this._evaluateSingle(rootBoard, nextPla, komi, history, size);
     }
@@ -880,6 +860,55 @@ export class OnnxEngine extends Engine {
     };
   }
 
+  /**
+   * Run a batch inference, handling GPU buffer padding for graph capture.
+   * Used by both analyzeBatch and batch MCTS.
+   */
+  private async _runBatchInference(
+    bin_input: Float32Array,
+    global_input: Float32Array,
+    plas: Sign[],
+    size: number
+  ): Promise<AnalysisResult[]> {
+    const batchSize = plas.length;
+    const perPosBinSize = 22 * size * size;
+
+    let binTensor: ort.Tensor;
+    let globalTensor: ort.Tensor;
+    let usingGpuBuffers = false;
+
+    if (this.useGpuInputs && this.gpuDevice) {
+      // Pad to maxInferenceBatch for graph capture (all shapes must be static)
+      const paddedBin = new Float32Array(this.maxInferenceBatch * perPosBinSize);
+      paddedBin.set(bin_input);
+      const paddedGlobal = new Float32Array(this.maxInferenceBatch * 19);
+      paddedGlobal.set(global_input);
+      const binData =
+        this.inputDataType === 'float16' ? this.float32ToFloat16(paddedBin) : paddedBin;
+      const globalData =
+        this.inputDataType === 'float16' ? this.float32ToFloat16(paddedGlobal) : paddedGlobal;
+      const gpuTensors = this.uploadToGpu(binData, globalData);
+      binTensor = gpuTensors.binTensor;
+      globalTensor = gpuTensors.globalTensor;
+      usingGpuBuffers = true;
+    } else {
+      binTensor = this.createTensor(new Float32Array(bin_input), [batchSize, 22, size, size]);
+      globalTensor = this.createTensor(new Float32Array(global_input), [batchSize, 19]);
+    }
+
+    const results = await this.session!.run({
+      bin_input: binTensor,
+      global_input: globalTensor,
+    });
+
+    if (!usingGpuBuffers) {
+      binTensor.dispose();
+      globalTensor.dispose();
+    }
+
+    return this.processBatchResults(results, plas, size, batchSize);
+  }
+
   /** Expand a node: create children from NN policy, skipping occupied and ko-illegal intersections. */
   private _expandNode(
     node: MCTSNode,
@@ -906,6 +935,7 @@ export class OnnxEngine extends Engine {
         P: suggestion.probability,
         children: null,
         expanded: false,
+        virtualLoss: 0,
       });
     }
     node.expanded = true;
@@ -955,8 +985,8 @@ export class OnnxEngine extends Engine {
 
     if (inputs.length === 0) return [];
 
-    // When MCTS is requested (numVisits > 1), use sequential analyze() which routes through
-    // analyzePosition → _runMCTS. Batch NN inference can't be used for MCTS.
+    // When MCTS is requested (numVisits > 1), route through analyzePosition → _runMCTS
+    // which handles its own batch evaluation with virtual loss.
     const hasMultiVisit = inputs.some(i => ((i.options as any)?.numVisits ?? 1) > 1);
     if (hasMultiVisit) {
       const results: AnalysisResult[] = [];
@@ -1079,53 +1109,21 @@ export class OnnxEngine extends Engine {
       const thisBatch = chunkEnd - chunkStart;
       const chunkPlas = plas.slice(chunkStart, chunkEnd);
 
-      // Extract chunk data
-      const chunkBin = bin_input.subarray(chunkStart * perPosBinSize, chunkEnd * perPosBinSize);
-      const chunkGlobal = global_input.subarray(chunkStart * 19, chunkEnd * 19);
-
-      let binTensor: ort.Tensor;
-      let globalTensor: ort.Tensor;
-      let usingGpuBuffers = false;
-
-      if (this.useGpuInputs && this.gpuDevice) {
-        // Graph capture mode: pad to full batch size (all shapes must be static)
-        const inferBatch = this.maxInferenceBatch;
-        const paddedBin = new Float32Array(inferBatch * perPosBinSize);
-        paddedBin.set(chunkBin);
-        const paddedGlobal = new Float32Array(inferBatch * 19);
-        paddedGlobal.set(chunkGlobal);
-        const binData =
-          this.inputDataType === 'float16' ? this.float32ToFloat16(paddedBin) : paddedBin;
-        const globalData =
-          this.inputDataType === 'float16' ? this.float32ToFloat16(paddedGlobal) : paddedGlobal;
-        const gpuTensors = this.uploadToGpu(binData, globalData);
-        binTensor = gpuTensors.binTensor;
-        globalTensor = gpuTensors.globalTensor;
-        usingGpuBuffers = true;
-      } else {
-        binTensor = this.createTensor(new Float32Array(chunkBin), [thisBatch, 22, size, size]);
-        globalTensor = this.createTensor(new Float32Array(chunkGlobal), [thisBatch, 19]);
-      }
+      const chunkBin = new Float32Array(
+        bin_input.buffer,
+        bin_input.byteOffset + chunkStart * perPosBinSize * 4,
+        thisBatch * perPosBinSize
+      );
+      const chunkGlobal = new Float32Array(
+        global_input.buffer,
+        global_input.byteOffset + chunkStart * 19 * 4,
+        thisBatch * 19
+      );
 
       const inferenceStart = performance.now();
-      const inferenceResults = await this.session.run({
-        bin_input: binTensor,
-        global_input: globalTensor,
-      });
+      const chunkResults = await this._runBatchInference(chunkBin, chunkGlobal, chunkPlas, size);
       totalInferenceTime += performance.now() - inferenceStart;
 
-      if (!usingGpuBuffers) {
-        binTensor.dispose();
-        globalTensor.dispose();
-      }
-
-      // Process only the real positions (not padding)
-      const chunkResults = await this.processBatchResults(
-        inferenceResults,
-        chunkPlas,
-        size,
-        thisBatch
-      );
       allBatchResults.push(...chunkResults);
     }
 
