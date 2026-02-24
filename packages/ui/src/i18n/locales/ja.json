@@ -112,6 +112,8 @@
     "minProbabilityDescription": "この閾値以下の確率の着手を非表示。",
     "saveAnalysisToSgf": "分析をSGFに保存",
     "saveAnalysisToSgfDescription": "SGF保存時にAI分析データ（勝率、目差、着手候補）を埋め込む。ファイルサイズは増加しますが分析結果を保持。",
+    "numVisits": "Search Visits",
+    "numVisitsDescription": "MCTS simulations per move. 1 = policy-only (fastest). Higher values improve move quality at the cost of speed. Use 50â200 for stronger play.",
     "modelUploadedSuccess": "モデルのアップロード成功",
     "modelUploadFailed": "モデルのアップロード失敗",
     "modelDownloadedSuccess": "モデルのダウンロード成功",

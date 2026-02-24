@@ -15,6 +15,15 @@ import {
 } from './base-engine';
 import type { AnalysisResult, MoveSuggestion } from './types';
 
+/** Node in the MCTS search tree */
+interface MCTSNode {
+  N: number; // visit count
+  W: number; // cumulative value (sum of Black's winrate)
+  P: number; // prior probability (from parent's NN policy)
+  children: Map<string, MCTSNode> | null;
+  expanded: boolean;
+}
+
 export interface OnnxEngineConfig extends BaseEngineConfig {
   /** ArrayBuffer of the ONNX model */
   modelBuffer?: ArrayBuffer;
@@ -59,6 +68,7 @@ export class OnnxEngine extends Engine {
   }
 
   private validateTensorData(buffer: Float32Array, label: string): void {
+    if (!this.debugEnabled) return;
     for (let i = 0; i < buffer.length; i++) {
       const value = buffer[i];
       if (!Number.isFinite(value)) {
@@ -353,9 +363,7 @@ export class OnnxEngine extends Engine {
   ): Promise<AnalysisResult> {
     if (!this.session) throw new Error('Engine not initialized');
 
-    const analysisStart = performance.now();
     const board = new GoBoard(signMap);
-    // Always use the actual board size from signMap, not cached value
     const size = board.width;
     this.boardSize = size;
 
@@ -366,8 +374,8 @@ export class OnnxEngine extends Engine {
     } else {
       let blackStones = 0,
         whiteStones = 0;
-      for (let y = 0; y < this.boardSize; y++) {
-        for (let x = 0; x < this.boardSize; x++) {
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
           const s = board.get([x, y]);
           if (s === 1) blackStones++;
           else if (s === -1) whiteStones++;
@@ -378,17 +386,51 @@ export class OnnxEngine extends Engine {
 
     const komi = options.komi ?? 7.5;
     const history = options.history || [];
+    const numVisits: number = (options as any).numVisits ?? 1;
 
-    // Featurize and run inference
-    const { bin_input, global_input } = this.featurize(board, nextPla, komi, history, size);
-    this.validateTensorData(bin_input, 'bin_input');
-    this.validateTensorData(global_input, 'global_input');
+    // Restore ko state so MCTS and featurization respect the current ko restriction.
+    // GoBoard created from signMap always resets _koInfo, so we re-apply it from options.
+    const koInfo = (options as any).koInfo as { sign: Sign; vertex: [number, number] } | undefined;
+    if (koInfo && (koInfo.sign as number) !== 0) {
+      board._koInfo = { sign: koInfo.sign, vertex: koInfo.vertex };
+    }
+
+    // Run MCTS if more than 1 visit is requested
+    if (numVisits > 1) {
+      return this._runMCTS(board, nextPla, komi, history, numVisits, size);
+    }
+
+    // Single-pass NN inference (default, fastest)
+    const analysisStart = performance.now();
     this.debugLog('Single analysis prepared', {
       nextPla,
       komi,
       historyLength: history.length,
       boardSize: size,
     });
+
+    const analysisResult = await this._evaluateSingle(board, nextPla, komi, history, size);
+    const totalTime = performance.now() - analysisStart;
+
+    this.debugLog('Single analysis complete', { totalTimeMs: totalTime });
+
+    return analysisResult;
+  }
+
+  /**
+   * Run a single NN inference on the given board position.
+   * Used by both analyzePosition (1 visit) and _runMCTS (leaf evaluation).
+   */
+  private async _evaluateSingle(
+    board: GoBoard,
+    nextPla: Sign,
+    komi: number,
+    history: { color: Sign; x: number; y: number }[],
+    size: number
+  ): Promise<AnalysisResult> {
+    const { bin_input, global_input } = this.featurize(board, nextPla, komi, history, size);
+    this.validateTensorData(bin_input, 'bin_input');
+    this.validateTensorData(global_input, 'global_input');
 
     let binTensor = this.createTensor(bin_input, [1, 22, size, size]);
     let globalTensor = this.createTensor(global_input, [1, 19]);
@@ -397,56 +439,279 @@ export class OnnxEngine extends Engine {
     let results: ort.InferenceSession.OnnxValueMapType;
 
     try {
-      results = await this.session.run({
-        bin_input: binTensor,
-        global_input: globalTensor,
-      });
+      results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
     } catch (error) {
-      // Check for FP16 mismatch error and retry with correct type
       const errorMsg = String(error);
       if (errorMsg.includes('expected: (tensor(float16))') && this.inputDataType === 'float32') {
         console.warn('[OnnxEngine] Detected FP16 model at runtime, switching input type');
         this.inputDataType = 'float16';
-
-        // Warn about FP16 on CPU
-        const isWasmOnly = this.usedProviders.every(p => p === 'wasm' || p === 'cpu');
-        if (isWasmOnly) {
-          console.warn(
-            '[OnnxEngine] FP16 model on CPU/WASM backend - this may not work correctly. ' +
-              'Consider using an FP32 model.'
-          );
-        }
-
-        // Dispose old tensors and create new ones with FP16
         binTensor.dispose();
         globalTensor.dispose();
         binTensor = this.createTensor(bin_input, [1, 22, size, size]);
         globalTensor = this.createTensor(global_input, [1, 19]);
-
-        results = await this.session.run({
-          bin_input: binTensor,
-          global_input: globalTensor,
-        });
+        results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
       } else {
         throw error;
       }
     }
 
-    const inferenceTime = performance.now() - inferenceStart;
-    this.debugLog('Single analysis inference complete', { inferenceTime });
-
+    this.debugLog('NN inference', { ms: performance.now() - inferenceStart });
     binTensor.dispose();
     globalTensor.dispose();
 
-    const analysisResult = await this.processResults(results, nextPla, this.boardSize);
-    const totalTime = performance.now() - analysisStart;
+    const analysisResult = await this.processResults(results, nextPla, size);
+    return this._filterKoMoves(analysisResult, board, nextPla, size);
+  }
 
-    this.debugLog('Single analysis complete', {
-      totalTimeMs: totalTime,
-      inferenceTimeMs: inferenceTime,
-    });
+  /**
+   * Same as _evaluateSingle but reuses pre-allocated buffers to avoid GC pressure.
+   * Used in the MCTS hot loop where we do many sequential evaluations.
+   */
+  private async _evaluateSingleBuffered(
+    board: GoBoard,
+    nextPla: Sign,
+    komi: number,
+    history: { color: Sign; x: number; y: number }[],
+    size: number,
+    bin_input: Float32Array,
+    global_input: Float32Array
+  ): Promise<AnalysisResult> {
+    // Zero out buffers and fill in-place
+    bin_input.fill(0);
+    global_input.fill(0);
+    this.featurizeToBuffer(board, nextPla, komi, history, bin_input, global_input, 0, size);
 
-    return analysisResult;
+    let binTensor = this.createTensor(bin_input, [1, 22, size, size]);
+    let globalTensor = this.createTensor(global_input, [1, 19]);
+
+    const inferenceStart = performance.now();
+    let results: ort.InferenceSession.OnnxValueMapType;
+
+    try {
+      results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
+    } catch (error) {
+      const errorMsg = String(error);
+      if (errorMsg.includes('expected: (tensor(float16))') && this.inputDataType === 'float32') {
+        this.inputDataType = 'float16';
+        binTensor.dispose();
+        globalTensor.dispose();
+        binTensor = this.createTensor(bin_input, [1, 22, size, size]);
+        globalTensor = this.createTensor(global_input, [1, 19]);
+        results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
+      } else {
+        throw error;
+      }
+    }
+
+    this.debugLog('NN inference', { ms: performance.now() - inferenceStart });
+    binTensor.dispose();
+    globalTensor.dispose();
+
+    const analysisResult = await this.processResults(results, nextPla, size);
+    return this._filterKoMoves(analysisResult, board, nextPla, size);
+  }
+
+  /**
+   * Run PUCT MCTS search from the given position.
+   * Each visit expands a leaf node using NN evaluation and backs up the value.
+   */
+  private async _runMCTS(
+    rootBoard: GoBoard,
+    nextPla: Sign,
+    komi: number,
+    history: { color: Sign; x: number; y: number }[],
+    numVisits: number,
+    size: number
+  ): Promise<AnalysisResult> {
+    const CPUCT = 1.5;
+
+    // Pre-allocate reusable buffers for featurization (avoids GC pressure in hot loop)
+    const reuseBin = new Float32Array(22 * size * size);
+    const reuseGlobal = new Float32Array(19);
+
+    const root: MCTSNode = { N: 0, W: 0, P: 1, children: null, expanded: false };
+    let rootEval: AnalysisResult | null = null;
+
+    for (let v = 0; v < numVisits; v++) {
+      // Selection: descend tree by PUCT until reaching an unexpanded leaf
+      type Step = { node: MCTSNode; board: GoBoard; pla: Sign; hist: typeof history };
+      const path: Step[] = [{ node: root, board: rootBoard, pla: nextPla, hist: history }];
+
+      while (true) {
+        const { node, board, pla, hist } = path[path.length - 1];
+        if (!node.expanded || !node.children || node.children.size === 0) break;
+
+        // Check for game-end (2 consecutive passes)
+        const len = hist.length;
+        if (len >= 2 && hist[len - 1].x < 0 && hist[len - 2].x < 0) break;
+
+        // PUCT selection
+        let bestScore = -Infinity;
+        let bestMove = '';
+        let bestChild: MCTSNode | null = null;
+
+        for (const [move, child] of node.children) {
+          // Q from current player's perspective (all W values stored as Black's winrate)
+          const q = child.N > 0 ? (pla === 1 ? child.W / child.N : 1 - child.W / child.N) : 0;
+          const u = (CPUCT * child.P * Math.sqrt(Math.max(node.N, 1))) / (1 + child.N);
+          if (q + u > bestScore) {
+            bestScore = q + u;
+            bestMove = move;
+            bestChild = child;
+          }
+        }
+        if (!bestChild) break;
+
+        // Apply the selected move
+        let newBoard: GoBoard;
+        let newHist: typeof history;
+        if (bestMove === 'PASS') {
+          // Pass: create new board object to reset ko state
+          newBoard = new GoBoard(board.signMap.map(row => [...row] as Sign[]));
+          newHist = [...hist.slice(-4), { color: pla, x: -1, y: -1 }];
+        } else {
+          const parsed = this._parseMoveStr(bestMove, size);
+          if (!parsed) break;
+          try {
+            newBoard = board.makeMove(pla, parsed, {});
+          } catch {
+            break;
+          }
+          newHist = [...hist.slice(-4), { color: pla, x: parsed[0], y: parsed[1] }];
+        }
+
+        path.push({
+          node: bestChild,
+          board: newBoard,
+          pla: (pla === 1 ? -1 : 1) as Sign,
+          hist: newHist,
+        });
+      }
+
+      // Expansion + evaluation of the leaf node
+      const leaf = path[path.length - 1];
+      let value: number;
+
+      if (!leaf.node.expanded) {
+        const leafEval = await this._evaluateSingleBuffered(
+          leaf.board,
+          leaf.pla,
+          komi,
+          leaf.hist,
+          size,
+          reuseBin,
+          reuseGlobal
+        );
+        this._expandNode(leaf.node, leafEval, leaf.board, leaf.pla, size);
+        value = leafEval.winRate;
+        if (leaf.node === root) rootEval = leafEval;
+      } else {
+        // Terminal or childless: use running average as value estimate
+        value = leaf.node.N > 0 ? leaf.node.W / leaf.node.N : 0.5;
+      }
+
+      // Backup: propagate value (Black's winrate) up to root
+      for (const { node } of path) {
+        node.N++;
+        node.W += value;
+      }
+    }
+
+    // Ensure we have a root evaluation (should always be set after ≥1 visit)
+    if (!rootEval) {
+      rootEval = await this._evaluateSingle(rootBoard, nextPla, komi, history, size);
+    }
+
+    // Build AnalysisResult from MCTS visit counts
+    const moveSuggestions: MoveSuggestion[] = [];
+    if (root.children && root.children.size > 0) {
+      const totalChildVisits = [...root.children.values()].reduce((s, c) => s + c.N, 0);
+      const sorted = [...root.children.entries()].sort(([, a], [, b]) => b.N - a.N);
+      for (const [move, child] of sorted.slice(0, 10)) {
+        moveSuggestions.push({
+          move,
+          probability: totalChildVisits > 0 ? child.N / totalChildVisits : child.P,
+        });
+      }
+    }
+
+    const winRate = root.N > 0 ? root.W / root.N : rootEval.winRate;
+    this.debugLog('MCTS complete', { visits: root.N, winRate });
+
+    return {
+      moveSuggestions,
+      winRate,
+      scoreLead: rootEval.scoreLead,
+      currentTurn: nextPla === 1 ? 'B' : 'W',
+      visits: root.N,
+      ownership: rootEval.ownership,
+    };
+  }
+
+  /** Expand a node: create children from NN policy, skipping occupied and ko-illegal intersections. */
+  private _expandNode(
+    node: MCTSNode,
+    eval_: AnalysisResult,
+    board: GoBoard,
+    pla: Sign,
+    size: number
+  ): void {
+    node.children = new Map();
+    const koVertex = this._getKoVertex(board, pla, size);
+    for (const suggestion of eval_.moveSuggestions) {
+      const move = suggestion.move;
+      if (move !== 'PASS') {
+        if (koVertex && move === koVertex) continue;
+        const parsed = this._parseMoveStr(move, size);
+        if (!parsed) continue;
+        // Skip occupied intersections
+        const stone = board.get(parsed);
+        if (stone !== 0) continue;
+      }
+      node.children.set(move, {
+        N: 0,
+        W: 0,
+        P: suggestion.probability,
+        children: null,
+        expanded: false,
+      });
+    }
+    node.expanded = true;
+  }
+
+  /** Parse a GTP move string (e.g. "D4", "Q16", "PASS") to board [x, y] or null for pass. */
+  private _parseMoveStr(move: string, size: number): [number, number] | null {
+    if (!move || move === 'PASS') return null;
+    const letters = 'ABCDEFGHJKLMNOPQRST';
+    const x = letters.indexOf(move[0].toUpperCase());
+    const y = size - parseInt(move.slice(1), 10);
+    if (x < 0 || y < 0 || y >= size) return null;
+    return [x, y];
+  }
+
+  /** Get the GTP string for the ko-forbidden vertex, or null if no ko. */
+  private _getKoVertex(board: GoBoard, pla: Sign, size: number): string | null {
+    const koInfo = board._koInfo;
+    if (!koInfo || koInfo.sign !== pla || koInfo.vertex[0] === -1) return null;
+    const letters = 'ABCDEFGHJKLMNOPQRST';
+    return `${letters[koInfo.vertex[0]]}${size - koInfo.vertex[1]}`;
+  }
+
+  /** Remove the ko-forbidden move from suggestions and renormalise probabilities. */
+  private _filterKoMoves(
+    result: AnalysisResult,
+    board: GoBoard,
+    pla: Sign,
+    size: number
+  ): AnalysisResult {
+    const koMove = this._getKoVertex(board, pla, size);
+    if (!koMove) return result;
+    const filtered = result.moveSuggestions.filter(s => s.move !== koMove);
+    const total = filtered.reduce((sum, s) => sum + s.probability, 0);
+    if (total > 0) {
+      for (const s of filtered) s.probability /= total;
+    }
+    return { ...result, moveSuggestions: filtered };
   }
 
   async analyzeBatch(
@@ -457,6 +722,17 @@ export class OnnxEngine extends Engine {
     }
 
     if (inputs.length === 0) return [];
+
+    // When MCTS is requested (numVisits > 1), use sequential analyze() which routes through
+    // analyzePosition → _runMCTS. Batch NN inference can't be used for MCTS.
+    const hasMultiVisit = inputs.some(i => ((i.options as any)?.numVisits ?? 1) > 1);
+    if (hasMultiVisit) {
+      const results: AnalysisResult[] = [];
+      for (const input of inputs) {
+        results.push(await this.analyze(input.signMap, input.options));
+      }
+      return results;
+    }
 
     // Always use the actual board size from the first input's signMap
     const size = inputs[0].signMap.length;
@@ -469,6 +745,8 @@ export class OnnxEngine extends Engine {
       originalIndex: number;
       signMap: SignMap;
       options: EngineAnalysisOptions;
+      board: GoBoard;
+      nextPla: Sign;
     }[] = [];
 
     const useCache = this.config.enableCache;
@@ -482,7 +760,16 @@ export class OnnxEngine extends Engine {
           continue;
         }
       }
-      uncachedInputs.push({ originalIndex: i, signMap, options });
+      const board = new GoBoard(signMap);
+      const nextPla: Sign = options.nextToPlay === 'W' ? -1 : 1;
+      // Restore ko state from options so featurization includes the ko feature
+      const koInfo = (options as any).koInfo as
+        | { sign: Sign; vertex: [number, number] }
+        | undefined;
+      if (koInfo && (koInfo.sign as number) !== 0) {
+        board._koInfo = { sign: koInfo.sign, vertex: koInfo.vertex };
+      }
+      uncachedInputs.push({ originalIndex: i, signMap, options, board, nextPla });
     }
 
     if (uncachedInputs.length === 0) {
@@ -491,23 +778,18 @@ export class OnnxEngine extends Engine {
     }
 
     const actualBatchSize = uncachedInputs.length;
-    // Pad batch size to minimum of 8 to avoid WebGPU issues with small batches
-    // WebGPU can hang when batch size differs from warmup size on some hardware
-    // const MIN_BATCH_SIZE = 8;
-    const batchSize = actualBatchSize; // Math.max(actualBatchSize, MIN_BATCH_SIZE);
+    const batchSize = actualBatchSize;
     const batchStart = performance.now();
 
-    // Prepare batch tensors (including padding slots)
+    // Prepare batch tensors
     const bin_input = new Float32Array(batchSize * numPlanes * size * size);
     const global_input = new Float32Array(batchSize * 19);
     const plas: Sign[] = [];
 
-    // Fill real data
+    // Fill real data (boards already have ko info restored)
     for (let b = 0; b < actualBatchSize; b++) {
-      const { signMap, options } = uncachedInputs[b];
-      const board = new GoBoard(signMap);
+      const { options, board, nextPla } = uncachedInputs[b];
       const komi = options.komi ?? 7.5;
-      const nextPla: Sign = options.nextToPlay === 'W' ? -1 : 1;
       plas.push(nextPla);
       const history = options.history || [];
       this.featurizeToBuffer(board, nextPla, komi, history, bin_input, global_input, b, size);
@@ -592,10 +874,10 @@ export class OnnxEngine extends Engine {
     // Process results (full batch including padding)
     const batchResults = await this.processBatchResults(inferenceResults, plas, size, batchSize);
 
-    // Store in cache (only actual results, not padding)
+    // Store in cache (only actual results, not padding); filter ko moves
     for (let b = 0; b < actualBatchSize; b++) {
-      const { originalIndex, signMap, options } = uncachedInputs[b];
-      const result = batchResults[b];
+      const { originalIndex, signMap, options, board, nextPla } = uncachedInputs[b];
+      const result = this._filterKoMoves(batchResults[b], board, nextPla, size);
       results[originalIndex] = result;
 
       if (useCache) {
@@ -663,16 +945,43 @@ export class OnnxEngine extends Engine {
       bin_input[batchOffset + c * size * size + h * size + w] = val;
     };
 
+    // Pre-compute liberty counts once per group (avoids redundant BFS per stone)
+    const libertyCount = new Int8Array(size * size); // 0 = empty/uncomputed
+    const groupVisited = new Uint8Array(size * size);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const idx = y * size + x;
+        if (groupVisited[idx]) continue;
+        const color = board.signMap[y][x];
+        if (color === 0) continue;
+        // BFS to find group and count liberties in one pass
+        const chain = board.getChain([x, y]);
+        const libSet = new Set<number>();
+        for (const [cx, cy] of chain) {
+          groupVisited[cy * size + cx] = 1;
+          // Check neighbors for liberties
+          if (cx > 0 && board.signMap[cy][cx - 1] === 0) libSet.add(cy * size + (cx - 1));
+          if (cx < size - 1 && board.signMap[cy][cx + 1] === 0) libSet.add(cy * size + (cx + 1));
+          if (cy > 0 && board.signMap[cy - 1][cx] === 0) libSet.add((cy - 1) * size + cx);
+          if (cy < size - 1 && board.signMap[cy + 1][cx] === 0) libSet.add((cy + 1) * size + cx);
+        }
+        const libs = Math.min(libSet.size, 4); // clamp to 4 (we only care about 1/2/3)
+        for (const [cx, cy] of chain) {
+          libertyCount[cy * size + cx] = libs;
+        }
+      }
+    }
+
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         set(0, y, x, 1.0); // Ones
 
-        const color = board.get([x, y]);
+        const color = board.signMap[y][x];
         if (color === pla) set(1, y, x, 1.0);
         else if (color === opp) set(2, y, x, 1.0);
 
         if (color !== 0) {
-          const libs = board.getLiberties([x, y]).length;
+          const libs = libertyCount[y * size + x];
           if (libs === 1) set(3, y, x, 1.0);
           if (libs === 2) set(4, y, x, 1.0);
           if (libs === 3) set(5, y, x, 1.0);

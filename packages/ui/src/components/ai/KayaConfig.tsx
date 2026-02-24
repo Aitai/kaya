@@ -524,6 +524,27 @@ export const KayaConfig: React.FC = () => {
             />
           </div>
 
+          {/* Search Visits - Full width */}
+          <div className="setting-item setting-item-full">
+            <div className="setting-info">
+              <label htmlFor="num-visits-slider" className="setting-label">
+                {t('aiConfig.numVisits')}
+                <span className="setting-value">{aiSettings.numVisits}</span>
+              </label>
+              <p className="setting-description">{t('aiConfig.numVisitsDescription')}</p>
+            </div>
+            <input
+              id="num-visits-slider"
+              type="range"
+              min="1"
+              max="400"
+              step="1"
+              value={aiSettings.numVisits}
+              onChange={e => setAISettings({ numVisits: parseInt(e.target.value) })}
+              className="ai-slider"
+            />
+          </div>
+
           {/* Save Analysis to SGF - Full width toggle */}
           <div className="setting-item setting-item-toggle setting-item-full">
             <div className="setting-info">

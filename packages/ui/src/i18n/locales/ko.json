@@ -112,6 +112,8 @@
     "minProbabilityDescription": "이 임계값 이하 확률의 착수는 숨깁니다.",
     "saveAnalysisToSgf": "분석을 SGF에 저장",
     "saveAnalysisToSgfDescription": "SGF 저장 시 AI 분석 데이터(승률, 목차, 착수 후보)를 포함합니다. 파일 크기는 증가하지만 분석 결과가 보존됩니다.",
+    "numVisits": "Search Visits",
+    "numVisitsDescription": "MCTS simulations per move. 1 = policy-only (fastest). Higher values improve move quality at the cost of speed. Use 50â200 for stronger play.",
     "modelUploadedSuccess": "모델 업로드 성공",
     "modelUploadFailed": "모델 업로드 실패",
     "modelDownloadedSuccess": "모델 다운로드 성공",

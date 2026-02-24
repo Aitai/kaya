@@ -112,6 +112,8 @@
     "minProbabilityDescription": "Hide moves with probability below this threshold.",
     "saveAnalysisToSgf": "Save Analysis to SGF",
     "saveAnalysisToSgfDescription": "Embed AI analysis data (win rate, score, move suggestions) when saving SGF files. Increases file size but preserves your analysis.",
+    "numVisits": "Search Visits",
+    "numVisitsDescription": "MCTS simulations per move. 1 = policy-only (fastest). Higher values improve move quality at the cost of speed. Use 50–200 for stronger play.",
     "modelUploadedSuccess": "Model uploaded successfully",
     "modelUploadFailed": "Failed to upload model",
     "modelDownloadedSuccess": "Model downloaded successfully",

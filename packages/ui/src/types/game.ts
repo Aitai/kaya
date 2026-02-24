@@ -33,6 +33,8 @@ export interface AISettings {
    */
   backend: 'native' | 'native-cpu' | 'webgpu' | 'webgl' | 'wasm';
   saveAnalysisToSgf: boolean;
+  /** Number of MCTS visits per position (1 = policy-only, >1 enables tree search) */
+  numVisits: number;
 }
 
 /**

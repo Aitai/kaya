@@ -112,6 +112,8 @@
     "minProbabilityDescription": "Masquer les coups avec une probabilité inférieure.",
     "saveAnalysisToSgf": "Sauver l'analyse dans le SGF",
     "saveAnalysisToSgfDescription": "Intégrer les données d'analyse IA lors de la sauvegarde. Augmente la taille du fichier.",
+    "numVisits": "Search Visits",
+    "numVisitsDescription": "MCTS simulations per move. 1 = policy-only (fastest). Higher values improve move quality at the cost of speed. Use 50â200 for stronger play.",
     "modelUploadedSuccess": "Modèle importé avec succès",
     "modelUploadFailed": "Échec de l'import du modèle",
     "modelDownloadedSuccess": "Modèle téléchargé avec succès",

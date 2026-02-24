@@ -72,6 +72,9 @@ export interface AIAnalysisContextValue {
 
   // Fallback notification (from AIEngineContext)
   backendFallbackMessage: string | null;
+
+  // Wait for the currently running live analysis to finish (resolves immediately if none)
+  waitForCurrentAnalysis: () => Promise<void>;
 }
 
 const AIAnalysisContext = createContext<AIAnalysisContextValue | null>(null);
@@ -199,6 +202,12 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const prevKomiRef = useRef<number | undefined>(undefined);
   // Track previous loading state to detect when loading just finished
   const prevLoadingRef = useRef<boolean>(false);
+  // Track previous numVisits to clear cache when search depth changes
+  const prevNumVisitsRef = useRef<number | undefined>(undefined);
+  // Promise that resolves when the current live analysis run finishes
+  const analysisCompleteRef = useRef<(() => void) | null>(null);
+  const analysisWaiterRef = useRef<Promise<void>>(Promise.resolve());
+  const waitForCurrentAnalysis = useCallback(() => analysisWaiterRef.current, []);
 
   // Clear cache when komi changes (analysis results depend on komi)
   // Skip during SGF loading and right after loading finishes
@@ -234,6 +243,48 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       prevKomiRef.current = currentKomi;
     }
   }, [gameInfo?.komi, analysisCache, updateAnalysisCacheSize, setAnalysisResult, isLoadingSGF]);
+
+  // When numVisits changes, only invalidate the current position's cached result
+  // so it re-analyzes with the new visit count. Keep the rest of the graph intact.
+  useEffect(() => {
+    const currentNumVisits = aiSettings.numVisits;
+    if (prevNumVisitsRef.current === undefined) {
+      prevNumVisitsRef.current = currentNumVisits;
+      return;
+    }
+    if (prevNumVisitsRef.current !== currentNumVisits) {
+      // Invalidate only the current position's cache entry
+      if (gameTree && currentNodeId !== null && currentNodeId !== undefined) {
+        const boardSize = currentBoard.signMap.length;
+        const komi = gameInfo?.komi ?? 7.5;
+        const sequence = getPathToNode(gameTree, currentNodeId);
+        let state = createInitialAnalysisState(boardSize);
+        for (let i = 0; i < sequence.length; i++) {
+          state = updateAnalysisState(state, sequence[i], i);
+        }
+        const cacheKey = generateAnalysisCacheKey(
+          state.board.signMap,
+          state.nextToPlay,
+          komi,
+          state.history
+        );
+        analysisCache.current.delete(cacheKey);
+        updateAnalysisCacheSize();
+      }
+      // Clear displayed result so live analysis re-triggers for the current position
+      setAnalysisResult(null);
+      prevNumVisitsRef.current = currentNumVisits;
+    }
+  }, [
+    aiSettings.numVisits,
+    analysisCache,
+    updateAnalysisCacheSize,
+    setAnalysisResult,
+    gameTree,
+    currentNodeId,
+    currentBoard,
+    gameInfo,
+  ]);
 
   // Run analysis when mode is enabled and engine is ready
   const runAnalysis = useCallback(async () => {
@@ -319,13 +370,23 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const analysisStartTime = performance.now();
 
     setIsAnalyzing(true);
+    analysisWaiterRef.current = new Promise(resolve => {
+      analysisCompleteRef.current = resolve;
+    });
     setError(null);
 
     try {
+      const numVisits = aiSettings.numVisits ?? 1;
       const toAnalyze: Array<{
         key: 'prev' | 'current';
         signMap: SignMap;
-        options: { history: AnalysisHistoryItem[]; nextToPlay: 'B' | 'W'; komi: number };
+        options: {
+          history: AnalysisHistoryItem[];
+          nextToPlay: 'B' | 'W';
+          komi: number;
+          numVisits: number;
+          koInfo: { sign: number; vertex: [number, number] };
+        };
         cacheKey: string;
       }> = [];
 
@@ -337,6 +398,11 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             history: positions.prev.state.history,
             nextToPlay: positions.prev.state.nextToPlay,
             komi,
+            numVisits,
+            koInfo: positions.prev.state.board._koInfo as {
+              sign: number;
+              vertex: [number, number];
+            },
           },
           cacheKey: positions.prev.cacheKey,
         });
@@ -350,6 +416,11 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             history: positions.current.state.history,
             nextToPlay: positions.current.state.nextToPlay,
             komi,
+            numVisits,
+            koInfo: positions.current.state.board._koInfo as {
+              sign: number;
+              vertex: [number, number];
+            },
           },
           cacheKey: positions.current.cacheKey,
         });
@@ -463,6 +534,8 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } finally {
       globalIsAnalyzing = false;
       globalAnalyzingForNodeId = null;
+      analysisCompleteRef.current?.();
+      analysisCompleteRef.current = null;
       if (currentRequestId === globalAnalysisId) {
         setIsAnalyzing(false);
       }
@@ -475,6 +548,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     currentNodeId,
     moveNumber,
     gameInfo,
+    aiSettings.numVisits,
     analysisCache,
     updateAnalysisCacheSize,
     setAnalysisResult,
@@ -572,6 +646,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         history: typeof state.history;
         nextToPlay: 'B' | 'W';
         cacheKey: string;
+        koInfo: { sign: number; vertex: [number, number] };
       }[] = [];
 
       for (let i = 0; i < fullSequence.length; i++) {
@@ -592,6 +667,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             history: [...state.history],
             nextToPlay: state.nextToPlay,
             cacheKey,
+            koInfo: state.board._koInfo as { sign: number; vertex: [number, number] },
           });
         }
       }
@@ -604,7 +680,9 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
 
       let processedCount = cachedCount;
-      const BATCH_SIZE = 8;
+      // When numVisits > 1, MCTS is sequential per position, so reduce batch size
+      const numVisits = aiSettings.numVisits ?? 1;
+      const BATCH_SIZE = numVisits > 1 ? 1 : 8;
       let totalBatchTime = 0;
       let totalBatchPositions = 0;
 
@@ -617,7 +695,13 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         const batch = positionsToAnalyze.slice(i, i + BATCH_SIZE);
         const inputs = batch.map(p => ({
           signMap: p.signMap,
-          options: { history: p.history, nextToPlay: p.nextToPlay, komi },
+          options: {
+            history: p.history,
+            nextToPlay: p.nextToPlay,
+            komi,
+            numVisits,
+            koInfo: p.koInfo,
+          },
         }));
 
         try {
@@ -713,6 +797,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     engine,
     currentBoard,
     gameInfo,
+    aiSettings.numVisits,
     analysisCache,
     lookupCachedResult,
     setAnalysisMode,
@@ -876,6 +961,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     pendingFullGameAnalysis,
     nativeUploadProgress,
     backendFallbackMessage,
+    waitForCurrentAnalysis,
   };
 
   return <AIAnalysisContext.Provider value={value}>{children}</AIAnalysisContext.Provider>;

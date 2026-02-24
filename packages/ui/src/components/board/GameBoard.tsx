@@ -106,7 +106,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
   const [pendingSuggestMove, setPendingSuggestMove] = useState(false);
 
   // AI Move generation - get engine directly from AIEngineContext
-  const { isModelLoaded } = useGameTree();
+  const { isModelLoaded, aiSettings } = useGameTree();
   const {
     engine: aiEngine,
     isEngineReady,
@@ -153,7 +153,18 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     pendingFullGameAnalysis,
     nativeUploadProgress,
     backendFallbackMessage,
+    waitForCurrentAnalysis,
   } = useAIAnalysis();
+
+  // Keep refs in sync so executeGenerateMove always reads the latest values from its closure
+  const isAnalyzingRef = useRef(isAnalyzing);
+  useEffect(() => {
+    isAnalyzingRef.current = isAnalyzing;
+  }, [isAnalyzing]);
+  const analysisResultRef = useRef(analysisResult);
+  useEffect(() => {
+    analysisResultRef.current = analysisResult;
+  }, [analysisResult]);
 
   const formatWinRate = useCallback((value?: number | null) => {
     if (value === null || value === undefined) return '—';
@@ -668,16 +679,28 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     setIsGeneratingMove(true);
     setPendingSuggestMove(false);
     try {
-      // Get the current board state
-      const signMap = currentBoard.signMap;
+      let moveStr: string;
 
-      // Determine whose turn it is (use existing currentPlayer from component scope)
-      const nextToPlay = currentPlayer === 1 ? 'B' : 'W';
+      // If analysis is currently running, wait for it rather than starting a second MCTS run.
+      // isAnalyzingRef is always up-to-date even if the closure captured a stale value.
+      if (isAnalyzingRef.current) {
+        await waitForCurrentAnalysis();
+      }
 
-      const moveStr = await aiEngine.generateMove(signMap, {
-        komi: gameInfo.komi ?? 7.5,
-        nextToPlay,
-      });
+      // Use the already-computed analysis result if available — avoids redundant MCTS
+      const cachedResult = analysisResultRef.current;
+      if (cachedResult?.moveSuggestions && cachedResult.moveSuggestions.length > 0) {
+        moveStr = cachedResult.moveSuggestions[0].move;
+      } else {
+        // Fall back to running the engine when no cached analysis is present
+        const signMap = currentBoard.signMap;
+        const nextToPlay = currentPlayer === 1 ? 'B' : 'W';
+        moveStr = await aiEngine.generateMove(signMap, {
+          komi: gameInfo.komi ?? 7.5,
+          nextToPlay,
+          numVisits: aiSettings.numVisits ?? 1,
+        });
+      }
 
       // Parse the move and play it
       const vertex = parseGTPCoordinate(moveStr, currentBoard.width);
@@ -701,9 +724,12 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
   }, [
     aiEngine,
     isModelLoaded,
+    analysisResult,
     currentBoard,
     currentPlayer,
     gameInfo.komi,
+    aiSettings.numVisits,
+    waitForCurrentAnalysis,
     playMove,
     playSound,
     showToast,

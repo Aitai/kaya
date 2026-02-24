@@ -112,6 +112,8 @@
     "minProbabilityDescription": "隐藏概率低于此阈值的着法。",
     "saveAnalysisToSgf": "将分析保存到 SGF",
     "saveAnalysisToSgfDescription": "保存 SGF 文件时嵌入 AI 分析数据（胜率、目差、着法建议）。会增加文件大小但保留分析结果。",
+    "numVisits": "Search Visits",
+    "numVisitsDescription": "MCTS simulations per move. 1 = policy-only (fastest). Higher values improve move quality at the cost of speed. Use 50â200 for stronger play.",
     "modelUploadedSuccess": "模型上传成功",
     "modelUploadFailed": "模型上传失败",
     "modelDownloadedSuccess": "模型下载成功",

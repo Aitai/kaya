@@ -112,6 +112,8 @@
     "minProbabilityDescription": "Ocultar movimientos con probabilidad por debajo de este umbral.",
     "saveAnalysisToSgf": "Guardar análisis en SGF",
     "saveAnalysisToSgfDescription": "Incluir datos de análisis de IA (tasa de victoria, puntos, movimientos) al guardar como SGF. Aumenta el tamaño del archivo pero preserva el análisis.",
+    "numVisits": "Search Visits",
+    "numVisitsDescription": "MCTS simulations per move. 1 = policy-only (fastest). Higher values improve move quality at the cost of speed. Use 50â200 for stronger play.",
     "modelUploadedSuccess": "Modelo subido correctamente",
     "modelUploadFailed": "Error al subir el modelo",
     "modelDownloadedSuccess": "Modelo descargado correctamente",

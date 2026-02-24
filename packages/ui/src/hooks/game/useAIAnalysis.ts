@@ -176,6 +176,7 @@ const DEFAULT_AI_SETTINGS: AISettings = {
   // Default depends on environment - set dynamically
   backend: 'wasm', // This will be overridden by loadAISettings
   saveAnalysisToSgf: true,
+  numVisits: 1, // Policy-only by default (fastest); increase for MCTS tree search
 };
 
 // Load AI settings from localStorage
@@ -218,6 +219,10 @@ function loadAISettings(): AISettings {
           typeof parsed.saveAnalysisToSgf === 'boolean'
             ? parsed.saveAnalysisToSgf
             : DEFAULT_AI_SETTINGS.saveAnalysisToSgf,
+        numVisits:
+          typeof parsed.numVisits === 'number' && parsed.numVisits >= 1 && parsed.numVisits <= 400
+            ? Math.round(parsed.numVisits)
+            : DEFAULT_AI_SETTINGS.numVisits,
       };
     }
   } catch (e) {
