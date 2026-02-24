@@ -106,6 +106,7 @@
     "nativeCpu": "原生 - 仅 CPU",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU（浏览器 GPU）",
+    "webnn": "WebNN（Chrome ML API）",
     "wasm": "WASM（浏览器 CPU）",
     "maxTopMoves": "最多显示着法",
     "maxTopMovesDescription": "棋盘上显示的最大着法建议数量。",

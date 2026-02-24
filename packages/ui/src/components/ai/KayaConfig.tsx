@@ -76,6 +76,8 @@ export const KayaConfig: React.FC = () => {
 
   // Check if PyTorch GPU engine is available (Linux with ROCm/CUDA only)
   const [pytorchAvailable, setPytorchAvailable] = useState(false);
+  // Check WebNN availability (Chrome with navigator.ml)
+  const [webnnAvailable, setWebnnAvailable] = useState(false);
   useEffect(() => {
     if (isTauriApp()) {
       // Dynamic import to avoid loading in non-Tauri environments
@@ -84,6 +86,10 @@ export const KayaConfig: React.FC = () => {
           isPyTorchAvailable().then(setPytorchAvailable);
         })
         .catch(() => {});
+    }
+    // Check WebNN
+    if (typeof navigator !== 'undefined' && 'ml' in navigator) {
+      setWebnnAvailable(true);
     }
   }, []);
 
@@ -493,6 +499,8 @@ export const KayaConfig: React.FC = () => {
               {typeof navigator !== 'undefined' && (navigator as any).gpu && (
                 <option value="webgpu">{t('aiConfig.webgpu')}</option>
               )}
+              {/* WebNN: Chrome with ML API */}
+              {webnnAvailable && <option value="webnn">{t('aiConfig.webnn')}</option>}
               <option value="wasm">{t('aiConfig.wasm')}</option>
             </select>
           </div>

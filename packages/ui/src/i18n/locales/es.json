@@ -106,6 +106,7 @@
     "nativeCpu": "Native - Solo CPU",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (GPU del navegador)",
+    "webnn": "WebNN (API ML de Chrome)",
     "wasm": "WASM (CPU del navegador)",
     "maxTopMoves": "Máximo de movimientos a mostrar",
     "maxTopMovesDescription": "Número máximo de movimientos candidatos a mostrar en el tablero.",

@@ -9,6 +9,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { Engine } from '@kaya/ai-engine';
+import { convertModelForWebGPU, isWebGPUOptimized } from '@kaya/ai-engine';
 import { useGameTree } from './GameTreeContext';
 import { isTauriApp } from '../services/fileSave';
 import { loadModelData } from '../services/modelStorage';
@@ -162,6 +163,26 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           const isTauri = isTauriApp();
 
+          // Auto-convert model for WebGPU if needed
+          const isWebGPU = aiSettings.backend === 'webgpu';
+          const modelName = customAIModel?.name || '';
+          const alreadyConverted = isWebGPUOptimized(modelName);
+          let isAutoConverted = false;
+
+          if (isWebGPU && !alreadyConverted && !isTauri) {
+            try {
+              console.log('[AIEngine] Auto-converting model for WebGPU...');
+              const result = await convertModelForWebGPU(buffer);
+              if (result.wasConverted) {
+                buffer = result.buffer;
+                isAutoConverted = true;
+                console.log(`[AIEngine] Model converted: ${result.changes.join(', ')}`);
+              }
+            } catch (err) {
+              console.warn('[AIEngine] Auto-conversion failed, using original model:', err);
+            }
+          }
+
           // Determine engine type based on backend setting
           let engineType: CreateEngineOptions['engineType'] = 'web';
           if (isTauri && aiSettings.backend === 'pytorch') {
@@ -196,9 +217,22 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
 
           // Determine execution providers for web engine
-          let executionProviders: string[];
+          let executionProviders: (string | Record<string, unknown>)[];
+          let enableGraphCapture = false;
+          // Detect static batch models (pre-converted or auto-converted)
+          const isStaticBatch =
+            modelName.includes('static-b1') || modelName.includes('.webgpu.') || isAutoConverted;
           if (aiSettings.backend === 'webgpu') {
             executionProviders = ['webgpu', 'wasm'];
+            // Enable graph capture for converted models (no unsupported ops)
+            if (modelName.includes('.webgpu.') || isAutoConverted) {
+              enableGraphCapture = true;
+            }
+          } else if (aiSettings.backend === 'webnn') {
+            executionProviders = [
+              { name: 'webnn', deviceType: 'gpu', powerPreference: 'high-performance' },
+              'wasm',
+            ];
           } else {
             executionProviders = ['wasm'];
           }
@@ -210,7 +244,9 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               executionProvider: aiSettings.backend === 'native-cpu' ? 'cpu' : 'auto',
               engineType,
               wasmPath,
-              executionProviders,
+              executionProviders: executionProviders as string[],
+              enableGraphCapture,
+              staticBatchSize: isStaticBatch ? 1 : undefined,
               maxMoves: 10,
               enableCache: true,
               numThreads: Math.min(8, navigator.hardwareConcurrency || 4),

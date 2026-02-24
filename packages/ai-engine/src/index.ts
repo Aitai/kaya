@@ -57,6 +57,7 @@ export * from './types';
 // Utilities
 export * from './analysis-utils';
 export * from './sgf-utils';
+export * from './webgpu-converter';
 
 // High-level APIs
 export * from './analyze';

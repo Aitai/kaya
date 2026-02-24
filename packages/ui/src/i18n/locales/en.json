@@ -106,6 +106,7 @@
     "nativeCpu": "Native - CPU only",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (Browser GPU)",
+    "webnn": "WebNN (Chrome ML API)",
     "wasm": "WASM (Browser CPU)",
     "maxTopMoves": "Max Top Moves",
     "maxTopMovesDescription": "Maximum number of move suggestions to display on the board.",

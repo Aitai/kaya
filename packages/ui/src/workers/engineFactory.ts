@@ -69,6 +69,12 @@ export interface CreateEngineOptions {
    */
   engineType?: 'native' | 'pytorch' | 'web' | 'auto';
 
+  /** Enable WebGPU graph capture for static-shape models */
+  enableGraphCapture?: boolean;
+
+  /** Static batch size of the model (1 for static-b1 models) */
+  staticBatchSize?: number;
+
   /** Progress callback for native engine model upload (Tauri only) */
   onProgress?: (progress: { stage: string; progress: number; message: string }) => void;
 }
@@ -151,6 +157,8 @@ export async function createEngine(
       enableCache: options.enableCache ?? true,
       maxMoves: options.maxMoves ?? 10,
       debug: options.debug,
+      enableGraphCapture: options.enableGraphCapture,
+      staticBatchSize: options.staticBatchSize,
     };
 
     const engine = new WorkerEngine(worker, config);

@@ -106,6 +106,7 @@
     "nativeCpu": "네이티브 - CPU만",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (브라우저 GPU)",
+    "webnn": "WebNN (Chrome ML API)",
     "wasm": "WASM (브라우저 CPU)",
     "maxTopMoves": "표시할 최대 착수 수",
     "maxTopMovesDescription": "바둑판에 표시할 착수 후보의 최대 개수.",

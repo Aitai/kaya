@@ -200,7 +200,7 @@ function loadAISettings(): AISettings {
         );
         backend = 'wasm';
       } else if (
-        !['native', 'native-cpu', 'pytorch', 'webgpu', 'webgl', 'wasm'].includes(backend)
+        !['native', 'native-cpu', 'pytorch', 'webgpu', 'webnn', 'webgl', 'wasm'].includes(backend)
       ) {
         backend = defaultBackend;
       } else if (backend === 'webgpu' && !hasGPU) {

@@ -106,6 +106,7 @@
     "nativeCpu": "ネイティブ - CPUのみ",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU（ブラウザGPU）",
+    "webnn": "WebNN（Chrome ML API）",
     "wasm": "WASM（ブラウザCPU）",
     "maxTopMoves": "表示する最大着手数",
     "maxTopMovesDescription": "碁盤に表示する着手候補の最大数。",

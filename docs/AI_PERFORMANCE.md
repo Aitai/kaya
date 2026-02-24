@@ -18,13 +18,18 @@
 
 ### Model Variants
 
-| File                                 | Size   | Type                 |
-| ------------------------------------ | ------ | -------------------- |
-| kata1-b18c384nbt...uint8.onnx        | 30 MB  | INT8 quantized       |
-| kata1-b18c384nbt...fp16.onnx         | 58 MB  | FP16                 |
-| kata1-b18c384nbt...fp32.onnx         | 116 MB | FP32                 |
-| kata1-b18c384nbt.fp16.static-b1.onnx | 55 MB  | FP16, static batch=1 |
-| kata1-b18c384nbt.fp32.static-b1.onnx | 111 MB | FP32, static batch=1 |
+| File                                        | Size   | Type                           |
+| ------------------------------------------- | ------ | ------------------------------ |
+| kata1-b18c384nbt...uint8.onnx               | 30 MB  | INT8 quantized                 |
+| kata1-b18c384nbt...fp16.onnx                | 58 MB  | FP16, dynamic batch            |
+| kata1-b18c384nbt...fp32.onnx                | 116 MB | FP32, dynamic batch            |
+| kata1-b18c384nbt.fp16.static-b1.onnx        | 55 MB  | FP16, static batch=1           |
+| kata1-b18c384nbt.fp32.static-b1.onnx        | 111 MB | FP32, static batch=1           |
+| kata1-b18c384nbt.fp16.static-b1.webgpu.onnx | 56 MB  | FP16, static, WebGPU-optimized |
+| kata1-b18c384nbt.fp32.static-b1.webgpu.onnx | 111 MB | FP32, static, WebGPU-optimized |
+
+**WebGPU-optimized models** have Softplus/LogSoftmax ops decomposed into GPU-supported equivalents.
+Use these with the WebGPU backend for 100ms/pos inference (vs 14,700ms with original models).
 
 ## Benchmark Results (2026-02-24)
 
@@ -45,16 +50,25 @@
 | fp32  | WASM (8 threads)         | 160 ms | 6.2 inf/s  | 8.3 pos/s |
 | fp32  | WASM (8 threads, Chrome) | 176 ms | 5.7 inf/s  | N/A       |
 
-### Browser WebGPU (onnxruntime-web 1.23.2)
+### Browser WebGPU (onnxruntime-web 1.24.2)
 
-| Model           | Browser                    | Single    | Issue                       |
-| --------------- | -------------------------- | --------- | --------------------------- |
-| fp32 (original) | Firefox                    | 14,700 ms | 215 GPU↔CPU transitions     |
-| fp32 (original) | Chrome headless            | 7,700 ms  | Same root cause             |
-| fp32 (static)   | Chrome headless            | 7,707 ms  | FP32 compute kernels slow   |
-| fp16 (static)   | Chrome headless (software) | 238 ms    | Works in software rendering |
-| fp16 (static)   | Chrome (real AMD GPU)      | CRASH     | `shader-f16` not supported  |
-| fp16 (static)   | Firefox                    | 14,700 ms | WebGPU EP slow regardless   |
+**Before optimization (original model):**
+
+| Model           | Browser               | Single    | Issue                                  |
+| --------------- | --------------------- | --------- | -------------------------------------- |
+| fp32 (original) | Firefox               | 14,700 ms | 129 Softplus/LogSoftmax → CPU fallback |
+| fp32 (original) | Chrome headless       | 7,700 ms  | Same root cause                        |
+| fp16 (original) | Chrome (real AMD GPU) | CRASH     | `shader-f16` not supported             |
+
+**After optimization (WebGPU-converted model with graph capture):**
+
+| Model                 | Browser | Per-position | Throughput   | Notes                         |
+| --------------------- | ------- | ------------ | ------------ | ----------------------------- |
+| fp32 static-b1 webgpu | Firefox | 100 ms       | **10 pos/s** | Graph capture + IO binding    |
+| fp16 static-b1 webgpu | Firefox | TBD          | TBD          | FP16 with aligned GPU buffers |
+| fp32 (WASM baseline)  | Firefox | 165 ms       | 6 pos/s      | CPU only                      |
+
+**WebGPU is 1.65× faster than WASM** after op decomposition + graph capture.
 
 ### Reference: KataGo Desktop (b18c384, from community)
 
@@ -69,20 +83,32 @@
 
 ## Root Cause Analysis
 
-### WebGPU FP32 Slowness (7.7s per inference)
+### WebGPU Slowness (14.7s → 100ms: solved)
 
-The KataGo ONNX model has **215 GPU↔CPU data transfer barriers** caused by `Shape`, `Gather`,
-`Constant` ops that the WebGPU EP cannot run on GPU. Each sync costs ~35-68ms.
+The KataGo ONNX model has **125 Softplus** and **4 LogSoftmax** ops that are **not supported** by
+ORT Web's WebGPU execution provider. Each unsupported op falls back to WASM (CPU), requiring a
+GPU→CPU→GPU data transfer round-trip. With 129 such transfers per inference, this caused 14.7s
+per inference (Firefox) or 7.7s (Chrome).
 
-Creating static-shape models (fixed batch=1, height=19, width=19) eliminates these transitions
-(1276 ops, 0 transitions vs 1562 ops, 215 transitions), but **FP32 WebGPU compute kernels in
-onnxruntime-web are inherently slow** — no improvement was observed.
+**Solution: Op decomposition** (`scripts/convert-model-webgpu.py`)
+
+Decompose unsupported ops into WebGPU-supported equivalents:
+
+- `Softplus(x)` → `Relu(x) + Log(1 + Exp(-Abs(x)))` (numerically stable, 6 GPU-supported ops)
+- `LogSoftmax(x)` → `Log(Softmax(x))` (2 GPU-supported ops)
+
+After conversion: 1276 → 2030 ops, **0 unsupported ops**, enabling:
+
+1. **All ops on GPU** — no CPU fallback round-trips
+2. **Graph capture** — ORT captures GPU command buffer on first run, replays on subsequent runs
+3. **GPU IO binding** — pre-allocated GPU buffers for inputs, eliminating CPU↔GPU copies
 
 ### WebGPU FP16 on AMD/Linux
 
 - **Chrome**: AMD GPUs on Linux (Mesa RADV) don't expose `shader-f16` in WebGPU.
-  All FP16 shaders fail: `'f16' type used without 'f16' extension enabled` (188 errors).
-- **Firefox**: WebGPU EP is slow (~14.7s) regardless of model optimization.
+  All FP16 shaders fail: `'f16' type used without 'f16' extension enabled`.
+  FP16 models load but compute in FP32 emulation.
+- **Firefox**: WebGPU works with op-decomposed models (no shader-f16 required for FP16 emulation).
 
 ### WASM vs Native Gap
 
@@ -198,12 +224,48 @@ Raw GPU compute tests (single conv2d 384ch 19x19):
 - Eliminates Python dependency
 - System already has libtorch with ROCm at /usr/lib/
 
-### Path 4: Updated onnxruntime-web
+### Path 4: WebGPU Op Decomposition + Graph Capture (WORKING ✅)
 
-- Current: 1.23.2, latest may have WebGPU improvements
+Browser WebGPU inference with converted models:
+
+- **Op decomposition** eliminates 129 CPU fallbacks (Softplus + LogSoftmax → GPU equivalents)
+- **Graph capture** replays GPU command buffer (no per-op dispatch overhead)
+- **GPU IO binding** pre-allocates GPU buffers for zero-copy input
+- Result: 100ms/pos (10 pos/s) vs 14,700ms/pos before — **147× speedup**
+
+**Model conversion pipeline:**
+
+There are two ways to convert models:
+
+**Option A: Automatic (in-browser, no tools needed)**
+
+Upload any KataGo ONNX model. When WebGPU is selected, the app auto-converts:
+
+- Makes batch dimension static (batch=1)
+- Decomposes Softplus/LogSoftmax to GPU-supported ops
+- Uses protobufjs (bundled) — no Python or external tools needed
+
+**Option B: Python script (pre-convert)**
+
+```bash
+# One command handles everything (dynamic→static + op decomposition):
+pip install onnx numpy
+python3 scripts/convert-model-webgpu.py model.onnx
+# Output: model.static-b1.webgpu.onnx
+```
+
+**Requirements:**
+
+- Static batch=1 is required for graph capture (auto-handled by both options)
+- The app auto-detects `.webgpu.` in the filename and enables graph capture + GPU IO binding
+- In-browser conversion adds ~1-2s on first load (one-time cost)
+
+### Path 5: Updated onnxruntime-web
+
+- Current: 1.24.2, latest may have WebGPU improvements
 - WebNN EP could access native GPU/NPU from browser
 
-### Path 5: Multi-Worker WASM
+### Path 6: Multi-Worker WASM
 
 - Multiple Web Workers with independent ORT sessions
 - Each uses fewer threads, but runs in parallel

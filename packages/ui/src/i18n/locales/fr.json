@@ -106,6 +106,7 @@
     "nativeCpu": "Natif - CPU uniquement",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (GPU navigateur)",
+    "webnn": "WebNN (API ML Chrome)",
     "wasm": "WASM (CPU navigateur)",
     "maxTopMoves": "Coups max affichés",
     "maxTopMovesDescription": "Nombre maximum de suggestions de coups à afficher.",
