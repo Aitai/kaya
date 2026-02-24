@@ -69,8 +69,14 @@ export class OnnxEngine extends Engine {
   private didFallback: boolean = false;
   private graphCaptureEnabled: boolean = false;
   private useGpuInputs: boolean = false;
+  /** Board size for which GPU buffers are currently allocated (0 = not allocated) */
+  private allocatedBoardSize: number = 0;
   /** Max batch size for inference (1 for static/graph-capture models) */
   private maxInferenceBatch: number = Infinity;
+
+  // Stored for session recreation on board size change (graph capture locks buffers)
+  private storedSessionOptions: ort.InferenceSession.SessionOptions | null = null;
+  private modelSource: { buffer?: ArrayBuffer; url?: string } | null = null;
 
   // Pre-allocated GPU buffers for graph capture mode
   // Using 'any' for WebGPU types to avoid @webgpu/types dependency
@@ -169,7 +175,7 @@ export class OnnxEngine extends Engine {
    * Pre-allocate GPU buffers for graph capture mode.
    * Graph capture requires external GPU buffers for all inputs.
    */
-  private async allocateGpuBuffers(): Promise<void> {
+  private async allocateGpuBuffers(boardSize: number): Promise<void> {
     // Get the WebGPU device from ORT
     const device = (ort.env as any).webgpu?.device;
     if (!device) {
@@ -177,7 +183,7 @@ export class OnnxEngine extends Engine {
     }
     this.gpuDevice = device;
 
-    const size = 19; // board size
+    const size = boardSize;
     const batchSize = this.maxInferenceBatch; // match model's static batch size
     const bytesPerElement = this.inputDataType === 'float16' ? 2 : 4;
     const dataType = this.inputDataType === 'float16' ? 'float16' : 'float32';
@@ -188,7 +194,7 @@ export class OnnxEngine extends Engine {
     // Round up to multiple of 4 bytes (WebGPU requirement)
     const align4 = (n: number) => Math.ceil(n / 4) * 4;
 
-    // bin_input: [batch, 22, 19, 19]
+    // bin_input: [batch, 22, size, size]
     const binSize = align4(batchSize * 22 * size * size * bytesPerElement);
     this.gpuBinBuffer = device.createBuffer({
       size: binSize,
@@ -210,7 +216,73 @@ export class OnnxEngine extends Engine {
       dims: [batchSize, 19],
     });
 
-    console.log(`[OnnxEngine] GPU buffers allocated for graph capture (batch=${batchSize})`);
+    console.log(
+      `[OnnxEngine] GPU buffers allocated for graph capture (batch=${batchSize}, board=${size}x${size})`
+    );
+    this.allocatedBoardSize = size;
+  }
+
+  /**
+   * Ensure GPU buffers are allocated for the given board size.
+   * Graph capture locks GPU buffers to the captured graph, so changing board size
+   * requires destroying and recreating the entire ONNX session.
+   */
+  private async ensureGpuBuffersForSize(size: number): Promise<void> {
+    if (size === this.allocatedBoardSize) return;
+
+    if (!this.storedSessionOptions || !this.modelSource) {
+      throw new Error('Cannot recreate session: missing stored config');
+    }
+
+    console.log(
+      `[OnnxEngine] Board size changed (${this.allocatedBoardSize}→${size}), recreating session for graph capture`
+    );
+
+    // Destroy existing GPU buffers
+    if (this.gpuBinBuffer) {
+      this.gpuBinBuffer.destroy();
+      this.gpuBinBuffer = null;
+    }
+    if (this.gpuGlobalBuffer) {
+      this.gpuGlobalBuffer.destroy();
+      this.gpuGlobalBuffer = null;
+    }
+    this.gpuBinTensor = null;
+    this.gpuGlobalTensor = null;
+    this.allocatedBoardSize = 0;
+
+    // Recreate the ONNX session so graph capture starts fresh
+    try {
+      if (this.session) {
+        await this.session.release();
+        this.session = null;
+      }
+
+      const recreateStart = performance.now();
+      if (this.modelSource.buffer) {
+        this.session = await ort.InferenceSession.create(
+          this.modelSource.buffer,
+          this.storedSessionOptions
+        );
+      } else if (this.modelSource.url) {
+        this.session = await ort.InferenceSession.create(
+          this.modelSource.url,
+          this.storedSessionOptions
+        );
+      } else {
+        throw new Error('No model source available');
+      }
+
+      await this.allocateGpuBuffers(size);
+      const elapsed = performance.now() - recreateStart;
+      console.log(
+        `[OnnxEngine] Session recreated for ${size}x${size} board in ${elapsed.toFixed(0)}ms`
+      );
+    } catch (e) {
+      console.warn('[OnnxEngine] Session recreation failed, disabling graph capture:', e);
+      this.graphCaptureEnabled = false;
+      this.useGpuInputs = false;
+    }
   }
 
   /**
@@ -398,6 +470,10 @@ export class OnnxEngine extends Engine {
       this.initialized = true;
       this.usedProviders = usedProviderNames;
 
+      // Store for potential session recreation on board size change
+      this.modelSource = { buffer: config.modelBuffer, url: config.modelUrl };
+      this.storedSessionOptions = sessionOptions;
+
       // Detect static batch size from model input shapes
       if (config.staticBatchSize && config.staticBatchSize > 0) {
         this.maxInferenceBatch = config.staticBatchSize;
@@ -465,10 +541,10 @@ export class OnnxEngine extends Engine {
         this.inputDataType = 'float32';
       }
 
-      // Pre-allocate GPU buffers for graph capture mode
+      // Pre-allocate GPU buffers for graph capture mode (default 19x19, re-allocated on demand)
       if (this.graphCaptureEnabled) {
         try {
-          await this.allocateGpuBuffers();
+          await this.allocateGpuBuffers(19);
         } catch (e) {
           console.warn('[OnnxEngine] GPU buffer allocation failed, disabling graph capture:', e);
           this.graphCaptureEnabled = false;
@@ -620,6 +696,11 @@ export class OnnxEngine extends Engine {
     let binTensor: ort.Tensor;
     let globalTensor: ort.Tensor;
     let usingGpuBuffers = false;
+
+    if (this.useGpuInputs && this.gpuDevice) {
+      // Ensure GPU buffers match the current board size (may recreate session on size change)
+      await this.ensureGpuBuffersForSize(size);
+    }
 
     if (this.useGpuInputs && this.gpuDevice) {
       // Pad to full batch size for graph capture (all shapes must be static)
@@ -876,6 +957,11 @@ export class OnnxEngine extends Engine {
     let binTensor: ort.Tensor;
     let globalTensor: ort.Tensor;
     let usingGpuBuffers = false;
+
+    if (this.useGpuInputs && this.gpuDevice) {
+      // Ensure GPU buffers match the current board size (may recreate session on size change)
+      await this.ensureGpuBuffersForSize(size);
+    }
 
     if (this.useGpuInputs && this.gpuDevice) {
       // Pad to maxInferenceBatch for graph capture (all shapes must be static)
