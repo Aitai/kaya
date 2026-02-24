@@ -15,6 +15,11 @@
       "types": "./dist/tauri-engine.d.ts",
       "import": "./dist/tauri-engine.js",
       "require": "./dist/tauri-engine.js"
+    },
+    "./pytorch-tauri-engine": {
+      "types": "./dist/pytorch-tauri-engine.d.ts",
+      "import": "./dist/pytorch-tauri-engine.js",
+      "require": "./dist/pytorch-tauri-engine.js"
     }
   },
   "scripts": {
@@ -36,7 +41,7 @@
     "@kaya/gametree": "workspace:*",
     "@kaya/goboard": "workspace:*",
     "@kaya/sgf": "workspace:*",
-    "onnxruntime-web": "^1.23.2"
+    "onnxruntime-web": "^1.24.2"
   },
   "devDependencies": {
     "@types/bun": "latest",

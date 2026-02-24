@@ -104,6 +104,7 @@
     "inferenceBackendDescription": "Elige cómo ejecutar el modelo de IA. Native es el más rápido, WebGPU usa la GPU, WASM usa la CPU (mayor compatibilidad).",
     "nativeAuto": "Native - Automático (GPU si está disponible)",
     "nativeCpu": "Native - Solo CPU",
+    "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (GPU del navegador)",
     "wasm": "WASM (CPU del navegador)",
     "maxTopMoves": "Máximo de movimientos a mostrar",

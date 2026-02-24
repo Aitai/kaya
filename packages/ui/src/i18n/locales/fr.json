@@ -104,6 +104,7 @@
     "inferenceBackendDescription": "Choisissez comment le modèle s'exécute. Natif est le plus rapide, WebGPU utilise la carte graphique, WASM fonctionne sur CPU.",
     "nativeAuto": "Natif - Auto (GPU si disponible)",
     "nativeCpu": "Natif - CPU uniquement",
+    "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (GPU navigateur)",
     "wasm": "WASM (CPU navigateur)",
     "maxTopMoves": "Coups max affichés",

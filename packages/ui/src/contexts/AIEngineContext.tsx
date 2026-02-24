@@ -164,7 +164,22 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           // Determine engine type based on backend setting
           let engineType: CreateEngineOptions['engineType'] = 'web';
-          if (isTauri && (aiSettings.backend === 'native' || aiSettings.backend === 'native-cpu')) {
+          if (isTauri && aiSettings.backend === 'pytorch') {
+            engineType = 'pytorch';
+          } else if (isTauri && aiSettings.backend === 'native') {
+            // "native" = auto for desktop: prefer PyTorch GPU if available, then ONNX
+            try {
+              const { isPyTorchAvailable } = await import('@kaya/ai-engine/pytorch-tauri-engine');
+              if (await isPyTorchAvailable()) {
+                console.log('[AIEngine] PyTorch GPU available, using it for native backend');
+                engineType = 'pytorch';
+              } else {
+                engineType = 'native';
+              }
+            } catch {
+              engineType = 'native';
+            }
+          } else if (isTauri && aiSettings.backend === 'native-cpu') {
             engineType = 'native';
           }
 

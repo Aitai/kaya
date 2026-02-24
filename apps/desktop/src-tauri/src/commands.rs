@@ -79,12 +79,29 @@ pub async fn onnx_upload_chunk(chunk_base64: String) -> Result<(), String> {
 /// Optionally caches the model with a given ID for faster future loads
 #[tauri::command]
 pub async fn onnx_finish_upload(model_id: Option<String>, app_handle: tauri::AppHandle) -> Result<(), String> {
+    let path_str = save_uploaded_model(model_id, &app_handle)?;
+    
+    tokio::task::spawn_blocking(move || {
+        onnx_engine::initialize_engine_from_path(&path_str)
+    })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?
+}
+
+/// Save the uploaded model to disk without initializing any engine.
+/// Returns the path where the model was saved.
+#[tauri::command]
+pub async fn onnx_save_model(model_id: Option<String>, app_handle: tauri::AppHandle) -> Result<String, String> {
+    save_uploaded_model(model_id, &app_handle)
+}
+
+/// Internal helper: move temp upload to cache location, return final path
+fn save_uploaded_model(model_id: Option<String>, app_handle: &tauri::AppHandle) -> Result<String, String> {
     let temp_path = {
         let mut upload_path = MODEL_UPLOAD_PATH.lock().unwrap();
         upload_path.take().ok_or("No upload in progress")?
     };
     
-    // If model_id provided, cache the model in app data directory
     let final_path = if let Some(id) = model_id {
         let app_data = app_handle.path().app_data_dir()
             .map_err(|e| format!("Failed to get app data dir: {}", e))?;
@@ -94,10 +111,8 @@ pub async fn onnx_finish_upload(model_id: Option<String>, app_handle: tauri::App
         
         let cached_path = models_dir.join(format!("{}.onnx", id));
         
-        // Move temp file to cache location
         std::fs::rename(&temp_path, &cached_path)
             .or_else(|_| {
-                // If rename fails (cross-device), copy and delete
                 std::fs::copy(&temp_path, &cached_path)?;
                 std::fs::remove_file(&temp_path)
             })
@@ -108,13 +123,7 @@ pub async fn onnx_finish_upload(model_id: Option<String>, app_handle: tauri::App
         temp_path
     };
     
-    let path_str = final_path.to_string_lossy().to_string();
-    
-    tokio::task::spawn_blocking(move || {
-        onnx_engine::initialize_engine_from_path(&path_str)
-    })
-    .await
-    .map_err(|e| format!("Task failed: {}", e))?
+    Ok(final_path.to_string_lossy().to_string())
 }
 
 /// Check if a model is cached and return its path
@@ -237,6 +246,7 @@ pub fn onnx_set_provider_preference(preference: String) -> Result<(), String> {
     let pref = match preference.as_str() {
         "auto" => ExecutionProviderPreference::Auto,
         "cuda" => ExecutionProviderPreference::Cuda,
+        "migraphx" => ExecutionProviderPreference::MiGraphX,
         "coreml" => ExecutionProviderPreference::CoreMl,
         "directml" => ExecutionProviderPreference::DirectMl,
         "nnapi" => ExecutionProviderPreference::Nnapi,
@@ -253,9 +263,196 @@ pub fn onnx_get_provider_preference() -> String {
     match onnx_engine::get_execution_provider_preference() {
         ExecutionProviderPreference::Auto => "auto",
         ExecutionProviderPreference::Cuda => "cuda",
+        ExecutionProviderPreference::MiGraphX => "migraphx",
         ExecutionProviderPreference::CoreMl => "coreml",
         ExecutionProviderPreference::DirectMl => "directml",
         ExecutionProviderPreference::Nnapi => "nnapi",
         ExecutionProviderPreference::Cpu => "cpu",
     }.to_string()
+}
+
+// === PyTorch GPU engine commands (Linux only) ===
+
+/// Check if PyTorch GPU inference is available
+#[tauri::command]
+pub fn pytorch_is_available() -> bool {
+    #[cfg(target_os = "linux")]
+    {
+        crate::pytorch_engine::is_pytorch_available()
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        false
+    }
+}
+
+/// Initialize PyTorch GPU engine with a model file
+#[tauri::command]
+pub async fn pytorch_initialize(model_path: String) -> Result<serde_json::Value, String> {
+    #[cfg(target_os = "linux")]
+    {
+        tokio::task::spawn_blocking(move || {
+            let info = crate::pytorch_engine::initialize_engine(&model_path)?;
+            serde_json::to_value(info).map_err(|e| e.to_string())
+        })
+        .await
+        .map_err(|e| format!("Task failed: {}", e))?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = model_path;
+        Err("PyTorch GPU engine is only available on Linux".to_string())
+    }
+}
+
+/// Run PyTorch inference on a single position (using ONNX engine's featurization)
+#[tauri::command]
+pub async fn pytorch_analyze(
+    sign_map: Vec<Vec<i8>>,
+    options: onnx_engine::AnalysisOptions,
+) -> Result<onnx_engine::AnalysisResult, String> {
+    #[cfg(target_os = "linux")]
+    {
+        tokio::task::spawn_blocking(move || {
+            let pla = onnx_engine::determine_next_player(&sign_map, &options);
+            let (bin_input, global_input) = onnx_engine::featurize_position(
+                &sign_map, pla, options.komi, &options.history,
+            );
+            let result = crate::pytorch_engine::run_inference(&bin_input, &global_input, 1)?;
+            onnx_engine::process_raw_outputs(
+                &result.policy,
+                &result.value,
+                &result.miscvalue,
+                result.ownership.as_deref(),
+                &result.policy_dims,
+                pla,
+                sign_map.len(),
+            )
+        })
+        .await
+        .map_err(|e| format!("Task failed: {}", e))?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = (sign_map, options);
+        Err("PyTorch GPU engine is only available on Linux".to_string())
+    }
+}
+
+/// Run PyTorch batch inference
+#[tauri::command]
+pub async fn pytorch_analyze_batch(inputs: Vec<BatchInput>) -> Result<Vec<onnx_engine::AnalysisResult>, String> {
+    #[cfg(target_os = "linux")]
+    {
+        tokio::task::spawn_blocking(move || {
+            if inputs.is_empty() {
+                return Ok(vec![]);
+            }
+            let board_size = inputs[0].sign_map.len();
+
+            // Featurize all positions and concatenate into batch tensors
+            let mut all_bin = Vec::new();
+            let mut all_global = Vec::new();
+            let mut plas = Vec::new();
+            for input in &inputs {
+                let pla = onnx_engine::determine_next_player(&input.sign_map, &input.options);
+                plas.push(pla);
+                let (bin, global) = onnx_engine::featurize_position(
+                    &input.sign_map, pla, input.options.komi, &input.options.history,
+                );
+                all_bin.extend(bin);
+                all_global.extend(global);
+            }
+
+            let batch_size = inputs.len();
+            let result = crate::pytorch_engine::run_inference(&all_bin, &all_global, batch_size)?;
+
+            // Process batch results
+            let policy_per_item = if result.policy_dims.len() >= 2 {
+                result.policy_dims.iter().skip(1).product::<usize>()
+            } else {
+                result.policy.len() / batch_size
+            };
+            let value_per_item = 3;
+            let miscvalue_per_item = if result.miscvalue.len() >= batch_size * 10 { 10 } else { result.miscvalue.len() / batch_size };
+            let ownership_per_item = board_size * board_size;
+
+            let mut results = Vec::with_capacity(batch_size);
+            for b in 0..batch_size {
+                let policy_start = b * policy_per_item;
+                let policy_end = (policy_start + policy_per_item).min(result.policy.len());
+                let value_start = b * value_per_item;
+                let value_end = (value_start + value_per_item).min(result.value.len());
+                let misc_start = b * miscvalue_per_item;
+                let misc_end = (misc_start + miscvalue_per_item).min(result.miscvalue.len());
+
+                let ownership_slice = result.ownership.as_ref().map(|own| {
+                    let start = b * ownership_per_item;
+                    let end = (start + ownership_per_item).min(own.len());
+                    &own[start..end]
+                });
+
+                // Build per-item policy_dims (single item, not batch)
+                let item_policy_dims = if result.policy_dims.len() >= 2 {
+                    let mut dims = result.policy_dims.clone();
+                    dims[0] = 1;
+                    dims
+                } else {
+                    vec![1, policy_per_item]
+                };
+
+                let r = onnx_engine::process_raw_outputs(
+                    &result.policy[policy_start..policy_end],
+                    &result.value[value_start..value_end],
+                    &result.miscvalue[misc_start..misc_end],
+                    ownership_slice,
+                    &item_policy_dims,
+                    plas[b],
+                    board_size,
+                )?;
+                results.push(r);
+            }
+            Ok(results)
+        })
+        .await
+        .map_err(|e| format!("Task failed: {}", e))?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = inputs;
+        Err("PyTorch GPU engine is only available on Linux".to_string())
+    }
+}
+
+/// Run PyTorch benchmark
+#[tauri::command]
+pub async fn pytorch_benchmark() -> Result<serde_json::Value, String> {
+    #[cfg(target_os = "linux")]
+    {
+        tokio::task::spawn_blocking(|| {
+            let result = crate::pytorch_engine::benchmark(30)?;
+            serde_json::to_value(result).map_err(|e| e.to_string())
+        })
+        .await
+        .map_err(|e| format!("Task failed: {}", e))?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        Err("PyTorch GPU engine is only available on Linux".to_string())
+    }
+}
+
+/// Dispose PyTorch engine
+#[tauri::command]
+pub async fn pytorch_dispose() -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        tokio::task::spawn_blocking(crate::pytorch_engine::dispose_engine)
+            .await
+            .map_err(|e| format!("Task failed: {}", e))?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        Ok(())
+    }
 }

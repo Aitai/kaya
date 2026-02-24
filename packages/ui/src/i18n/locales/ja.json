@@ -104,6 +104,7 @@
     "inferenceBackendDescription": "AIモデルの実行方法を選択。ネイティブが最速、WebGPUはGPU使用、WASMはCPU（最も互換性あり）。",
     "nativeAuto": "ネイティブ - 自動（GPU利用可能時）",
     "nativeCpu": "ネイティブ - CPUのみ",
+    "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU（ブラウザGPU）",
     "wasm": "WASM（ブラウザCPU）",
     "maxTopMoves": "表示する最大着手数",

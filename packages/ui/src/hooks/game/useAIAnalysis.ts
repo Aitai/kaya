@@ -192,12 +192,16 @@ function loadAISettings(): AISettings {
       // Validate backend - if GPU was selected but not available, fallback to WASM
       let backend = parsed.backend;
 
-      // 'native' and 'native-cpu' are only valid in Tauri desktop app
-      // If we're on web and backend is 'native' or 'native-cpu', fallback to 'wasm'
-      if ((backend === 'native' || backend === 'native-cpu') && !isTauri) {
-        console.log('[AI Settings] Native backend not available on web, falling back to wasm');
+      // 'native', 'native-cpu', and 'pytorch' are only valid in Tauri desktop app
+      // If we're on web and backend is one of these, fallback to 'wasm'
+      if ((backend === 'native' || backend === 'native-cpu' || backend === 'pytorch') && !isTauri) {
+        console.log(
+          '[AI Settings] Native/PyTorch backend not available on web, falling back to wasm'
+        );
         backend = 'wasm';
-      } else if (!['native', 'native-cpu', 'webgpu', 'webgl', 'wasm'].includes(backend)) {
+      } else if (
+        !['native', 'native-cpu', 'pytorch', 'webgpu', 'webgl', 'wasm'].includes(backend)
+      ) {
         backend = defaultBackend;
       } else if (backend === 'webgpu' && !hasGPU) {
         backend = 'wasm'; // GPU not available, fallback

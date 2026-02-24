@@ -74,6 +74,19 @@ export const KayaConfig: React.FC = () => {
     [modelLibrary]
   );
 
+  // Check if PyTorch GPU engine is available (Linux with ROCm/CUDA only)
+  const [pytorchAvailable, setPytorchAvailable] = useState(false);
+  useEffect(() => {
+    if (isTauriApp()) {
+      // Dynamic import to avoid loading in non-Tauri environments
+      import('@kaya/ai-engine/pytorch-tauri-engine')
+        .then(({ isPyTorchAvailable }) => {
+          isPyTorchAvailable().then(setPytorchAvailable);
+        })
+        .catch(() => {});
+    }
+  }, []);
+
   // Track if user has manually interacted with expand/collapse
   const hasUserInteracted = useRef(false);
 
@@ -474,6 +487,8 @@ export const KayaConfig: React.FC = () => {
                   <option value="native-cpu">{t('aiConfig.nativeCpu')}</option>
                 </>
               )}
+              {/* PyTorch GPU: fastest, Linux with ROCm/CUDA only */}
+              {pytorchAvailable && <option value="pytorch">{t('aiConfig.pytorch')}</option>}
               {/* Only show WebGPU if supported */}
               {typeof navigator !== 'undefined' && (navigator as any).gpu && (
                 <option value="webgpu">{t('aiConfig.webgpu')}</option>

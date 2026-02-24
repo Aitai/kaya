@@ -34,13 +34,20 @@ base64 = "0.22"
 ndarray = "0.16"
 half = "2.4"
 
-# Desktop-only dependencies
-[target.'cfg(not(target_os = "android"))'.dependencies]
-# ONNX Runtime - static linking with download-binaries for desktop
-ort = { version = "2.0.0-rc.10", features = ["download-binaries", "half"] }
-# Reqwest with rustls (default) - uses ring/aws-lc
+# Linux desktop: use load-dynamic to support MIGraphX (AMD GPU) execution provider.
+# Set ORT_DYLIB_PATH to point to a MIGraphX-enabled libonnxruntime.so.
+[target.'cfg(target_os = "linux")'.dependencies]
+ort = { version = "2.0.0-rc.10", default-features = false, features = ["load-dynamic", "ndarray", "half"] }
 reqwest = { version = "0.13", features = ["stream"] }
-# Desktop-only Tauri plugins
+tauri-plugin-http = "2"
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2.4.1"
+
+# Non-Linux desktop (macOS, Windows): static linking with download-binaries
+[target.'cfg(all(not(target_os = "android"), not(target_os = "linux")))'.dependencies]
+ort = { version = "2.0.0-rc.10", features = ["download-binaries", "half"] }
+reqwest = { version = "0.13", features = ["stream"] }
 tauri-plugin-http = "2"
 tauri-plugin-process = "2"
 tauri-plugin-updater = "2"

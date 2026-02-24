@@ -104,6 +104,7 @@
     "inferenceBackendDescription": "AI 모델 실행 방법을 선택합니다. 네이티브가 가장 빠르고, WebGPU는 GPU 사용, WASM은 CPU(가장 호환성 높음).",
     "nativeAuto": "네이티브 - 자동 (GPU 사용 가능 시)",
     "nativeCpu": "네이티브 - CPU만",
+    "pytorch": "PyTorch GPU (ROCm/CUDA)",
     "webgpu": "WebGPU (브라우저 GPU)",
     "wasm": "WASM (브라우저 CPU)",
     "maxTopMoves": "표시할 최대 착수 수",
