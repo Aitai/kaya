@@ -224,7 +224,8 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             modelName.includes('static-b1') || modelName.includes('.webgpu.') || isAutoConverted;
           if (aiSettings.backend === 'webgpu') {
             executionProviders = ['webgpu', 'wasm'];
-            // Enable graph capture for converted models (no unsupported ops)
+            // Enable graph capture for converted models (pre-converted or auto-converted).
+            // Graph capture + GPU IO binding gives ~100ms/pos in Firefox (vs 14.7s without).
             if (modelName.includes('.webgpu.') || isAutoConverted) {
               enableGraphCapture = true;
             }

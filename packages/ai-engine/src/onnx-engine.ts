@@ -342,16 +342,16 @@ export class OnnxEngine extends Engine {
         executionMode: 'sequential',
       };
 
-      // WebGPU optimization: keep outputs on GPU + enable graph capture
+      // WebGPU optimization: enable graph capture + GPU IO binding
       const effectiveProviders = providers.map(p => (typeof p === 'string' ? p : (p as any).name));
-      if (effectiveProviders.includes('webgpu')) {
+      if (effectiveProviders.includes('webgpu') && config.enableGraphCapture) {
+        // Only use gpu-buffer output location with graph capture — it causes
+        // severe slowness in Chrome when graph capture is not fully supported.
         sessionOptions.preferredOutputLocation = 'gpu-buffer';
-        if (config.enableGraphCapture) {
-          (sessionOptions as any).enableGraphCapture = true;
-          this.graphCaptureEnabled = true;
-          this.useGpuInputs = true;
-          console.log('[OnnxEngine] Graph capture enabled for WebGPU');
-        }
+        (sessionOptions as any).enableGraphCapture = true;
+        this.graphCaptureEnabled = true;
+        this.useGpuInputs = true;
+        console.log('[OnnxEngine] Graph capture enabled for WebGPU');
       }
 
       const createStart = performance.now();
@@ -380,12 +380,14 @@ export class OnnxEngine extends Engine {
           this.didFallback = true;
           this.graphCaptureEnabled = false;
           this.useGpuInputs = false;
+          // Build clean WASM-only options (don't spread GPU options like preferredOutputLocation)
           this.session = await createSession({
-            ...sessionOptions,
             executionProviders: usedProviderNames,
-            enableGraphCapture: false,
-            preferredOutputLocation: undefined,
-          } as any);
+            graphOptimizationLevel: sessionOptions.graphOptimizationLevel,
+            enableCpuMemArena: sessionOptions.enableCpuMemArena,
+            enableMemPattern: sessionOptions.enableMemPattern,
+            executionMode: sessionOptions.executionMode,
+          });
         } else {
           throw initialError;
         }
