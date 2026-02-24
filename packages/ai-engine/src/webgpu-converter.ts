@@ -251,11 +251,19 @@ function getRoot(): protobuf.Root {
   return _root;
 }
 
+/**
+ * Default batch size for WebGPU graph capture.
+ * Larger batches amortize GPU↔CPU sync overhead (~80ms) over more positions.
+ * batch=8: ~12ms/pos in batch analysis vs ~100ms/pos with batch=1.
+ */
+export const WEBGPU_BATCH_SIZE = 8;
+
 /** Result of model conversion */
 export interface ConversionResult {
   buffer: ArrayBuffer;
   wasConverted: boolean;
   changes: string[];
+  batchSize: number;
 }
 
 /**
@@ -299,12 +307,21 @@ export function isWebGPUOptimized(modelName: string): boolean {
  * Convert an ONNX model for optimal WebGPU execution.
  *
  * Performs two transformations:
- * 1. Makes batch dimension static (batch=1) for graph capture
+ * 1. Makes batch dimension static (default batch=8) for graph capture
  * 2. Decomposes Softplus/LogSoftmax into GPU-supported equivalents
  *
  * Works with both FP32 and FP16 models. No external tools needed.
+ *
+ * @param modelBuffer - Raw ONNX model bytes
+ * @param options - Conversion options
+ * @param options.batchSize - Static batch size (default: WEBGPU_BATCH_SIZE=8).
+ *   Larger batches amortize GPU sync overhead for batch analysis.
  */
-export async function convertModelForWebGPU(modelBuffer: ArrayBuffer): Promise<ConversionResult> {
+export async function convertModelForWebGPU(
+  modelBuffer: ArrayBuffer,
+  options?: { batchSize?: number }
+): Promise<ConversionResult> {
+  const batchSize = options?.batchSize ?? WEBGPU_BATCH_SIZE;
   const root = getRoot();
   const ModelProto = root.lookupType('onnx.ModelProto');
 
@@ -334,9 +351,9 @@ export async function convertModelForWebGPU(modelBuffer: ArrayBuffer): Promise<C
       const firstDim = dims[0];
       if (firstDim.dimParam || !firstDim.dimValue || Number(firstDim.dimValue) <= 0) {
         const oldVal = firstDim.dimParam || String(firstDim.dimValue || '?');
-        firstDim.dimValue = 1;
+        firstDim.dimValue = batchSize;
         delete firstDim.dimParam;
-        changes.push(`${label} ${vi.name}: batch ${oldVal} → 1`);
+        changes.push(`${label} ${vi.name}: batch ${oldVal} → ${batchSize}`);
       }
     }
   };
@@ -482,6 +499,7 @@ export async function convertModelForWebGPU(modelBuffer: ArrayBuffer): Promise<C
     ) as ArrayBuffer,
     wasConverted: changes.length > 0,
     changes,
+    batchSize,
   };
 }
 

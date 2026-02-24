@@ -64,7 +64,7 @@ export default defineConfig({
       root: 'dist',
     },
     sourceMap: {
-      js: 'source-map',
+      js: process.env.NODE_ENV === 'production' ? false : 'source-map',
     },
   },
   server: {

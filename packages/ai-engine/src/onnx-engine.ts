@@ -177,7 +177,7 @@ export class OnnxEngine extends Engine {
     this.gpuDevice = device;
 
     const size = 19; // board size
-    const batchSize = 1; // static batch=1 for graph capture
+    const batchSize = this.maxInferenceBatch; // match model's static batch size
     const bytesPerElement = this.inputDataType === 'float16' ? 2 : 4;
     const dataType = this.inputDataType === 'float16' ? 'float16' : 'float32';
 
@@ -187,7 +187,7 @@ export class OnnxEngine extends Engine {
     // Round up to multiple of 4 bytes (WebGPU requirement)
     const align4 = (n: number) => Math.ceil(n / 4) * 4;
 
-    // bin_input: [1, 22, 19, 19]
+    // bin_input: [batch, 22, 19, 19]
     const binSize = align4(batchSize * 22 * size * size * bytesPerElement);
     this.gpuBinBuffer = device.createBuffer({
       size: binSize,
@@ -198,7 +198,7 @@ export class OnnxEngine extends Engine {
       dims: [batchSize, 22, size, size],
     });
 
-    // global_input: [1, 19]
+    // global_input: [batch, 19]
     const globalSize = align4(batchSize * 19 * bytesPerElement);
     this.gpuGlobalBuffer = device.createBuffer({
       size: globalSize,
@@ -209,7 +209,7 @@ export class OnnxEngine extends Engine {
       dims: [batchSize, 19],
     });
 
-    console.log('[OnnxEngine] GPU buffers allocated for graph capture');
+    console.log(`[OnnxEngine] GPU buffers allocated for graph capture (batch=${batchSize})`);
   }
 
   /**
@@ -419,10 +419,8 @@ export class OnnxEngine extends Engine {
           // Not available
         }
       }
-      // enableGraphCapture implies static batch=1
-      if (this.graphCaptureEnabled && this.maxInferenceBatch > 1) {
-        this.maxInferenceBatch = 1;
-      }
+      // Graph capture requires fixed batch size — use the configured static batch
+      // (no longer force to 1; the converter now uses WEBGPU_BATCH_SIZE)
 
       // Check if we fell back
       if (
@@ -623,10 +621,14 @@ export class OnnxEngine extends Engine {
     let usingGpuBuffers = false;
 
     if (this.useGpuInputs && this.gpuDevice) {
-      const binData =
-        this.inputDataType === 'float16' ? this.float32ToFloat16(bin_input) : bin_input;
+      // Pad to full batch size for graph capture (all shapes must be static)
+      const batchBin = new Float32Array(this.maxInferenceBatch * 22 * size * size);
+      batchBin.set(bin_input);
+      const batchGlobal = new Float32Array(this.maxInferenceBatch * 19);
+      batchGlobal.set(global_input);
+      const binData = this.inputDataType === 'float16' ? this.float32ToFloat16(batchBin) : batchBin;
       const globalData =
-        this.inputDataType === 'float16' ? this.float32ToFloat16(global_input) : global_input;
+        this.inputDataType === 'float16' ? this.float32ToFloat16(batchGlobal) : batchGlobal;
       const gpuTensors = this.uploadToGpu(binData, globalData);
       binTensor = gpuTensors.binTensor;
       globalTensor = gpuTensors.globalTensor;
@@ -692,10 +694,14 @@ export class OnnxEngine extends Engine {
     let usingGpuBuffers = false;
 
     if (this.useGpuInputs && this.gpuDevice) {
-      const binData =
-        this.inputDataType === 'float16' ? this.float32ToFloat16(bin_input) : bin_input;
+      // Pad to full batch size for graph capture
+      const batchBin = new Float32Array(this.maxInferenceBatch * 22 * size * size);
+      batchBin.set(bin_input);
+      const batchGlobal = new Float32Array(this.maxInferenceBatch * 19);
+      batchGlobal.set(global_input);
+      const binData = this.inputDataType === 'float16' ? this.float32ToFloat16(batchBin) : batchBin;
       const globalData =
-        this.inputDataType === 'float16' ? this.float32ToFloat16(global_input) : global_input;
+        this.inputDataType === 'float16' ? this.float32ToFloat16(batchGlobal) : batchGlobal;
       const gpuTensors = this.uploadToGpu(binData, globalData);
       binTensor = gpuTensors.binTensor;
       globalTensor = gpuTensors.globalTensor;
@@ -1081,16 +1087,17 @@ export class OnnxEngine extends Engine {
       let globalTensor: ort.Tensor;
       let usingGpuBuffers = false;
 
-      if (this.useGpuInputs && this.gpuDevice && thisBatch === 1) {
-        // Graph capture mode: upload to pre-allocated GPU buffers
+      if (this.useGpuInputs && this.gpuDevice) {
+        // Graph capture mode: pad to full batch size (all shapes must be static)
+        const inferBatch = this.maxInferenceBatch;
+        const paddedBin = new Float32Array(inferBatch * perPosBinSize);
+        paddedBin.set(chunkBin);
+        const paddedGlobal = new Float32Array(inferBatch * 19);
+        paddedGlobal.set(chunkGlobal);
         const binData =
-          this.inputDataType === 'float16'
-            ? this.float32ToFloat16(new Float32Array(chunkBin))
-            : new Float32Array(chunkBin);
+          this.inputDataType === 'float16' ? this.float32ToFloat16(paddedBin) : paddedBin;
         const globalData =
-          this.inputDataType === 'float16'
-            ? this.float32ToFloat16(new Float32Array(chunkGlobal))
-            : new Float32Array(chunkGlobal);
+          this.inputDataType === 'float16' ? this.float32ToFloat16(paddedGlobal) : paddedGlobal;
         const gpuTensors = this.uploadToGpu(binData, globalData);
         binTensor = gpuTensors.binTensor;
         globalTensor = gpuTensors.globalTensor;
@@ -1112,6 +1119,7 @@ export class OnnxEngine extends Engine {
         globalTensor.dispose();
       }
 
+      // Process only the real positions (not padding)
       const chunkResults = await this.processBatchResults(
         inferenceResults,
         chunkPlas,

@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { Engine } from '@kaya/ai-engine';
-import { convertModelForWebGPU, isWebGPUOptimized } from '@kaya/ai-engine';
+import { convertModelForWebGPU, isWebGPUOptimized, WEBGPU_BATCH_SIZE } from '@kaya/ai-engine';
 import { useGameTree } from './GameTreeContext';
 import { isTauriApp } from '../services/fileSave';
 import { loadModelData } from '../services/modelStorage';
@@ -219,13 +219,21 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Determine execution providers for web engine
           let executionProviders: (string | Record<string, unknown>)[];
           let enableGraphCapture = false;
-          // Detect static batch models (pre-converted or auto-converted)
-          const isStaticBatch =
-            modelName.includes('static-b1') || modelName.includes('.webgpu.') || isAutoConverted;
+          // Detect static batch size from model name or auto-conversion
+          let staticBatchSize: number | undefined;
+          const batchMatch = modelName.match(/static-b(\d+)/);
+          if (batchMatch) {
+            staticBatchSize = parseInt(batchMatch[1], 10);
+          } else if (isAutoConverted) {
+            staticBatchSize = WEBGPU_BATCH_SIZE;
+          } else if (modelName.includes('.webgpu.')) {
+            // Legacy pre-converted models default to batch=1
+            staticBatchSize = 1;
+          }
           if (aiSettings.backend === 'webgpu') {
             executionProviders = ['webgpu', 'wasm'];
             // Enable graph capture for converted models (pre-converted or auto-converted).
-            // Graph capture + GPU IO binding gives ~100ms/pos in Firefox (vs 14.7s without).
+            // Graph capture + GPU IO binding eliminates per-op dispatch overhead.
             if (modelName.includes('.webgpu.') || isAutoConverted) {
               enableGraphCapture = true;
             }
@@ -247,7 +255,7 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               wasmPath,
               executionProviders: executionProviders as string[],
               enableGraphCapture,
-              staticBatchSize: isStaticBatch ? 1 : undefined,
+              staticBatchSize,
               maxMoves: 10,
               enableCache: true,
               numThreads: Math.min(8, navigator.hardwareConcurrency || 4),
@@ -321,6 +329,16 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     }
   }, [aiSettings.backend, engine, initializeEngine]);
+
+  // Re-initialize when model changes (if we already have an engine)
+  useEffect(() => {
+    if (engine && globalEngineConfig && customAIModel) {
+      const currentModelName = customAIModel.name || 'default';
+      if (globalEngineConfig.modelName !== currentModelName) {
+        initializeEngine();
+      }
+    }
+  }, [customAIModel, engine, initializeEngine]);
 
   const value: AIEngineContextValue = {
     engine,
