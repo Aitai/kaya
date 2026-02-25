@@ -325,20 +325,7 @@
 
 .analysis-mode-indicator.active .analysis-mode-dot {
   background: var(--accent, #3b82f6);
-  animation: pulse-indicator 2s ease-in-out infinite;
-}
-
-@keyframes pulse-indicator {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 var(--accent-transparent, rgba(59, 130, 246, 0.4));
-  }
-
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 0 3px transparent;
-  }
+  box-shadow: 0 0 0 2px var(--accent-transparent, rgba(59, 130, 246, 0.4));
 }
 
 .analysis-mode-indicator svg {
@@ -396,18 +383,7 @@
 .analysis-action-button.analyzing {
   background-color: var(--warning, #f59e0b);
   color: white;
-  animation: pulse-analyzing 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-analyzing {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
-  }
-
-  50% {
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0);
-  }
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
 }
 
 /* Analysis Status Bar */

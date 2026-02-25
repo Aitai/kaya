@@ -347,7 +347,7 @@ const Vertex = React.memo<VertexProps>(
               borderRadius: '4px',
               backgroundColor: 'transparent',
               pointerEvents: 'none',
-              animation: 'cursor-pulse 1.5s ease-in-out infinite',
+              boxShadow: '0 0 8px rgba(52, 152, 219, 0.6)',
               zIndex: 100,
             }}
           />
