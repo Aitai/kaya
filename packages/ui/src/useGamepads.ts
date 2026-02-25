@@ -33,7 +33,16 @@ export const useGamepads = () => {
       }
     }
 
-    setGamepads(connectedGamepads);
+    // Avoid re-renders when nothing has changed (polling runs every second)
+    setGamepads(prev => {
+      if (
+        prev.length === connectedGamepads.length &&
+        prev.every((p, i) => p.index === connectedGamepads[i].index)
+      ) {
+        return prev;
+      }
+      return connectedGamepads;
+    });
   }, []);
 
   useEffect(() => {

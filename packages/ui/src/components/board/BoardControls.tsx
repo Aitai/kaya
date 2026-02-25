@@ -330,7 +330,6 @@ export const BoardControls: React.FC = memo(() => {
           className={`player-indicator ${currentPlayer === 1 ? 'active' : ''}`}
           style={{
             background: 'radial-gradient(circle at 35% 35%, #555 0%, #222 30%, #000 100%)',
-            boxShadow: '0 2px 3px rgba(0, 0, 0, 0.4)',
           }}
         />
         <div className="player-details">
@@ -564,7 +563,6 @@ export const BoardControls: React.FC = memo(() => {
           style={{
             background:
               'radial-gradient(circle at 30% 30%, #fff 0%, #f0f0f0 25%, #d5d5d5 60%, #bbb 100%)',
-            boxShadow: '0 2px 3px rgba(0, 0, 0, 0.3)',
           }}
         />
       </div>

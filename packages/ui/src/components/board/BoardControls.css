@@ -36,36 +36,19 @@
   height: 20px;
   border-radius: 50%;
   flex-shrink: 0;
-  transition: all 0.2s;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .player-indicator.active {
   box-shadow:
     0 0 0 3px #4a9eff,
-    0 0 0 5px rgba(74, 158, 255, 0.3),
-    0 0 12px rgba(74, 158, 255, 0.5),
+    0 0 0 5px rgba(74, 158, 255, 0.4),
+    0 0 14px rgba(74, 158, 255, 0.6),
     0 2px 6px rgba(0, 0, 0, 0.3);
   transform: scale(1.15);
-  animation: pulse-border 2.5s ease-in-out infinite;
-}
-
-@keyframes pulse-border {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 3px #4a9eff,
-      0 0 0 5px rgba(74, 158, 255, 0.3),
-      0 0 12px rgba(74, 158, 255, 0.5),
-      0 2px 6px rgba(0, 0, 0, 0.3);
-  }
-
-  50% {
-    box-shadow:
-      0 0 0 3px #4a9eff,
-      0 0 0 5px rgba(74, 158, 255, 0.4),
-      0 0 14px rgba(74, 158, 255, 0.6),
-      0 2px 6px rgba(0, 0, 0, 0.3);
-  }
 }
 
 .player-details {
