@@ -18,7 +18,8 @@ import { createEngine, type CreateEngineOptions } from '../workers/engineFactory
 // Global state for singleton engine management
 let globalEngineInstance: Engine | null = null;
 let globalEnginePromise: Promise<Engine> | null = null;
-let globalEngineConfig: { modelName: string; backend: string } | null = null;
+let globalEngineConfig: { modelName: string; backend: string; webgpuBatchSize: number } | null =
+  null;
 
 export interface AIEngineContextValue {
   /** The AI engine instance, or null if not initialized */
@@ -96,12 +97,14 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const currentConfig = {
       modelName: customAIModel?.name || 'default',
       backend: aiSettings.backend,
+      webgpuBatchSize: aiSettings.webgpuBatchSize,
     };
 
     const configChanged =
       !globalEngineConfig ||
       globalEngineConfig.modelName !== currentConfig.modelName ||
-      globalEngineConfig.backend !== currentConfig.backend;
+      globalEngineConfig.backend !== currentConfig.backend ||
+      globalEngineConfig.webgpuBatchSize !== currentConfig.webgpuBatchSize;
 
     // Reuse existing instance if config matches
     if (globalEngineInstance && !configChanged) {
@@ -171,8 +174,9 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           if (isWebGPU && !alreadyConverted && !isTauri) {
             try {
-              console.log('[AIEngine] Auto-converting model for WebGPU...');
-              const result = await convertModelForWebGPU(buffer);
+              const batchSize = aiSettings.webgpuBatchSize || 8;
+              console.log(`[AIEngine] Auto-converting model for WebGPU (batch=${batchSize})...`);
+              const result = await convertModelForWebGPU(buffer, { batchSize });
               if (result.wasConverted) {
                 buffer = result.buffer;
                 isAutoConverted = true;
@@ -225,7 +229,7 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           if (batchMatch) {
             staticBatchSize = parseInt(batchMatch[1], 10);
           } else if (isAutoConverted) {
-            staticBatchSize = WEBGPU_BATCH_SIZE;
+            staticBatchSize = aiSettings.webgpuBatchSize || WEBGPU_BATCH_SIZE;
           } else if (modelName.includes('.webgpu.')) {
             // Legacy pre-converted models default to batch=1
             staticBatchSize = 1;
@@ -244,6 +248,14 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             ];
           } else {
             executionProviders = ['wasm'];
+          }
+
+          // URL parameter override for GPU memory benchmarking:
+          //   ?gc=0  → disable graph capture (keep WebGPU + static batch)
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('gc') === '0') {
+            enableGraphCapture = false;
+            console.log('[AIEngine][benchmark] Graph capture DISABLED via ?gc=0');
           }
 
           const newEngine = await createEngine(
@@ -311,7 +323,14 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsInitializing(false);
       initializationTriggeredRef.current = false;
     }
-  }, [customAIModel, isModelLoaded, aiSettings.backend, setAIConfigOpen, setAISettings]);
+  }, [
+    customAIModel,
+    isModelLoaded,
+    aiSettings.backend,
+    aiSettings.webgpuBatchSize,
+    setAIConfigOpen,
+    setAISettings,
+  ]);
 
   // Auto-initialize when model becomes available
   useEffect(() => {
@@ -320,15 +339,19 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [isModelLoaded, customAIModel, engine, isInitializing, error, initializeEngine]);
 
-  // Re-initialize when backend changes (if we already have an engine)
+  // Re-initialize when backend or batch size changes (if we already have an engine)
   useEffect(() => {
     if (engine && globalEngineConfig) {
       const currentBackend = aiSettings.backend;
-      if (globalEngineConfig.backend !== currentBackend) {
+      const currentBatch = aiSettings.webgpuBatchSize;
+      if (
+        globalEngineConfig.backend !== currentBackend ||
+        globalEngineConfig.webgpuBatchSize !== currentBatch
+      ) {
         initializeEngine();
       }
     }
-  }, [aiSettings.backend, engine, initializeEngine]);
+  }, [aiSettings.backend, aiSettings.webgpuBatchSize, engine, initializeEngine]);
 
   // Re-initialize when model changes (if we already have an engine)
   useEffect(() => {

@@ -37,6 +37,11 @@ export interface AISettings {
   saveAnalysisToSgf: boolean;
   /** Number of MCTS visits per position (1 = policy-only, >1 enables tree search) */
   numVisits: number;
+  /**
+   * Batch size for WebGPU graph capture (1–8, default 8).
+   * Lower values use less GPU memory at the cost of analysis throughput.
+   */
+  webgpuBatchSize: number;
 }
 
 /**

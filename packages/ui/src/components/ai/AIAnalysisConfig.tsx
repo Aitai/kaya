@@ -160,11 +160,11 @@ export const AIAnalysisConfig: React.FC = () => {
   // Check if any model is downloaded
   const hasAnyDownloaded = modelLibrary.some(m => m.isDownloaded);
 
-  // Get the recommended model's default variant ID (fp32 for full compatibility)
+  // Get the recommended model's default variant ID (fp16 for best GPU memory efficiency)
   const recommendedModelId = useMemo(() => {
     const recommendedBase = BASE_MODELS.findIndex(m => m.recommended);
     if (recommendedBase >= 0) {
-      return getModelId(recommendedBase, 'fp32');
+      return getModelId(recommendedBase, 'fp16');
     }
     return null;
   }, []);
@@ -504,6 +504,31 @@ export const AIAnalysisConfig: React.FC = () => {
                     <option value="wasm">{t('aiConfig.wasm')}</option>
                   </select>
                 </div>
+
+                {/* WebGPU Batch Size - only visible when WebGPU is selected */}
+                {aiSettings.backend === 'webgpu' && (
+                  <div className="setting-item setting-item-full">
+                    <div className="setting-info">
+                      <label htmlFor="webgpu-batch-slider" className="setting-label">
+                        {t('aiConfig.webgpuBatchSize')}
+                        <span className="setting-value">{aiSettings.webgpuBatchSize}</span>
+                      </label>
+                      <p className="setting-description">
+                        {t('aiConfig.webgpuBatchSizeDescription')}
+                      </p>
+                    </div>
+                    <input
+                      id="webgpu-batch-slider"
+                      type="range"
+                      min="1"
+                      max="8"
+                      step="1"
+                      value={aiSettings.webgpuBatchSize}
+                      onChange={e => setAISettings({ webgpuBatchSize: parseInt(e.target.value) })}
+                      className="ai-slider"
+                    />
+                  </div>
+                )}
 
                 {/* Max Top Moves - Left column */}
                 <div className="setting-item">

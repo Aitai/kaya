@@ -102,6 +102,8 @@
     "analysisOptions": "Analyseoptionen",
     "inferenceBackend": "Inferenz-Backend",
     "inferenceBackendDescription": "Wählen Sie, wie das KI-Modell ausgeführt wird. Native ist am schnellsten, WebGPU nutzt die GPU, WASM nutzt die CPU (höchste Kompatibilität).",
+    "webgpuBatchSize": "WebGPU-Batchgröße",
+    "webgpuBatchSizeDescription": "Positionen pro GPU-Aufruf. Höher = schnellere Analyse, aber mehr GPU-Speicher. Reduzieren Sie auf 1-2, wenn der GPU-Speicher nicht ausreicht.",
     "nativeAuto": "Native - Automatisch (GPU wenn verfügbar)",
     "nativeCpu": "Native - Nur CPU",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",

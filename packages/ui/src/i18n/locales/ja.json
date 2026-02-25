@@ -102,6 +102,8 @@
     "analysisOptions": "分析オプション",
     "inferenceBackend": "推論バックエンド",
     "inferenceBackendDescription": "AIモデルの実行方法を選択。ネイティブが最速、WebGPUはGPU使用、WASMはCPU（最も互換性あり）。",
+    "webgpuBatchSize": "WebGPU バッチサイズ",
+    "webgpuBatchSizeDescription": "GPU呼び出しごとに評価する局面数。大きいほど分析が速くなりますが、GPUメモリを多く使用します。メモリ不足の場合は1-2に下げてください。",
     "nativeAuto": "ネイティブ - 自動（GPU利用可能時）",
     "nativeCpu": "ネイティブ - CPUのみ",
     "pytorch": "PyTorch GPU (ROCm/CUDA)",

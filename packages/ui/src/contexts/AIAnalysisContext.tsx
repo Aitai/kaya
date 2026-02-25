@@ -682,7 +682,7 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       let processedCount = cachedCount;
       // When numVisits > 1, MCTS is sequential per position, so reduce batch size
       const numVisits = aiSettings.numVisits ?? 1;
-      const BATCH_SIZE = numVisits > 1 ? 1 : 8;
+      const BATCH_SIZE = numVisits > 1 ? 1 : aiSettings.webgpuBatchSize || 8;
       let totalBatchTime = 0;
       let totalBatchPositions = 0;
 

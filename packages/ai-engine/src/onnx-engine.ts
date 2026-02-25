@@ -557,10 +557,12 @@ export class OnnxEngine extends Engine {
       const threadInfo = numThreads > 1 ? ` (${numThreads} threads)` : '';
       const dtypeInfo = this.inputDataType === 'float16' ? ' [FP16]' : '';
       const gcInfo = this.graphCaptureEnabled ? ' [GraphCapture]' : '';
+      const batchInfo =
+        this.maxInferenceBatch !== Infinity ? ` [batch=${this.maxInferenceBatch}]` : '';
       const timeStr =
         createTime >= 1000 ? `${(createTime / 1000).toFixed(1)}s` : `${createTime.toFixed(0)}ms`;
       console.log(
-        `[AI] Model loaded: ${backendInfo}${threadInfo}${dtypeInfo}${gcInfo} in ${timeStr}`
+        `[AI] Model loaded: ${backendInfo}${threadInfo}${dtypeInfo}${gcInfo}${batchInfo} in ${timeStr}`
       );
 
       this.debugLog('Session ready', {
@@ -715,6 +717,14 @@ export class OnnxEngine extends Engine {
       binTensor = gpuTensors.binTensor;
       globalTensor = gpuTensors.globalTensor;
       usingGpuBuffers = true;
+    } else if (this.maxInferenceBatch !== Infinity && this.maxInferenceBatch > 1) {
+      // Static batch model without graph capture: pad inputs to expected batch size
+      const batchBin = new Float32Array(this.maxInferenceBatch * 22 * size * size);
+      batchBin.set(bin_input);
+      const batchGlobal = new Float32Array(this.maxInferenceBatch * 19);
+      batchGlobal.set(global_input);
+      binTensor = this.createTensor(batchBin, [this.maxInferenceBatch, 22, size, size]);
+      globalTensor = this.createTensor(batchGlobal, [this.maxInferenceBatch, 19]);
     } else {
       binTensor = this.createTensor(bin_input, [1, 22, size, size]);
       globalTensor = this.createTensor(global_input, [1, 19]);
@@ -734,8 +744,21 @@ export class OnnxEngine extends Engine {
           binTensor.dispose();
           globalTensor.dispose();
         }
-        binTensor = this.createTensor(bin_input, [1, 22, size, size]);
-        globalTensor = this.createTensor(global_input, [1, 19]);
+        const batchDim =
+          this.maxInferenceBatch !== Infinity && this.maxInferenceBatch > 1
+            ? this.maxInferenceBatch
+            : 1;
+        if (batchDim > 1) {
+          const batchBin = new Float32Array(batchDim * 22 * size * size);
+          batchBin.set(bin_input);
+          const batchGlobal = new Float32Array(batchDim * 19);
+          batchGlobal.set(global_input);
+          binTensor = this.createTensor(batchBin, [batchDim, 22, size, size]);
+          globalTensor = this.createTensor(batchGlobal, [batchDim, 19]);
+        } else {
+          binTensor = this.createTensor(bin_input, [1, 22, size, size]);
+          globalTensor = this.createTensor(global_input, [1, 19]);
+        }
         usingGpuBuffers = false;
         results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
       } else {
@@ -977,6 +1000,14 @@ export class OnnxEngine extends Engine {
       binTensor = gpuTensors.binTensor;
       globalTensor = gpuTensors.globalTensor;
       usingGpuBuffers = true;
+    } else if (this.maxInferenceBatch !== Infinity && batchSize < this.maxInferenceBatch) {
+      // Static batch model without graph capture: pad to expected batch size
+      const paddedBin = new Float32Array(this.maxInferenceBatch * perPosBinSize);
+      paddedBin.set(bin_input);
+      const paddedGlobal = new Float32Array(this.maxInferenceBatch * 19);
+      paddedGlobal.set(global_input);
+      binTensor = this.createTensor(paddedBin, [this.maxInferenceBatch, 22, size, size]);
+      globalTensor = this.createTensor(paddedGlobal, [this.maxInferenceBatch, 19]);
     } else {
       binTensor = this.createTensor(new Float32Array(bin_input), [batchSize, 22, size, size]);
       globalTensor = this.createTensor(new Float32Array(global_input), [batchSize, 19]);

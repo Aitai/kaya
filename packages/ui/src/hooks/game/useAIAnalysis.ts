@@ -142,9 +142,9 @@ const PREDEFINED_MODELS: Array<{
       predefinedId: id,
       baseModelIndex: modelIndex,
       quantization: variant.quantization,
-      // Only apply recommended/isDefault to the first variant (fp32)
-      ...(variantIndex === 0 && model.recommended ? { recommended: true } : {}),
-      ...(variantIndex === 0 && model.isDefault ? { isDefault: true } : {}),
+      // Apply recommended/isDefault to fp16 variant (best balance of quality and GPU memory)
+      ...(variantIndex === 1 && model.recommended ? { recommended: true } : {}),
+      ...(variantIndex === 1 && model.isDefault ? { isDefault: true } : {}),
     };
   })
 );
@@ -160,12 +160,15 @@ function isTauriDesktop(): boolean {
 }
 
 // Get default backend based on environment
-function getDefaultBackend(): 'native' | 'wasm' {
+function getDefaultBackend(): 'native' | 'webgpu' | 'wasm' {
   // In Tauri desktop, default to native for best performance
   if (isTauriDesktop()) {
     return 'native';
   }
-  // In web, default to WASM (more stable than WebGPU)
+  // In web, default to WebGPU if available for GPU acceleration
+  if (isWebGPUAvailable()) {
+    return 'webgpu';
+  }
   return 'wasm';
 }
 
@@ -177,6 +180,7 @@ const DEFAULT_AI_SETTINGS: AISettings = {
   backend: 'wasm', // This will be overridden by loadAISettings
   saveAnalysisToSgf: true,
   numVisits: 1, // Policy-only by default (fastest); increase for MCTS tree search
+  webgpuBatchSize: 4, // Default batch size for WebGPU graph capture
 };
 
 // Load AI settings from localStorage
@@ -227,6 +231,12 @@ function loadAISettings(): AISettings {
           typeof parsed.numVisits === 'number' && parsed.numVisits >= 1 && parsed.numVisits <= 400
             ? Math.round(parsed.numVisits)
             : DEFAULT_AI_SETTINGS.numVisits,
+        webgpuBatchSize:
+          typeof parsed.webgpuBatchSize === 'number' &&
+          parsed.webgpuBatchSize >= 1 &&
+          parsed.webgpuBatchSize <= 8
+            ? Math.round(parsed.webgpuBatchSize)
+            : DEFAULT_AI_SETTINGS.webgpuBatchSize,
       };
     }
   } catch (e) {
