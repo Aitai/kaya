@@ -1,6 +1,5 @@
 {
   "addToLibrary": "添加到棋库",
-
   "landing": {
     "tagline": "现代围棋应用",
     "continue": "继续对局",
@@ -85,7 +84,6 @@
   "export": "导出",
   "copy": "复制",
   "paste": "粘贴",
-
   "aiConfig": {
     "title": "分析配置",
     "modelLibrary": "模型库",
@@ -130,7 +128,6 @@
     "downloading": "下载中...",
     "poweredBy": "AI 引擎基于"
   },
-
   "kayaConfig": {
     "title": "设置",
     "close": "关闭设置",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "切换地域热图",
     "toggleTopMoves": "切换最佳着法",
@@ -200,7 +196,6 @@
     "analysisModeOn": "分析模式已开启 - 点击关闭",
     "analysisModeOff": "分析模式已关闭 - 点击开启"
   },
-
   "analysisLegend": {
     "title": "分析图例",
     "policyDescription": "颜色表示 AI 对每个着法建议的<strong>策略概率</strong>。这代表神经网络认为某着法是最佳选择的置信度。",
@@ -220,7 +215,6 @@
     "blackArea": "黑方区域",
     "whiteArea": "白方区域"
   },
-
   "library": {
     "newFolder": "新建文件夹",
     "importSgfZip": "导入 SGF/ZIP",
@@ -257,7 +251,6 @@
     "create": "创建",
     "unsavedChangesIndicator": "未保存的更改"
   },
-
   "updater": {
     "checkForUpdates": "检查更新...",
     "updateAvailable": "有可用更新",
@@ -277,7 +270,6 @@
     "updateFailed": "更新失败",
     "updateFailedMessage": "安装更新失败。请稍后重试或从以下地址手动下载最新版本："
   },
-
   "editToolbar": {
     "stones": "棋子",
     "playMode": "对弈模式",
@@ -310,7 +302,6 @@
     "undo": "撤销",
     "redo": "重做"
   },
-
   "gameInfo": {
     "game": "对局",
     "untitled": "未命名",
@@ -338,7 +329,6 @@
     "editAllFields": "编辑所有字段",
     "exitEditMode": "退出编辑模式"
   },
-
   "comment": {
     "move": "第 {{number}} 手",
     "moveNumber": "第 {{number}} 手",
@@ -354,7 +344,6 @@
     "saveShortcut": "保存 (Cmd/Ctrl+S)",
     "cancelShortcut": "取消 (Esc)"
   },
-
   "gameTree": {
     "switchToVertical": "切换到垂直布局",
     "switchToHorizontal": "切换到水平布局",
@@ -362,7 +351,6 @@
     "showMinimap": "显示小地图",
     "centerOnPosition": "居中当前位置"
   },
-
   "boardControls": {
     "captured": "提子",
     "branch": "分支",
@@ -382,7 +370,6 @@
     "resignConfirm": "{{player}} 认输。确定吗？",
     "resign": "认输"
   },
-
   "scoring": {
     "clear": "清除",
     "clearAllDeadStones": "清除所有死子",
@@ -410,7 +397,6 @@
     "stonesMarkedDead": "{{count}} 颗棋子标记为死子",
     "stonesMarkedDeadPlural": "{{count}} 颗棋子标记为死子"
   },
-
   "mobileTab": {
     "board": "棋盘",
     "info": "信息",
@@ -418,7 +404,6 @@
     "analysis": "分析",
     "library": "棋库"
   },
-
   "toast": {
     "exportedFile": "已导出「{{filename}}」",
     "savedToLibrary": "已保存到棋库",
@@ -434,21 +419,17 @@
     "failedToPaste": "粘贴失败：{{error}}",
     "failedToLoadSgf": "加载 SGF 文件失败：{{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "正在加载 SGF 文件"
   },
-
   "dropzone": {
     "dropToLoad": "拖放以加载对局",
     "dropOnLibrary": "拖放到棋库以保存"
   },
-
   "languageSwitcher": {
     "changeLanguage": "更改语言",
     "selectLanguage": "选择语言"
   },
-
   "gameboardActions": {
     "pass": "跳过",
     "resign": "认输",
@@ -481,7 +462,6 @@
     "hideControls": "隐藏控制栏",
     "showControls": "显示控制栏"
   },
-
   "analysisBar": {
     "uploadingModel": "上传模型中 ({{progress}}%)",
     "checkingCache": "检查缓存中...",
@@ -494,7 +474,6 @@
     "scoreLead": "目数优势",
     "analyzeFullGameLong": "分析全局（较长对局可能需要几分钟）"
   },
-
   "panels": {
     "library": "棋库",
     "analysis": "分析",
@@ -504,7 +483,6 @@
     "showLibrary": "显示棋库 (Ctrl+L)",
     "showSidebar": "显示侧边栏 (Ctrl+B)"
   },
-
   "shortcuts": {
     "title": "键盘快捷键",
     "description": "自定义键盘快捷键。点击快捷键进行修改。",
@@ -561,7 +539,6 @@
       "message": "这将把所有键盘快捷键重置为默认值。此操作无法撤销。"
     }
   },
-
   "quickNewGameTooltip": "快速新对局（{{size}}×{{size}}）- ⚠️ 未保存的对局将被删除！",
   "close": "关闭",
   "aboutKaya": "关于 Kaya",
@@ -573,12 +550,10 @@
   "aboutGitHub": "GitHub 仓库",
   "aboutReportIssue": "报告问题",
   "aboutVersionNotAvailable": "版本信息不可用",
-
   "analysisPanel": {
     "graphTab": "图表",
     "reportTab": "报告"
   },
-
   "performanceReport": {
     "black": "黑方",
     "white": "白方",
@@ -625,5 +600,28 @@
       "phasesDesc": "在19×19棋盘上:布局(1-50手)、中盘(51-150手)、官子(151手以后)。小棋盘边界会相应调整。",
       "note": "注意:分析基于策略网络的单次推理建议。结果可能与多次搜索引擎有所不同。"
     }
+  },
+  "boardRecognition": {
+    "title": "棋盘图片识别",
+    "selectSize": "棋盘大小：",
+    "photo": "图片",
+    "preview": "识别结果",
+    "dragHint": "拖动角点以框选棋盘区域",
+    "analyzing": "正在分析…",
+    "chooseSizeFirst": "请先选择棋盘大小",
+    "importSGF": "导入为 SGF",
+    "cornersManual": "自动检测失败，请手动调整角点",
+    "loadError": "图片加载失败",
+    "analysisError": "分析失败",
+    "alignGrid": "网格：",
+    "resetGrid": "重置网格对齐",
+    "gridClickHint": "在预览中点击网格的4个角点交叉 ({{count}}/4)",
+    "gridFineTuneHint": "点击角点手柄以微调其位置",
+    "calibrate": "校准：",
+    "markBlack": "标记黑子",
+    "markWhite": "标记白子",
+    "markEmpty": "标记空位",
+    "resetCalibration": "重置校准",
+    "calibrateHint": "点击预览中的交叉点以修正误检"
   }
 }

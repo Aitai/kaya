@@ -45,6 +45,8 @@ import { loadContentOrOGSUrl, getFilenameForSGF } from '../../services/ogsLoader
 import { readClipboardText, writeClipboardText } from '../../services/clipboard';
 import { KayaConfig } from '../ai/KayaConfig';
 
+import { BoardRecognitionDialog } from '../dialogs/BoardRecognitionDialog';
+
 import type { VersionData } from './StatusBar';
 
 interface HeaderProps {
@@ -89,6 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useLibrary();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const filenameInputRef = useRef<HTMLInputElement>(null);
+  const [recognitionFile, setRecognitionFile] = useState<File | null>(null);
   const [isNewGameDialogOpen, setIsNewGameDialogOpen] = useState(false);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [isSaveToLibraryDialogOpen, setIsSaveToLibraryDialogOpen] = useState(false);
@@ -122,8 +125,16 @@ export const Header: React.FC<HeaderProps> = ({
   }, [fileName, gameInfo.gameName, gameInfo.playerBlack, gameInfo.playerWhite]);
 
   // File loading
+  const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.bmp'];
+
   const handleFileLoad = useCallback(
     async (file: File) => {
+      const lowerName = file.name.toLowerCase();
+      if (IMAGE_EXTENSIONS.some(ext => lowerName.endsWith(ext))) {
+        setRecognitionFile(file);
+        return;
+      }
+
       // Check for unsaved changes first
       const canProceed = await checkUnsavedChanges();
       if (!canProceed) return;
@@ -142,6 +153,22 @@ export const Header: React.FC<HeaderProps> = ({
         }
       };
       reader.readAsText(file);
+    },
+    [loadSGFAsync, setFileName, clearLoadedFile, checkUnsavedChanges] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleRecognitionImport = useCallback(
+    async (sgf: string, filename: string) => {
+      setRecognitionFile(null);
+      const canProceed = await checkUnsavedChanges();
+      if (!canProceed) return;
+      try {
+        await loadSGFAsync(sgf);
+        setFileName(filename);
+        clearLoadedFile();
+      } catch (error) {
+        alert(`Failed to load recognized board: ${error}`);
+      }
     },
     [loadSGFAsync, setFileName, clearLoadedFile, checkUnsavedChanges]
   );
@@ -527,270 +554,279 @@ export const Header: React.FC<HeaderProps> = ({
   ]);
 
   return (
-    <header className="app-header">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".sgf"
-        style={{ display: 'none' }}
-        onChange={handleFileInputChange}
-      />
+    <>
+      <header className="app-header">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".sgf,.jpg,.jpeg,.png,.webp,.bmp"
+          style={{ display: 'none' }}
+          onChange={handleFileInputChange}
+        />
 
-      <div className="header-file-controls">
-        {/* Primary actions - always visible */}
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          title={t('menu')}
-          className="header-mobile-menu-btn"
-        >
-          <LuMenu size={24} />
-        </button>
-
-        {/* Primary actions - always visible on desktop, hidden on mobile */}
-        <button
-          onClick={handleQuickNewGame}
-          title={`Quick New Game (${currentBoard.width}×${currentBoard.height}) - ⚠️ Erases current game without saving!`}
-          className="quick-new-button header-desktop-only"
-        >
-          <LuZap size={18} />
-        </button>
-        <button
-          onClick={handleNewGame}
-          title={t('newGame')}
-          className="header-btn-primary header-desktop-only"
-        >
-          <LuPlus size={18} /> <span className="btn-text">{t('new')}</span>
-        </button>
-        <button
-          onClick={handleOpenClick}
-          title={t('openSgfFile')}
-          className="header-btn-primary header-desktop-only"
-        >
-          <LuFolderOpen size={18} /> <span className="btn-text">{t('open')}</span>
-        </button>
-        <button
-          onClick={handleSaveClick}
-          title={`${t('saveToLibrary')} (${bindingToDisplayString(getBinding('file.save'))})`}
-          className="header-btn-primary header-desktop-only"
-          disabled={!isDirty && loadedFileId !== null}
-        >
-          <LuSave size={18} /> <span className="btn-text">{t('save')}</span>
-        </button>
-        <button
-          onClick={handleSaveAsClick}
-          title={`${t('saveAs')} (${bindingToDisplayString(getBinding('file.saveAs'))})`}
-          className="header-btn-primary header-desktop-only"
-        >
-          <LuBookmarkPlus size={18} /> <span className="btn-text">{t('saveAsShort')}</span>
-        </button>
-        <button
-          onClick={handleExportClick}
-          title={t('exportToDisk')}
-          className="header-btn-primary header-desktop-only"
-        >
-          <LuDownload size={18} /> <span className="btn-text">{t('export')}</span>
-        </button>
-
-        {/* Secondary actions - collapse on small screens */}
-        <div className="header-secondary-actions">
+        <div className="header-file-controls">
+          {/* Primary actions - always visible */}
           <button
-            onClick={handleCopyClick}
-            title={t('copySgfToClipboard')}
-            className="header-btn-secondary"
+            onClick={() => setIsMobileMenuOpen(true)}
+            title={t('menu')}
+            className="header-mobile-menu-btn"
           >
-            <LuCopy size={18} /> <span className="btn-text">{t('copy')}</span>
+            <LuMenu size={24} />
+          </button>
+
+          {/* Primary actions - always visible on desktop, hidden on mobile */}
+          <button
+            onClick={handleQuickNewGame}
+            title={`Quick New Game (${currentBoard.width}×${currentBoard.height}) - ⚠️ Erases current game without saving!`}
+            className="quick-new-button header-desktop-only"
+          >
+            <LuZap size={18} />
           </button>
           <button
-            onClick={handlePasteClick}
-            title={`${t('pasteSgfOrOgs')} (${bindingToDisplayString(getBinding('file.paste'))})`}
-            className="header-btn-secondary"
+            onClick={handleNewGame}
+            title={t('newGame')}
+            className="header-btn-primary header-desktop-only"
           >
-            <LuClipboardPaste size={18} /> <span className="btn-text">{t('paste')}</span>
+            <LuPlus size={18} /> <span className="btn-text">{t('new')}</span>
           </button>
+          <button
+            onClick={handleOpenClick}
+            title={t('openSgfFile')}
+            className="header-btn-primary header-desktop-only"
+          >
+            <LuFolderOpen size={18} /> <span className="btn-text">{t('open')}</span>
+          </button>
+          <button
+            onClick={handleSaveClick}
+            title={`${t('saveToLibrary')} (${bindingToDisplayString(getBinding('file.save'))})`}
+            className="header-btn-primary header-desktop-only"
+            disabled={!isDirty && loadedFileId !== null}
+          >
+            <LuSave size={18} /> <span className="btn-text">{t('save')}</span>
+          </button>
+          <button
+            onClick={handleSaveAsClick}
+            title={`${t('saveAs')} (${bindingToDisplayString(getBinding('file.saveAs'))})`}
+            className="header-btn-primary header-desktop-only"
+          >
+            <LuBookmarkPlus size={18} /> <span className="btn-text">{t('saveAsShort')}</span>
+          </button>
+          <button
+            onClick={handleExportClick}
+            title={t('exportToDisk')}
+            className="header-btn-primary header-desktop-only"
+          >
+            <LuDownload size={18} /> <span className="btn-text">{t('export')}</span>
+          </button>
+
+          {/* Secondary actions - collapse on small screens */}
+          <div className="header-secondary-actions">
+            <button
+              onClick={handleCopyClick}
+              title={t('copySgfToClipboard')}
+              className="header-btn-secondary"
+            >
+              <LuCopy size={18} /> <span className="btn-text">{t('copy')}</span>
+            </button>
+            <button
+              onClick={handlePasteClick}
+              title={`${t('pasteSgfOrOgs')} (${bindingToDisplayString(getBinding('file.paste'))})`}
+              className="header-btn-secondary"
+            >
+              <LuClipboardPaste size={18} /> <span className="btn-text">{t('paste')}</span>
+            </button>
+          </div>
+
+          {/* More menu for collapsed actions on small screens */}
+          <div className="header-more-menu-container" ref={moreMenuRef}>
+            <button
+              className="header-more-btn"
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              title={t('moreActions')}
+            >
+              <LuEllipsis size={18} />
+            </button>
+            {showMoreMenu && (
+              <div className="header-more-menu">
+                <button
+                  onClick={() => {
+                    handleCopyClick();
+                    setShowMoreMenu(false);
+                  }}
+                >
+                  <LuCopy size={16} /> {t('copySgf')}
+                </button>
+                <button
+                  onClick={() => {
+                    handlePasteClick();
+                    setShowMoreMenu(false);
+                  }}
+                >
+                  <LuClipboardPaste size={16} /> {t('pasteSgfUrl')}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {fileName &&
+            (isEditingFilename ? (
+              <input
+                ref={filenameInputRef}
+                type="text"
+                className="header-filename-input"
+                value={editedFilename}
+                onChange={handleFilenameChange}
+                onBlur={handleFilenameBlur}
+                onKeyDown={handleFilenameKeyDown}
+                onKeyUp={e => e.stopPropagation()}
+                onKeyPress={e => e.stopPropagation()}
+              />
+            ) : (
+              <span
+                className="header-filename"
+                onClick={handleFilenameClick}
+                title={t('clickToRename')}
+              >
+                {isDirty && (
+                  <span className="header-dirty-indicator" title={t('unsavedChanges')}>
+                    •
+                  </span>
+                )}
+                {fileName}
+              </span>
+            ))}
         </div>
 
-        {/* More menu for collapsed actions on small screens */}
-        <div className="header-more-menu-container" ref={moreMenuRef}>
-          <button
-            className="header-more-btn"
-            onClick={() => setShowMoreMenu(!showMoreMenu)}
-            title={t('moreActions')}
-          >
-            <LuEllipsis size={18} />
-          </button>
-          {showMoreMenu && (
-            <div className="header-more-menu">
+        <div
+          className="header-right-group"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <KayaConfig />
+          {showThemeToggle && (
+            <div className="header-toggles">
+              {onToggleLibrary && (
+                <button
+                  className={`panel-toggle ${showLibrary ? 'active' : ''}`}
+                  onClick={onToggleLibrary}
+                  title={
+                    showLibrary ? `${t('hideLibrary')} (Ctrl+L)` : `${t('showLibrary')} (Ctrl+L)`
+                  }
+                >
+                  <LuLibrary size={20} />
+                </button>
+              )}
+              {onToggleSidebar && (
+                <button
+                  className={`panel-toggle ${showSidebar ? 'active' : ''}`}
+                  onClick={onToggleSidebar}
+                  title={
+                    showSidebar ? `${t('hideSidebar')} (Ctrl+B)` : `${t('showSidebar')} (Ctrl+B)`
+                  }
+                >
+                  <LuPanelRight size={20} />
+                </button>
+              )}
+              <GamepadIndicator />
               <button
-                onClick={() => {
-                  handleCopyClick();
-                  setShowMoreMenu(false);
-                }}
+                className="fullscreen-toggle"
+                onClick={toggleFullscreen}
+                title={
+                  isFullscreen
+                    ? `${t('exitFullscreen')} (${bindingToDisplayString(getBinding('view.toggleFullscreen'))})`
+                    : `${t('enterFullscreen')} (${bindingToDisplayString(getBinding('view.toggleFullscreen'))})`
+                }
               >
-                <LuCopy size={16} /> {t('copySgf')}
+                {isFullscreen ? <LuMinimize size={20} /> : <LuMaximize size={20} />}
               </button>
               <button
-                onClick={() => {
-                  handlePasteClick();
-                  setShowMoreMenu(false);
-                }}
+                className="theme-toggle"
+                onClick={toggleTheme}
+                title={theme === 'dark' ? t('switchToLightMode') : t('switchToDarkMode')}
               >
-                <LuClipboardPaste size={16} /> {t('pasteSgfUrl')}
+                {theme === 'dark' ? <LuSun size={20} /> : <LuMoon size={20} />}
               </button>
+              <button
+                className="sound-toggle"
+                onClick={toggleSound}
+                title={
+                  soundEnabled
+                    ? `${t('muteSounds')} (${bindingToDisplayString(getBinding('board.toggleSound'))})`
+                    : `${t('enableSounds')} (${bindingToDisplayString(getBinding('board.toggleSound'))})`
+                }
+              >
+                {soundEnabled ? <LuVolume2 size={20} /> : <LuVolumeX size={20} />}
+              </button>
+              <LanguageSwitcher />
+              <a
+                href="https://github.com/kaya-go/kaya"
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t('viewOnGitHub')}
+              >
+                <LuGithub size={20} />
+              </a>
+              {onHide && (
+                <button
+                  onClick={onHide}
+                  title={`${t('hideMenu')} (${bindingToDisplayString(getBinding('view.toggleHeader'))})`}
+                >
+                  <LuPanelTopClose size={20} />
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        {fileName &&
-          (isEditingFilename ? (
-            <input
-              ref={filenameInputRef}
-              type="text"
-              className="header-filename-input"
-              value={editedFilename}
-              onChange={handleFilenameChange}
-              onBlur={handleFilenameBlur}
-              onKeyDown={handleFilenameKeyDown}
-              onKeyUp={e => e.stopPropagation()}
-              onKeyPress={e => e.stopPropagation()}
-            />
-          ) : (
-            <span
-              className="header-filename"
-              onClick={handleFilenameClick}
-              title={t('clickToRename')}
-            >
-              {isDirty && (
-                <span className="header-dirty-indicator" title={t('unsavedChanges')}>
-                  •
-                </span>
-              )}
-              {fileName}
-            </span>
-          ))}
-      </div>
+        <ToastContainer messages={messages} onClose={closeToast} />
 
-      <div
-        className="header-right-group"
-        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-      >
-        <KayaConfig />
-        {showThemeToggle && (
-          <div className="header-toggles">
-            {onToggleLibrary && (
-              <button
-                className={`panel-toggle ${showLibrary ? 'active' : ''}`}
-                onClick={onToggleLibrary}
-                title={
-                  showLibrary ? `${t('hideLibrary')} (Ctrl+L)` : `${t('showLibrary')} (Ctrl+L)`
-                }
-              >
-                <LuLibrary size={20} />
-              </button>
-            )}
-            {onToggleSidebar && (
-              <button
-                className={`panel-toggle ${showSidebar ? 'active' : ''}`}
-                onClick={onToggleSidebar}
-                title={
-                  showSidebar ? `${t('hideSidebar')} (Ctrl+B)` : `${t('showSidebar')} (Ctrl+B)`
-                }
-              >
-                <LuPanelRight size={20} />
-              </button>
-            )}
-            <GamepadIndicator />
-            <button
-              className="fullscreen-toggle"
-              onClick={toggleFullscreen}
-              title={
-                isFullscreen
-                  ? `${t('exitFullscreen')} (${bindingToDisplayString(getBinding('view.toggleFullscreen'))})`
-                  : `${t('enterFullscreen')} (${bindingToDisplayString(getBinding('view.toggleFullscreen'))})`
-              }
-            >
-              {isFullscreen ? <LuMinimize size={20} /> : <LuMaximize size={20} />}
-            </button>
-            <button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              title={theme === 'dark' ? t('switchToLightMode') : t('switchToDarkMode')}
-            >
-              {theme === 'dark' ? <LuSun size={20} /> : <LuMoon size={20} />}
-            </button>
-            <button
-              className="sound-toggle"
-              onClick={toggleSound}
-              title={
-                soundEnabled
-                  ? `${t('muteSounds')} (${bindingToDisplayString(getBinding('board.toggleSound'))})`
-                  : `${t('enableSounds')} (${bindingToDisplayString(getBinding('board.toggleSound'))})`
-              }
-            >
-              {soundEnabled ? <LuVolume2 size={20} /> : <LuVolumeX size={20} />}
-            </button>
-            <LanguageSwitcher />
-            <a
-              href="https://github.com/kaya-go/kaya"
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t('viewOnGitHub')}
-            >
-              <LuGithub size={20} />
-            </a>
-            {onHide && (
-              <button
-                onClick={onHide}
-                title={`${t('hideMenu')} (${bindingToDisplayString(getBinding('view.toggleHeader'))})`}
-              >
-                <LuPanelTopClose size={20} />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+        <NewGameDialog
+          isOpen={isNewGameDialogOpen}
+          onClose={() => setIsNewGameDialogOpen(false)}
+          onConfirm={handleNewGameConfirm}
+        />
 
-      <ToastContainer messages={messages} onClose={closeToast} />
+        <ConfirmationDialog
+          isOpen={isConfirmationDialogOpen}
+          title={t('startNewGame')}
+          message={t('startNewGameConfirm')}
+          confirmLabel={t('newGame')}
+          onConfirm={handleConfirmationConfirm}
+          onCancel={handleConfirmationCancel}
+        />
 
-      <NewGameDialog
-        isOpen={isNewGameDialogOpen}
-        onClose={() => setIsNewGameDialogOpen(false)}
-        onConfirm={handleNewGameConfirm}
-      />
+        <SaveToLibraryDialog
+          isOpen={isSaveToLibraryDialogOpen}
+          defaultFileName={defaultSaveFileName}
+          libraryItems={libraryItems}
+          selectedFolderId={librarySelectedId}
+          onClose={() => setIsSaveToLibraryDialogOpen(false)}
+          onSave={handleSaveToLibrary}
+        />
 
-      <ConfirmationDialog
-        isOpen={isConfirmationDialogOpen}
-        title={t('startNewGame')}
-        message={t('startNewGameConfirm')}
-        confirmLabel={t('newGame')}
-        onConfirm={handleConfirmationConfirm}
-        onCancel={handleConfirmationCancel}
-      />
-
-      <SaveToLibraryDialog
-        isOpen={isSaveToLibraryDialogOpen}
-        defaultFileName={defaultSaveFileName}
-        libraryItems={libraryItems}
-        selectedFolderId={librarySelectedId}
-        onClose={() => setIsSaveToLibraryDialogOpen(false)}
-        onSave={handleSaveToLibrary}
-      />
-
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        versionData={versionData}
-        onNewGame={() => setIsNewGameDialogOpen(true)}
-        onQuickNewGame={handleQuickNewGame}
-        onOpen={handleOpenClick}
-        onSave={handleSaveClick}
-        onSaveAs={handleSaveAsClick}
-        onExport={handleExportClick}
-        onCopySGF={handleCopyClick}
-        onPasteSGF={handlePasteClick}
-        onGoHome={onGoHome}
-        isDirty={isDirty}
-        isInLibrary={loadedFileId !== null}
-      />
-    </header>
+        <MobileMenu
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+          versionData={versionData}
+          onNewGame={() => setIsNewGameDialogOpen(true)}
+          onQuickNewGame={handleQuickNewGame}
+          onOpen={handleOpenClick}
+          onSave={handleSaveClick}
+          onSaveAs={handleSaveAsClick}
+          onExport={handleExportClick}
+          onCopySGF={handleCopyClick}
+          onPasteSGF={handlePasteClick}
+          onGoHome={onGoHome}
+          isDirty={isDirty}
+          isInLibrary={loadedFileId !== null}
+        />
+      </header>
+      {recognitionFile && (
+        <BoardRecognitionDialog
+          file={recognitionFile}
+          onImport={handleRecognitionImport}
+          onClose={() => setRecognitionFile(null)}
+        />
+      )}
+    </>
   );
 };

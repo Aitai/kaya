@@ -1,6 +1,5 @@
 {
   "addToLibrary": "Ajouter",
-
   "landing": {
     "tagline": "Une application de Go moderne",
     "continue": "Continuer",
@@ -85,7 +84,6 @@
   "export": "Exporter",
   "copy": "Copier",
   "paste": "Coller",
-
   "aiConfig": {
     "title": "Configuration de l'analyse",
     "modelLibrary": "Bibliothèque de modèles",
@@ -130,7 +128,6 @@
     "downloading": "Téléchargement...",
     "poweredBy": "Moteur IA basé sur"
   },
-
   "kayaConfig": {
     "title": "Paramètres",
     "close": "Fermer les paramètres",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "Afficher/masquer la carte de territoire",
     "toggleTopMoves": "Afficher/masquer les meilleurs coups",
@@ -200,7 +196,6 @@
     "analysisModeOn": "Mode analyse activé - Cliquer pour désactiver",
     "analysisModeOff": "Mode analyse désactivé - Cliquer pour activer"
   },
-
   "analysisLegend": {
     "title": "Légende d'analyse",
     "policyDescription": "Les couleurs indiquent la <strong>probabilité</strong> de chaque coup suggéré selon le réseau de neurones.",
@@ -220,7 +215,6 @@
     "blackArea": "Zone noire",
     "whiteArea": "Zone blanche"
   },
-
   "library": {
     "newFolder": "Nouveau dossier",
     "importSgfZip": "Importer SGF/ZIP",
@@ -257,7 +251,6 @@
     "create": "Créer",
     "unsavedChangesIndicator": "Modifications non sauvegardées"
   },
-
   "updater": {
     "checkForUpdates": "Rechercher les mises à jour...",
     "updateAvailable": "Mise à jour disponible",
@@ -277,7 +270,6 @@
     "updateFailed": "Échec de la mise à jour",
     "updateFailedMessage": "Échec de l'installation. Téléchargez manuellement depuis :"
   },
-
   "editToolbar": {
     "stones": "Pierres",
     "playMode": "Mode jeu",
@@ -310,7 +302,6 @@
     "undo": "Annuler",
     "redo": "Rétablir"
   },
-
   "gameInfo": {
     "game": "Partie",
     "untitled": "Sans titre",
@@ -335,23 +326,21 @@
     "editAllFields": "Éditer tous les champs",
     "exitEditMode": "Quitter le mode édition"
   },
-
   "comment": {
     "move": "Coup {{number}}",
     "moveNumber": "Coup {{number}}",
-    "noMoveSelected": "Aucun coup s\u00e9lectionn\u00e9",
+    "noMoveSelected": "Aucun coup sélectionné",
     "noComment": "Pas de commentaire. Cliquez pour en ajouter un.",
-    "placeholder": "Entrez un commentaire (markdown support\u00e9)...",
-    "markdownHint": "Astuce : Utilisez le markdown. Ctrl/Cmd+S pour sauver, \u00c9chap pour annuler.",
-    "enterHint": "Entr\u00e9e pour sauvegarder \u2022 Maj+Entr\u00e9e pour nouvelle ligne \u2022 \u00c9chap pour annuler",
-    "hint": "Astuce : Utilisez le markdown. Ctrl/Cmd+S pour sauver, \u00c9chap pour annuler.",
-    "editComment": "\u00c9diter le commentaire",
+    "placeholder": "Entrez un commentaire (markdown supporté)...",
+    "markdownHint": "Astuce : Utilisez le markdown. Ctrl/Cmd+S pour sauver, Échap pour annuler.",
+    "enterHint": "Entrée pour sauvegarder • Maj+Entrée pour nouvelle ligne • Échap pour annuler",
+    "hint": "Astuce : Utilisez le markdown. Ctrl/Cmd+S pour sauver, Échap pour annuler.",
+    "editComment": "Éditer le commentaire",
     "save": "Sauver",
     "cancel": "Annuler",
     "saveShortcut": "Sauver (Cmd/Ctrl+S)",
-    "cancelShortcut": "Annuler (\u00c9chap)"
+    "cancelShortcut": "Annuler (Échap)"
   },
-
   "gameTree": {
     "switchToVertical": "Passer en disposition verticale",
     "switchToHorizontal": "Passer en disposition horizontale",
@@ -359,7 +348,6 @@
     "showMinimap": "Afficher la minimap",
     "centerOnPosition": "Centrer sur la position actuelle"
   },
-
   "boardControls": {
     "captured": "capturé(s)",
     "branch": "Branche",
@@ -379,7 +367,6 @@
     "resignConfirm": "{{player}} abandonne. Êtes-vous sûr ?",
     "resign": "Abandonner"
   },
-
   "scoring": {
     "clear": "Effacer",
     "clearAllDeadStones": "Effacer toutes les pierres mortes",
@@ -407,7 +394,6 @@
     "stonesMarkedDead": "{{count}} pierre marquée morte",
     "stonesMarkedDeadPlural": "{{count}} pierres marquées mortes"
   },
-
   "mobileTab": {
     "board": "Goban",
     "info": "Info",
@@ -415,7 +401,6 @@
     "analysis": "Analyse",
     "library": "Biblio"
   },
-
   "toast": {
     "exportedFile": "\"{{filename}}\" exporté",
     "savedToLibrary": "Sauvegardé dans la bibliothèque",
@@ -431,21 +416,17 @@
     "failedToPaste": "Échec du collage : {{error}}",
     "failedToLoadSgf": "Échec du chargement SGF : {{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "Chargement du fichier SGF"
   },
-
   "dropzone": {
     "dropToLoad": "Déposez pour charger la partie",
     "dropOnLibrary": "Déposez sur la Bibliothèque pour sauvegarder"
   },
-
   "languageSwitcher": {
     "changeLanguage": "Changer de langue",
     "selectLanguage": "Choisir la langue"
   },
-
   "gameboardActions": {
     "pass": "Passer",
     "resign": "Abandonner",
@@ -478,7 +459,6 @@
     "hideControls": "Masquer les contrôles",
     "showControls": "Afficher les contrôles"
   },
-
   "analysisBar": {
     "uploadingModel": "Téléversement du modèle ({{progress}}%)",
     "checkingCache": "Vérification du cache...",
@@ -491,7 +471,6 @@
     "scoreLead": "Avantage",
     "analyzeFullGameLong": "Analyser la partie entière (peut prendre plusieurs minutes)"
   },
-
   "panels": {
     "library": "Bibliothèque",
     "analysis": "Analyse",
@@ -501,7 +480,6 @@
     "showLibrary": "Afficher la bibliothèque (Ctrl+L)",
     "showSidebar": "Afficher le panneau latéral (Ctrl+B)"
   },
-
   "shortcuts": {
     "title": "Raccourcis clavier",
     "description": "Personnalisez les raccourcis clavier. Cliquez sur un raccourci pour le modifier.",
@@ -558,7 +536,6 @@
       "message": "Tous les raccourcis clavier seront réinitialisés à leurs valeurs par défaut. Cette action est irréversible."
     }
   },
-
   "quickNewGameTooltip": "Partie rapide ({{size}}×{{size}}) - ⚠️ Efface la partie sans sauvegarder !",
   "close": "Fermer",
   "aboutKaya": "À propos de Kaya",
@@ -570,12 +547,10 @@
   "aboutGitHub": "Dépôt GitHub",
   "aboutReportIssue": "Signaler un problème",
   "aboutVersionNotAvailable": "Informations de version non disponibles",
-
   "analysisPanel": {
     "graphTab": "Graphique",
     "reportTab": "Rapport"
   },
-
   "performanceReport": {
     "black": "Noir",
     "white": "Blanc",
@@ -622,5 +597,28 @@
       "phasesDesc": "Ouverture (coups 1-50), Milieu de partie (51-150), Fin de partie (151+) sur un goban 19×19. Les limites s'ajustent pour les petits gobans.",
       "note": "Note: L'analyse est basée sur les suggestions du réseau de politique en inférence simple. Les résultats peuvent différer des moteurs de recherche multi-passes."
     }
+  },
+  "boardRecognition": {
+    "title": "Reconnaissance de goban",
+    "selectSize": "Taille du goban :",
+    "photo": "Photo",
+    "preview": "Goban reconnu",
+    "dragHint": "Faites glisser les coins pour délimiter la zone du plateau",
+    "analyzing": "Analyse en cours…",
+    "chooseSizeFirst": "Choisissez d'abord la taille du goban",
+    "importSGF": "Importer en SGF",
+    "cornersManual": "Détection auto échouée – ajustez les coins manuellement",
+    "loadError": "Échec du chargement de l'image",
+    "analysisError": "Échec de l'analyse",
+    "alignGrid": "Grille :",
+    "resetGrid": "Réinitialiser l'alignement de la grille",
+    "gridClickHint": "Cliquez sur les 4 intersections d'angle de la grille ({{count}}/4)",
+    "gridFineTuneHint": "Cliquez sur un repère de coin pour affiner sa position",
+    "calibrate": "Calibrer :",
+    "markBlack": "Marquer pierre noire",
+    "markWhite": "Marquer pierre blanche",
+    "markEmpty": "Marquer intersection vide",
+    "resetCalibration": "Réinitialiser la calibration",
+    "calibrateHint": "Cliquez sur les intersections de l'aperçu pour corriger les erreurs"
   }
 }

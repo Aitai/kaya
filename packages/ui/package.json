@@ -43,7 +43,8 @@
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^3.0.6",
     "reactflow": "^11.11.4",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "@kaya/board-recognition": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.3",

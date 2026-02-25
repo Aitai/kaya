@@ -1,6 +1,5 @@
 {
   "addToLibrary": "라이브러리에 추가",
-
   "landing": {
     "tagline": "현대적인 바둑 애플리케이션",
     "continue": "대국 계속하기",
@@ -85,7 +84,6 @@
   "export": "내보내기",
   "copy": "복사",
   "paste": "붙여넣기",
-
   "aiConfig": {
     "title": "분석 설정",
     "modelLibrary": "모델 라이브러리",
@@ -130,7 +128,6 @@
     "downloading": "다운로드 중...",
     "poweredBy": "AI 엔진:"
   },
-
   "kayaConfig": {
     "title": "설정",
     "close": "설정 닫기",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "영역 히트맵 전환",
     "toggleTopMoves": "최선수 표시 전환",
@@ -200,7 +196,6 @@
     "analysisModeOn": "분석 모드 켜짐 - 클릭하여 끄기",
     "analysisModeOff": "분석 모드 꺼짐 - 클릭하여 켜기"
   },
-
   "analysisLegend": {
     "title": "분석 범례",
     "policyDescription": "색상은 AI의 각 착수 후보에 대한 <strong>정책 확률</strong>을 나타냅니다. 신경망이 해당 수를 최선이라고 판단하는 확신도입니다.",
@@ -220,7 +215,6 @@
     "blackArea": "흑 영역",
     "whiteArea": "백 영역"
   },
-
   "library": {
     "newFolder": "새 폴더",
     "importSgfZip": "SGF/ZIP 가져오기",
@@ -257,7 +251,6 @@
     "create": "생성",
     "unsavedChangesIndicator": "저장되지 않은 변경사항"
   },
-
   "updater": {
     "checkForUpdates": "업데이트 확인...",
     "updateAvailable": "업데이트 가능",
@@ -277,7 +270,6 @@
     "updateFailed": "업데이트 실패",
     "updateFailedMessage": "업데이트 설치에 실패했습니다. 나중에 다시 시도하거나 최신 버전을 수동으로 다운로드하세요:"
   },
-
   "editToolbar": {
     "stones": "돌",
     "playMode": "대국 모드",
@@ -310,7 +302,6 @@
     "undo": "실행 취소",
     "redo": "다시 실행"
   },
-
   "gameInfo": {
     "game": "대국",
     "untitled": "제목 없음",
@@ -338,7 +329,6 @@
     "editAllFields": "모든 필드 편집",
     "exitEditMode": "편집 모드 종료"
   },
-
   "comment": {
     "move": "{{number}}번째 수",
     "moveNumber": "{{number}}번째 수",
@@ -354,7 +344,6 @@
     "saveShortcut": "저장 (Cmd/Ctrl+S)",
     "cancelShortcut": "취소 (Esc)"
   },
-
   "gameTree": {
     "switchToVertical": "세로 레이아웃으로 전환",
     "switchToHorizontal": "가로 레이아웃으로 전환",
@@ -362,7 +351,6 @@
     "showMinimap": "미니맵 보기",
     "centerOnPosition": "현재 위치 중앙에"
   },
-
   "boardControls": {
     "captured": "잡힌 돌",
     "branch": "변화",
@@ -382,7 +370,6 @@
     "resignConfirm": "{{player}}이(가) 기권합니다. 확실합니까?",
     "resign": "기권"
   },
-
   "scoring": {
     "clear": "지우기",
     "clearAllDeadStones": "모든 죽은 돌 지우기",
@@ -410,7 +397,6 @@
     "stonesMarkedDead": "{{count}}개의 돌이 죽은 것으로 표시됨",
     "stonesMarkedDeadPlural": "{{count}}개의 돌이 죽은 것으로 표시됨"
   },
-
   "mobileTab": {
     "board": "바둑판",
     "info": "정보",
@@ -418,7 +404,6 @@
     "analysis": "분석",
     "library": "라이브러리"
   },
-
   "toast": {
     "exportedFile": "\"{{filename}}\" 내보내기 완료",
     "savedToLibrary": "라이브러리에 저장됨",
@@ -434,21 +419,17 @@
     "failedToPaste": "붙여넣기 실패: {{error}}",
     "failedToLoadSgf": "SGF 파일 불러오기 실패: {{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "SGF 파일 불러오는 중"
   },
-
   "dropzone": {
     "dropToLoad": "대국을 불러오려면 드롭하세요",
     "dropOnLibrary": "라이브러리에 드롭하여 저장"
   },
-
   "languageSwitcher": {
     "changeLanguage": "언어 변경",
     "selectLanguage": "언어 선택"
   },
-
   "gameboardActions": {
     "pass": "패스",
     "resign": "기권",
@@ -481,7 +462,6 @@
     "hideControls": "컨트롤 숨기기",
     "showControls": "컨트롤 표시"
   },
-
   "analysisBar": {
     "uploadingModel": "모델 업로드 중 ({{progress}}%)",
     "checkingCache": "캐시 확인 중...",
@@ -494,7 +474,6 @@
     "scoreLead": "형세",
     "analyzeFullGameLong": "전체 대국 분석 (긴 대국은 몇 분 소요)"
   },
-
   "panels": {
     "library": "라이브러리",
     "analysis": "분석",
@@ -504,7 +483,6 @@
     "showLibrary": "라이브러리 표시 (Ctrl+L)",
     "showSidebar": "사이드바 표시 (Ctrl+B)"
   },
-
   "shortcuts": {
     "title": "키보드 단축키",
     "description": "키보드 단축키를 사용자 정의하세요. 단축키를 클릭하여 변경할 수 있습니다.",
@@ -561,7 +539,6 @@
       "message": "모든 키보드 단축키가 기본값으로 재설정됩니다. 이 작업은 취소할 수 없습니다."
     }
   },
-
   "quickNewGameTooltip": "빠른 새 대국 ({{size}}×{{size}}) - ⚠️ 저장하지 않고 현재 대국 삭제!",
   "close": "닫기",
   "aboutKaya": "Kaya 정보",
@@ -573,12 +550,10 @@
   "aboutGitHub": "GitHub 저장소",
   "aboutReportIssue": "문제 신고",
   "aboutVersionNotAvailable": "버전 정보를 사용할 수 없습니다",
-
   "analysisPanel": {
     "graphTab": "그래프",
     "reportTab": "보고서"
   },
-
   "performanceReport": {
     "black": "흑",
     "white": "백",
@@ -625,5 +600,28 @@
       "phasesDesc": "19×19 바둑판: 포석(1-50수), 중반(51-150수), 끝내기(151수 이후). 작은 판에서는 경계가 조정됩니다.",
       "note": "참고: 분석은 단일 패스 추론의 정책 네트워크 제안을 기반으로 합니다. 결과는 다중 패스 탐색 엔진과 다를 수 있습니다."
     }
+  },
+  "boardRecognition": {
+    "title": "바둑판 이미지 인식",
+    "selectSize": "바둑판 크기:",
+    "photo": "사진",
+    "preview": "인식된 바둑판",
+    "dragHint": "모서리를 드래그하여 바둑판 영역을 지정하세요",
+    "analyzing": "분석 중…",
+    "chooseSizeFirst": "바둑판 크기를 선택하세요",
+    "importSGF": "SGF로 가져오기",
+    "cornersManual": "자동 감지 실패 – 수동으로 모서리를 조정하세요",
+    "loadError": "이미지 로드 실패",
+    "analysisError": "분석 실패",
+    "alignGrid": "격자:",
+    "resetGrid": "격자 정렬 초기화",
+    "gridClickHint": "미리보기에서 격자의 4개 모서리 교차점을 클릭하세요 ({{count}}/4)",
+    "gridFineTuneHint": "모서리 핸들을 클릭하여 위치를 미세 조정합니다",
+    "calibrate": "보정:",
+    "markBlack": "흑돌 표시",
+    "markWhite": "백돌 표시",
+    "markEmpty": "빈 교차점 표시",
+    "resetCalibration": "보정 초기화",
+    "calibrateHint": "미리보기에서 교차점을 클릭하여 오류를 수정하세요"
   }
 }

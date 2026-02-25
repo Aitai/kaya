@@ -1,6 +1,5 @@
 {
   "addToLibrary": "Add to Library",
-
   "landing": {
     "tagline": "A modern Go game application",
     "continue": "Continue Game",
@@ -85,7 +84,6 @@
   "export": "Export",
   "copy": "Copy",
   "paste": "Paste",
-
   "aiConfig": {
     "title": "Analysis Config",
     "modelLibrary": "Model Library",
@@ -130,7 +128,6 @@
     "downloading": "Downloading...",
     "poweredBy": "AI engine powered by"
   },
-
   "kayaConfig": {
     "title": "Settings",
     "close": "Close settings",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "Toggle Ownership Heatmap",
     "toggleTopMoves": "Toggle Top Moves",
@@ -200,7 +196,6 @@
     "analysisModeOn": "Analysis Mode On - Click to disable",
     "analysisModeOff": "Analysis Mode Off - Click to enable"
   },
-
   "analysisLegend": {
     "title": "Analysis Legend",
     "policyDescription": "Colors indicate the AI's <strong>Policy Probability</strong> for each move suggestion. This represents the neural network's confidence that a move is the best choice.",
@@ -220,7 +215,6 @@
     "blackArea": "Black Area",
     "whiteArea": "White Area"
   },
-
   "library": {
     "newFolder": "New Folder",
     "importSgfZip": "Import SGF/ZIP",
@@ -257,7 +251,6 @@
     "create": "Create",
     "unsavedChangesIndicator": "Unsaved changes"
   },
-
   "updater": {
     "checkForUpdates": "Check for Updates...",
     "updateAvailable": "Update Available",
@@ -277,7 +270,6 @@
     "updateFailed": "Update Failed",
     "updateFailedMessage": "Failed to install the update. Please try again later or download the latest version manually from:"
   },
-
   "editToolbar": {
     "stones": "Stones",
     "playMode": "Play mode",
@@ -310,7 +302,6 @@
     "undo": "Undo",
     "redo": "Redo"
   },
-
   "gameInfo": {
     "game": "Game",
     "untitled": "Untitled",
@@ -338,7 +329,6 @@
     "editAllFields": "Edit all fields",
     "exitEditMode": "Exit edit mode"
   },
-
   "comment": {
     "move": "Move {{number}}",
     "moveNumber": "Move {{number}}",
@@ -354,7 +344,6 @@
     "saveShortcut": "Save (Cmd/Ctrl+S)",
     "cancelShortcut": "Cancel (Esc)"
   },
-
   "gameTree": {
     "switchToVertical": "Switch to vertical layout",
     "switchToHorizontal": "Switch to horizontal layout",
@@ -362,7 +351,6 @@
     "showMinimap": "Show minimap",
     "centerOnPosition": "Center on current position"
   },
-
   "boardControls": {
     "captured": "captured",
     "branch": "Branch",
@@ -382,7 +370,6 @@
     "resignConfirm": "{{player}} resigns. Are you sure?",
     "resign": "Resign"
   },
-
   "scoring": {
     "clear": "Clear",
     "clearAllDeadStones": "Clear all dead stones",
@@ -410,7 +397,6 @@
     "stonesMarkedDead": "{{count}} stone marked as dead",
     "stonesMarkedDeadPlural": "{{count}} stones marked as dead"
   },
-
   "mobileTab": {
     "board": "Board",
     "info": "Info",
@@ -418,7 +404,6 @@
     "analysis": "Analysis",
     "library": "Library"
   },
-
   "toast": {
     "exportedFile": "Exported \"{{filename}}\"",
     "savedToLibrary": "Saved to library",
@@ -434,21 +419,17 @@
     "failedToPaste": "Failed to paste: {{error}}",
     "failedToLoadSgf": "Failed to load SGF file: {{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "Loading SGF File"
   },
-
   "dropzone": {
     "dropToLoad": "Drop to load game",
     "dropOnLibrary": "Drop on Library to save instead"
   },
-
   "languageSwitcher": {
     "changeLanguage": "Change language",
     "selectLanguage": "Select Language"
   },
-
   "gameboardActions": {
     "pass": "Pass",
     "resign": "Resign",
@@ -481,7 +462,6 @@
     "hideControls": "Hide controls",
     "showControls": "Show controls"
   },
-
   "analysisBar": {
     "uploadingModel": "Uploading model ({{progress}}%)",
     "checkingCache": "Checking cache...",
@@ -494,7 +474,6 @@
     "scoreLead": "Score Lead",
     "analyzeFullGameLong": "Analyze Full Game (may take a few minutes for long games)"
   },
-
   "panels": {
     "library": "Library",
     "analysis": "Analysis",
@@ -504,7 +483,6 @@
     "showLibrary": "Show Library (Ctrl+L)",
     "showSidebar": "Show Sidebar (Ctrl+B)"
   },
-
   "shortcuts": {
     "title": "Keyboard Shortcuts",
     "description": "Customize keyboard shortcuts. Click on a shortcut to change it.",
@@ -561,9 +539,7 @@
       "message": "This will reset all keyboard shortcuts to their default values. This action cannot be undone."
     }
   },
-
   "quickNewGameTooltip": "Quick New Game ({{size}}×{{size}}) - ⚠️ Erases current game without saving!",
-
   "close": "Close",
   "aboutKaya": "About Kaya",
   "aboutDescription": "A beautiful Go game application with AI analysis powered by KataGo",
@@ -574,12 +550,10 @@
   "aboutGitHub": "GitHub Repository",
   "aboutReportIssue": "Report an Issue",
   "aboutVersionNotAvailable": "Version information not available",
-
   "analysisPanel": {
     "graphTab": "Graph",
     "reportTab": "Report"
   },
-
   "performanceReport": {
     "black": "Black",
     "white": "White",
@@ -626,5 +600,28 @@
       "phasesDesc": "Opening (moves 1-50), Middle Game (51-150), and End Game (151+) on a 19×19 board. Phase boundaries adjust for smaller boards.",
       "note": "Note: Analysis is based on policy network suggestions from single-pass inference. Results may differ from multi-pass search engines."
     }
+  },
+  "boardRecognition": {
+    "title": "Board Image Recognition",
+    "selectSize": "Board size:",
+    "photo": "Photo",
+    "preview": "Recognized Board",
+    "dragHint": "Drag corners to outline the board area",
+    "analyzing": "Analyzing…",
+    "chooseSizeFirst": "Select a board size to begin",
+    "importSGF": "Import as SGF",
+    "cornersManual": "Auto-detection failed – adjust corners manually",
+    "loadError": "Failed to load image",
+    "analysisError": "Analysis failed",
+    "alignGrid": "Grid:",
+    "resetGrid": "Reset grid alignment",
+    "gridClickHint": "Click the 4 grid corner intersections on the preview ({{count}}/4)",
+    "gridFineTuneHint": "Click a corner handle to fine-tune its position",
+    "calibrate": "Calibrate:",
+    "markBlack": "Mark black stone",
+    "markWhite": "Mark white stone",
+    "markEmpty": "Mark empty intersection",
+    "resetCalibration": "Reset calibration",
+    "calibrateHint": "Click intersections on the preview to correct misdetections"
   }
 }

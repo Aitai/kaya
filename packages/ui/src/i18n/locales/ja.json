@@ -1,6 +1,5 @@
 {
   "addToLibrary": "ライブラリに追加",
-
   "landing": {
     "tagline": "モダンな囲碁アプリケーション",
     "continue": "対局を続ける",
@@ -85,7 +84,6 @@
   "export": "エクスポート",
   "copy": "コピー",
   "paste": "貼り付け",
-
   "aiConfig": {
     "title": "分析設定",
     "modelLibrary": "モデルライブラリ",
@@ -130,7 +128,6 @@
     "downloading": "ダウンロード中...",
     "poweredBy": "AIエンジン:"
   },
-
   "kayaConfig": {
     "title": "設定",
     "close": "設定を閉じる",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "地合いヒートマップ切替",
     "toggleTopMoves": "最善手表示切替",
@@ -200,7 +196,6 @@
     "analysisModeOn": "分析モードがオン - クリックで無効化",
     "analysisModeOff": "分析モードがオフ - クリックで有効化"
   },
-
   "analysisLegend": {
     "title": "分析の凡例",
     "policyDescription": "色はAIの各着手候補に対する<strong>ポリシー確率</strong>を示します。ニューラルネットワークがその手を最善と考える確信度を表します。",
@@ -220,7 +215,6 @@
     "blackArea": "黒の領域",
     "whiteArea": "白の領域"
   },
-
   "library": {
     "newFolder": "新規フォルダ",
     "importSgfZip": "SGF/ZIPをインポート",
@@ -257,7 +251,6 @@
     "create": "作成",
     "unsavedChangesIndicator": "未保存の変更"
   },
-
   "updater": {
     "checkForUpdates": "アップデートを確認...",
     "updateAvailable": "アップデート利用可能",
@@ -277,7 +270,6 @@
     "updateFailed": "アップデート失敗",
     "updateFailedMessage": "アップデートのインストールに失敗しました。後で再試行するか、手動で最新版をダウンロードしてください："
   },
-
   "editToolbar": {
     "stones": "石",
     "playMode": "対局モード",
@@ -310,7 +302,6 @@
     "undo": "元に戻す",
     "redo": "やり直す"
   },
-
   "gameInfo": {
     "game": "対局",
     "untitled": "無題",
@@ -338,7 +329,6 @@
     "editAllFields": "すべてのフィールドを編集",
     "exitEditMode": "編集モードを終了"
   },
-
   "comment": {
     "move": "第{{number}}手",
     "moveNumber": "第{{number}}手",
@@ -354,7 +344,6 @@
     "saveShortcut": "保存 (Cmd/Ctrl+S)",
     "cancelShortcut": "キャンセル (Esc)"
   },
-
   "gameTree": {
     "switchToVertical": "縦レイアウトに切替",
     "switchToHorizontal": "横レイアウトに切替",
@@ -362,7 +351,6 @@
     "showMinimap": "ミニマップを表示",
     "centerOnPosition": "現在位置を中央に"
   },
-
   "boardControls": {
     "captured": "取った石",
     "branch": "変化",
@@ -382,7 +370,6 @@
     "resignConfirm": "{{player}}が投了します。よろしいですか？",
     "resign": "投了"
   },
-
   "scoring": {
     "clear": "クリア",
     "clearAllDeadStones": "すべての死に石をクリア",
@@ -410,7 +397,6 @@
     "stonesMarkedDead": "{{count}}個の石が死に石としてマーク",
     "stonesMarkedDeadPlural": "{{count}}個の石が死に石としてマーク"
   },
-
   "mobileTab": {
     "board": "碁盤",
     "info": "情報",
@@ -418,7 +404,6 @@
     "analysis": "分析",
     "library": "ライブラリ"
   },
-
   "toast": {
     "exportedFile": "「{{filename}}」をエクスポートしました",
     "savedToLibrary": "ライブラリに保存しました",
@@ -434,21 +419,17 @@
     "failedToPaste": "貼り付けに失敗: {{error}}",
     "failedToLoadSgf": "SGFファイルの読み込みに失敗: {{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "SGFファイルを読み込み中"
   },
-
   "dropzone": {
     "dropToLoad": "ドロップして対局を読み込む",
     "dropOnLibrary": "ライブラリにドロップして保存"
   },
-
   "languageSwitcher": {
     "changeLanguage": "言語を変更",
     "selectLanguage": "言語を選択"
   },
-
   "gameboardActions": {
     "pass": "パス",
     "resign": "投了",
@@ -481,7 +462,6 @@
     "hideControls": "コントロールを非表示",
     "showControls": "コントロールを表示"
   },
-
   "analysisBar": {
     "uploadingModel": "モデルをアップロード中 ({{progress}}%)",
     "checkingCache": "キャッシュを確認中...",
@@ -494,7 +474,6 @@
     "scoreLead": "形勢",
     "analyzeFullGameLong": "全局分析（長い対局では数分かかる場合があります）"
   },
-
   "panels": {
     "library": "ライブラリ",
     "analysis": "分析",
@@ -504,7 +483,6 @@
     "showLibrary": "ライブラリを表示 (Ctrl+L)",
     "showSidebar": "サイドバーを表示 (Ctrl+B)"
   },
-
   "shortcuts": {
     "title": "キーボードショートカット",
     "description": "キーボードショートカットをカスタマイズします。ショートカットをクリックして変更します。",
@@ -561,7 +539,6 @@
       "message": "すべてのキーボードショートカットがデフォルト値にリセットされます。この操作は取り消せません。"
     }
   },
-
   "quickNewGameTooltip": "クイック新規対局（{{size}}×{{size}}）- ⚠️ 保存せずに現在の対局を削除します！",
   "close": "閉じる",
   "aboutKaya": "Kayaについて",
@@ -573,12 +550,10 @@
   "aboutGitHub": "GitHubリポジトリ",
   "aboutReportIssue": "問題を報告",
   "aboutVersionNotAvailable": "バージョン情報は利用できません",
-
   "analysisPanel": {
     "graphTab": "グラフ",
     "reportTab": "レポート"
   },
-
   "performanceReport": {
     "black": "黒",
     "white": "白",
@@ -625,5 +600,28 @@
       "phasesDesc": "19×19盤: 序盤(1-50手)、中盤(51-150手)、終盤(151手以降)。小さい盤では境界が調整されます。",
       "note": "注: 分析はシングルパス推論のポリシーネットワーク提案に基づいています。結果はマルチパス探索エンジンと異なる場合があります。"
     }
+  },
+  "boardRecognition": {
+    "title": "碁盤画像認識",
+    "selectSize": "碁盤サイズ：",
+    "photo": "写真",
+    "preview": "認識結果",
+    "dragHint": "コーナーをドラッグして碁盤の範囲を指定してください",
+    "analyzing": "分析中…",
+    "chooseSizeFirst": "まず碁盤のサイズを選択してください",
+    "importSGF": "SGF としてインポート",
+    "cornersManual": "自動検出失敗 – 手動でコーナーを調整してください",
+    "loadError": "画像の読み込みに失敗しました",
+    "analysisError": "分析に失敗しました",
+    "alignGrid": "グリッド：",
+    "resetGrid": "グリッド位置をリセット",
+    "gridClickHint": "プレビューでグリッドの4隅の交点をクリック ({{count}}/4)",
+    "gridFineTuneHint": "コーナーハンドルをクリックして位置を微調整します",
+    "calibrate": "補正：",
+    "markBlack": "黒石を指定",
+    "markWhite": "白石を指定",
+    "markEmpty": "空き交点を指定",
+    "resetCalibration": "補正をリセット",
+    "calibrateHint": "プレビュー上の交点をクリックして誤検出を修正"
   }
 }

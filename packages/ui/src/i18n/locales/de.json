@@ -1,6 +1,5 @@
 {
   "addToLibrary": "Zur Bibliothek hinzufügen",
-
   "landing": {
     "tagline": "Eine moderne Go-Anwendung",
     "continue": "Spiel fortsetzen",
@@ -85,7 +84,6 @@
   "export": "Exportieren",
   "copy": "Kopieren",
   "paste": "Einfügen",
-
   "aiConfig": {
     "title": "Analyse-Einstellungen",
     "modelLibrary": "Modellbibliothek",
@@ -130,7 +128,6 @@
     "downloading": "Wird heruntergeladen...",
     "poweredBy": "KI-Engine basiert auf"
   },
-
   "kayaConfig": {
     "title": "Einstellungen",
     "close": "Einstellungen schließen",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "Gebiets-Heatmap umschalten",
     "toggleTopMoves": "Beste Züge umschalten",
@@ -200,7 +196,6 @@
     "analysisModeOn": "Analyse-Modus aktiv - Klicken zum Deaktivieren",
     "analysisModeOff": "Analyse-Modus inaktiv - Klicken zum Aktivieren"
   },
-
   "analysisLegend": {
     "title": "Analyse-Legende",
     "policyDescription": "Farben zeigen die <strong>Richtlinien-Wahrscheinlichkeit</strong> der KI für jeden Zugkandidaten an. Dies repräsentiert die Konfidenz des neuronalen Netzwerks, dass der Zug am besten ist.",
@@ -220,7 +215,6 @@
     "blackArea": "Schwarzes Gebiet",
     "whiteArea": "Weißes Gebiet"
   },
-
   "library": {
     "newFolder": "Neuer Ordner",
     "importSgfZip": "SGF/ZIP importieren",
@@ -257,7 +251,6 @@
     "create": "Erstellen",
     "unsavedChangesIndicator": "Nicht gespeicherte Änderungen"
   },
-
   "updater": {
     "checkForUpdates": "Nach Updates suchen...",
     "updateAvailable": "Update verfügbar",
@@ -277,7 +270,6 @@
     "updateFailed": "Update fehlgeschlagen",
     "updateFailedMessage": "Update-Installation fehlgeschlagen. Bitte später erneut versuchen oder die neueste Version manuell herunterladen:"
   },
-
   "editToolbar": {
     "stones": "Steine",
     "playMode": "Spielmodus",
@@ -310,7 +302,6 @@
     "undo": "Rückgängig",
     "redo": "Wiederholen"
   },
-
   "gameInfo": {
     "game": "Spiel",
     "untitled": "Unbenannt",
@@ -335,13 +326,12 @@
     "editAllFields": "Alle Felder bearbeiten",
     "exitEditMode": "Bearbeitungsmodus beenden"
   },
-
   "comment": {
     "move": "Zug {{number}}",
     "moveNumber": "Zug {{number}}",
-    "noMoveSelected": "Kein Zug ausgew\u00e4hlt",
-    "noComment": "Kein Kommentar. Klicken zum Hinzuf\u00fcgen.",
-    "placeholder": "Kommentar eingeben (Markdown unterst\u00fctzt)...",
+    "noMoveSelected": "Kein Zug ausgewählt",
+    "noComment": "Kein Kommentar. Klicken zum Hinzufügen.",
+    "placeholder": "Kommentar eingeben (Markdown unterstützt)...",
     "markdownHint": "Tipp: Markdown zur Formatierung verwenden. Strg/Cmd+S zum Speichern, Esc zum Abbrechen.",
     "enterHint": "Enter zum Speichern • Shift+Enter für neue Zeile • Esc zum Abbrechen",
     "hint": "Tipp: Markdown zur Formatierung verwenden. Strg/Cmd+S zum Speichern, Esc zum Abbrechen.",
@@ -351,7 +341,6 @@
     "saveShortcut": "Speichern (Cmd/Strg+S)",
     "cancelShortcut": "Abbrechen (Esc)"
   },
-
   "gameTree": {
     "switchToVertical": "Zu vertikalem Layout wechseln",
     "switchToHorizontal": "Zu horizontalem Layout wechseln",
@@ -359,7 +348,6 @@
     "showMinimap": "Minimap anzeigen",
     "centerOnPosition": "Auf Position zentrieren"
   },
-
   "boardControls": {
     "captured": "Gefangen",
     "branch": "Variante",
@@ -379,7 +367,6 @@
     "resignConfirm": "{{player}} wird aufgeben. Sind Sie sicher?",
     "resign": "Aufgeben"
   },
-
   "scoring": {
     "clear": "Löschen",
     "clearAllDeadStones": "Alle toten Steine löschen",
@@ -407,7 +394,6 @@
     "stonesMarkedDead": "{{count}} Stein als tot markiert",
     "stonesMarkedDeadPlural": "{{count}} Steine als tot markiert"
   },
-
   "mobileTab": {
     "board": "Brett",
     "info": "Info",
@@ -415,7 +401,6 @@
     "analysis": "Analyse",
     "library": "Bibliothek"
   },
-
   "toast": {
     "exportedFile": "\"{{filename}}\" exportiert",
     "savedToLibrary": "In Bibliothek gespeichert",
@@ -431,21 +416,17 @@
     "failedToPaste": "Einfügen fehlgeschlagen: {{error}}",
     "failedToLoadSgf": "SGF-Datei laden fehlgeschlagen: {{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "SGF-Datei wird geladen"
   },
-
   "dropzone": {
     "dropToLoad": "Ablegen um Spiel zu laden",
     "dropOnLibrary": "Auf Bibliothek ablegen um zu speichern"
   },
-
   "languageSwitcher": {
     "changeLanguage": "Sprache ändern",
     "selectLanguage": "Sprache wählen"
   },
-
   "gameboardActions": {
     "pass": "Passen",
     "resign": "Aufgeben",
@@ -478,7 +459,6 @@
     "hideControls": "Steuerung ausblenden",
     "showControls": "Steuerung anzeigen"
   },
-
   "analysisBar": {
     "uploadingModel": "Modell wird hochgeladen ({{progress}}%)",
     "checkingCache": "Cache wird überprüft...",
@@ -491,7 +471,6 @@
     "scoreLead": "Punktevorsprung",
     "analyzeFullGameLong": "Gesamtes Spiel analysieren (kann bei langen Spielen einige Minuten dauern)"
   },
-
   "panels": {
     "library": "Bibliothek",
     "analysis": "Analyse",
@@ -501,7 +480,6 @@
     "showLibrary": "Bibliothek anzeigen (Strg+L)",
     "showSidebar": "Seitenleiste anzeigen (Strg+B)"
   },
-
   "shortcuts": {
     "title": "Tastenkürzel",
     "description": "Passen Sie Tastenkürzel an. Klicken Sie auf ein Kürzel, um es zu ändern.",
@@ -558,7 +536,6 @@
       "message": "Alle Tastenkürzel werden auf ihre Standardwerte zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden."
     }
   },
-
   "quickNewGameTooltip": "Schnelles neues Spiel ({{size}}×{{size}}) - ⚠️ Löscht aktuelles Spiel ohne Speichern!",
   "close": "Schließen",
   "aboutKaya": "Über Kaya",
@@ -570,12 +547,10 @@
   "aboutGitHub": "GitHub-Repository",
   "aboutReportIssue": "Problem melden",
   "aboutVersionNotAvailable": "Versionsinformationen nicht verfügbar",
-
   "analysisPanel": {
     "graphTab": "Diagramm",
     "reportTab": "Bericht"
   },
-
   "performanceReport": {
     "black": "Schwarz",
     "white": "Weiß",
@@ -622,5 +597,28 @@
       "phasesDesc": "Eröffnung (Züge 1-50), Mittelspiel (51-150), Endspiel (151+) auf einem 19×19 Brett. Grenzen werden für kleinere Bretter angepasst.",
       "note": "Hinweis: Die Analyse basiert auf Policy-Netzwerk-Vorschlägen aus Single-Pass-Inferenz. Ergebnisse können von Multi-Pass-Suchmaschinen abweichen."
     }
+  },
+  "boardRecognition": {
+    "title": "Brett-Bilderkennung",
+    "selectSize": "Brettgröße:",
+    "photo": "Foto",
+    "preview": "Erkanntes Brett",
+    "dragHint": "Eckpunkte ziehen, um den Brettbereich zu markieren",
+    "analyzing": "Analysiere…",
+    "chooseSizeFirst": "Bitte zuerst Brettgröße wählen",
+    "importSGF": "Als SGF importieren",
+    "cornersManual": "Automatische Erkennung fehlgeschlagen – Ecken manuell anpassen",
+    "loadError": "Bild konnte nicht geladen werden",
+    "analysisError": "Analyse fehlgeschlagen",
+    "alignGrid": "Gitter:",
+    "resetGrid": "Gitterausrichtung zurücksetzen",
+    "gridClickHint": "Klicken Sie auf die 4 Eck-Schnittpunkte des Gitters ({{count}}/4)",
+    "gridFineTuneHint": "Klicken Sie auf einen Eckpunkt, um die Position anzupassen",
+    "calibrate": "Kalibrieren:",
+    "markBlack": "Schwarzen Stein markieren",
+    "markWhite": "Weißen Stein markieren",
+    "markEmpty": "Leeren Schnittpunkt markieren",
+    "resetCalibration": "Kalibrierung zurücksetzen",
+    "calibrateHint": "Klicken Sie auf Schnittpunkte in der Vorschau, um Fehler zu korrigieren"
   }
 }

@@ -1,6 +1,5 @@
 {
   "addToLibrary": "Añadir a la biblioteca",
-
   "landing": {
     "tagline": "Una aplicación moderna de Go",
     "continue": "Continuar partida",
@@ -85,7 +84,6 @@
   "export": "Exportar",
   "copy": "Copiar",
   "paste": "Pegar",
-
   "aiConfig": {
     "title": "Configuración de análisis",
     "modelLibrary": "Biblioteca de modelos",
@@ -130,7 +128,6 @@
     "downloading": "Descargando...",
     "poweredBy": "Motor de IA basado en"
   },
-
   "kayaConfig": {
     "title": "Configuración",
     "close": "Cerrar configuración",
@@ -174,7 +171,6 @@
       }
     }
   },
-
   "analysis": {
     "toggleOwnership": "Alternar mapa de calor de territorio",
     "toggleTopMoves": "Alternar mejores movimientos",
@@ -200,7 +196,6 @@
     "analysisModeOn": "Modo análisis activado - Haz clic para desactivar",
     "analysisModeOff": "Modo análisis desactivado - Haz clic para activar"
   },
-
   "analysisLegend": {
     "title": "Leyenda del análisis",
     "policyDescription": "Los colores indican la <strong>probabilidad de política</strong> de la IA para cada movimiento candidato. Representa la confianza de la red neuronal en que el movimiento es el mejor.",
@@ -220,7 +215,6 @@
     "blackArea": "Territorio negro",
     "whiteArea": "Territorio blanco"
   },
-
   "library": {
     "newFolder": "Nueva carpeta",
     "importSgfZip": "Importar SGF/ZIP",
@@ -257,7 +251,6 @@
     "create": "Crear",
     "unsavedChangesIndicator": "Cambios sin guardar"
   },
-
   "updater": {
     "checkForUpdates": "Buscar actualizaciones...",
     "updateAvailable": "Actualización disponible",
@@ -277,7 +270,6 @@
     "updateFailed": "Error en la actualización",
     "updateFailedMessage": "Error al instalar la actualización. Por favor, inténtalo de nuevo más tarde o descarga la última versión manualmente:"
   },
-
   "editToolbar": {
     "stones": "Piedras",
     "playMode": "Modo juego",
@@ -310,7 +302,6 @@
     "undo": "Deshacer",
     "redo": "Rehacer"
   },
-
   "gameInfo": {
     "game": "Partida",
     "untitled": "Sin título",
@@ -335,12 +326,11 @@
     "editAllFields": "Editar todos los campos",
     "exitEditMode": "Salir del modo edición"
   },
-
   "comment": {
     "move": "Movimiento {{number}}",
     "moveNumber": "Movimiento {{number}}",
-    "noMoveSelected": "Ning\u00fan movimiento seleccionado",
-    "noComment": "Sin comentario. Haz clic para a\u00f1adir.",
+    "noMoveSelected": "Ningún movimiento seleccionado",
+    "noComment": "Sin comentario. Haz clic para añadir.",
     "placeholder": "Escribe un comentario (markdown soportado)...",
     "markdownHint": "Consejo: Usa markdown para formatear. Ctrl/Cmd+S para guardar, Esc para cancelar.",
     "enterHint": "Enter para guardar • Shift+Enter para nueva línea • Esc para cancelar",
@@ -351,7 +341,6 @@
     "saveShortcut": "Guardar (Cmd/Ctrl+S)",
     "cancelShortcut": "Cancelar (Esc)"
   },
-
   "gameTree": {
     "switchToVertical": "Cambiar a disposición vertical",
     "switchToHorizontal": "Cambiar a disposición horizontal",
@@ -359,7 +348,6 @@
     "showMinimap": "Mostrar minimapa",
     "centerOnPosition": "Centrar en posición"
   },
-
   "boardControls": {
     "captured": "Capturadas",
     "branch": "Variante",
@@ -379,7 +367,6 @@
     "resignConfirm": "{{player}} se va a rendir. ¿Estás seguro?",
     "resign": "Rendirse"
   },
-
   "scoring": {
     "clear": "Limpiar",
     "clearAllDeadStones": "Limpiar todas las piedras muertas",
@@ -407,7 +394,6 @@
     "stonesMarkedDead": "{{count}} piedra marcada como muerta",
     "stonesMarkedDeadPlural": "{{count}} piedras marcadas como muertas"
   },
-
   "mobileTab": {
     "board": "Tablero",
     "info": "Info",
@@ -415,7 +401,6 @@
     "analysis": "Análisis",
     "library": "Biblioteca"
   },
-
   "toast": {
     "exportedFile": "\"{{filename}}\" exportado",
     "savedToLibrary": "Guardado en la biblioteca",
@@ -431,21 +416,17 @@
     "failedToPaste": "Error al pegar: {{error}}",
     "failedToLoadSgf": "Error al cargar el archivo SGF: {{error}}"
   },
-
   "loading": {
     "loadingSgfFile": "Cargando archivo SGF"
   },
-
   "dropzone": {
     "dropToLoad": "Suelta para cargar la partida",
     "dropOnLibrary": "Suelta en la Biblioteca para guardar"
   },
-
   "languageSwitcher": {
     "changeLanguage": "Cambiar idioma",
     "selectLanguage": "Seleccionar idioma"
   },
-
   "gameboardActions": {
     "pass": "Pasar",
     "resign": "Rendirse",
@@ -478,7 +459,6 @@
     "hideControls": "Ocultar controles",
     "showControls": "Mostrar controles"
   },
-
   "analysisBar": {
     "uploadingModel": "Subiendo modelo ({{progress}}%)",
     "checkingCache": "Verificando caché...",
@@ -491,7 +471,6 @@
     "scoreLead": "Ventaja",
     "analyzeFullGameLong": "Analizar partida completa (puede tardar varios minutos)"
   },
-
   "panels": {
     "library": "Biblioteca",
     "analysis": "Análisis",
@@ -501,7 +480,6 @@
     "showLibrary": "Mostrar biblioteca (Ctrl+L)",
     "showSidebar": "Mostrar barra lateral (Ctrl+B)"
   },
-
   "shortcuts": {
     "title": "Atajos de teclado",
     "description": "Personaliza los atajos de teclado. Haz clic en un atajo para cambiarlo.",
@@ -558,7 +536,6 @@
       "message": "Todos los atajos de teclado se restablecerán a sus valores predeterminados. Esta acción no se puede deshacer."
     }
   },
-
   "quickNewGameTooltip": "Nueva partida rápida ({{size}}×{{size}}) - ⚠️ ¡Elimina la partida actual sin guardar!",
   "close": "Cerrar",
   "aboutKaya": "Acerca de Kaya",
@@ -570,12 +547,10 @@
   "aboutGitHub": "Repositorio de GitHub",
   "aboutReportIssue": "Reportar un problema",
   "aboutVersionNotAvailable": "Información de versión no disponible",
-
   "analysisPanel": {
     "graphTab": "Gráfico",
     "reportTab": "Informe"
   },
-
   "performanceReport": {
     "black": "Negro",
     "white": "Blanco",
@@ -622,5 +597,28 @@
       "phasesDesc": "Apertura (jugadas 1-50), Medio juego (51-150), Final (151+) en tablero 19×19. Los límites se ajustan para tableros más pequeños.",
       "note": "Nota: El análisis se basa en sugerencias de la red de políticas con inferencia simple. Los resultados pueden diferir de motores de búsqueda multi-paso."
     }
+  },
+  "boardRecognition": {
+    "title": "Reconocimiento de tablero",
+    "selectSize": "Tamaño del tablero:",
+    "photo": "Foto",
+    "preview": "Tablero reconocido",
+    "dragHint": "Arrastra las esquinas para delimitar el área del tablero",
+    "analyzing": "Analizando…",
+    "chooseSizeFirst": "Elige primero el tamaño del tablero",
+    "importSGF": "Importar como SGF",
+    "cornersManual": "Detección automática fallida – ajusta las esquinas manualmente",
+    "loadError": "Error al cargar la imagen",
+    "analysisError": "Error de análisis",
+    "alignGrid": "Cuadrícula:",
+    "resetGrid": "Restablecer alineación de cuadrícula",
+    "gridClickHint": "Haz clic en las 4 intersecciones de las esquinas de la cuadrícula ({{count}}/4)",
+    "gridFineTuneHint": "Haga clic en un controlador de esquina para ajustar su posición",
+    "calibrate": "Calibrar:",
+    "markBlack": "Marcar piedra negra",
+    "markWhite": "Marcar piedra blanca",
+    "markEmpty": "Marcar intersección vacía",
+    "resetCalibration": "Restablecer calibración",
+    "calibrateHint": "Haz clic en las intersecciones de la vista previa para corregir errores"
   }
 }

@@ -15,7 +15,10 @@ import { useLibrary } from '../../contexts/LibraryContext';
 import { useTauriDrag } from '../../contexts/TauriDragContext';
 import { loadContentOrOGSUrl, isOGSUrl, getFilenameForSGF } from '../../services/ogsLoader';
 import { readClipboardText } from '../../services/clipboard';
+import { BoardRecognitionDialog } from '../dialogs/BoardRecognitionDialog';
 import './AppDropZone.css';
+
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.bmp'];
 
 interface AppDropZoneProps {
   children: ReactNode;
@@ -54,6 +57,7 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
   const { setTauriDragging, setOverLibrary } = useTauriDrag();
   const [isDragging, setIsDragging] = useState(false);
   const [isOverLibrary, setIsOverLibrary] = useState(false);
+  const [recognitionFile, setRecognitionFile] = useState<File | null>(null);
 
   // Use ref to track library state for Tauri event handler (avoids stale closure)
   const isOverLibraryRef = useRef(false);
@@ -356,6 +360,13 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
         return;
       }
 
+      // Route image files to the recognition dialog
+      const lowerName = file.name.toLowerCase();
+      if (IMAGE_EXTENSIONS.some(ext => lowerName.endsWith(ext))) {
+        setRecognitionFile(file);
+        return;
+      }
+
       if (onFileDrop) {
         onFileDrop(file);
         return;
@@ -381,6 +392,22 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
       reader.readAsText(file);
     },
     [loadSGF, setFileName, setCustomAIModel, clearLoadedFile, checkUnsavedChanges]
+  );
+
+  const handleRecognitionImport = useCallback(
+    async (sgf: string, filename: string) => {
+      setRecognitionFile(null);
+      const canProceed = await checkUnsavedChanges();
+      if (!canProceed) return;
+      try {
+        loadSGF(sgf);
+        setFileName(filename);
+        clearLoadedFile();
+      } catch (error) {
+        alert(`Failed to load recognized board: ${error}`);
+      }
+    },
+    [loadSGF, setFileName, clearLoadedFile, checkUnsavedChanges]
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -421,10 +448,16 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
       }
 
       const file = e.dataTransfer.files?.[0];
-      if (file && (file.name.endsWith('.sgf') || file.name.endsWith('.onnx'))) {
+      const lowerName = file?.name.toLowerCase() ?? '';
+      if (
+        file &&
+        (lowerName.endsWith('.sgf') ||
+          lowerName.endsWith('.onnx') ||
+          IMAGE_EXTENSIONS.some(ext => lowerName.endsWith(ext)))
+      ) {
         handleFileLoad(file);
       } else if (file) {
-        alert('Please drop a .sgf or .onnx file');
+        alert('Please drop a .sgf, .onnx, or image file');
       }
     },
     [handleFileLoad]
@@ -447,6 +480,13 @@ export const AppDropZone: React.FC<AppDropZoneProps> = ({ children, onFileDrop }
             <div className="app-dropzone-hint">{t('dropzone.dropOnLibrary')}</div>
           </div>
         </div>
+      )}
+      {recognitionFile && (
+        <BoardRecognitionDialog
+          file={recognitionFile}
+          onImport={handleRecognitionImport}
+          onClose={() => setRecognitionFile(null)}
+        />
       )}
     </div>
   );

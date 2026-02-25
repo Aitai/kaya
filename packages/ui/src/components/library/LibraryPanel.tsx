@@ -36,6 +36,7 @@ import { useGameTreeFile } from '../../contexts/selectors';
 import { useToast } from '../ui/Toast';
 import type { LibraryItem, LibraryItemId } from '../../services/library/types';
 import { formatFileSize } from '../../services/library/utils';
+import { BoardRecognitionDialog } from '../dialogs/BoardRecognitionDialog';
 import './LibraryPanel.css';
 interface TreeNode {
   id: string;
@@ -123,6 +124,7 @@ export function LibraryPanel({ collapsed = false, onCollapseChange }: LibraryPan
   const [renamingId, setRenamingId] = useState<LibraryItemId | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [recognitionFile, setRecognitionFile] = useState<File | null>(null);
   const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderParent, setNewFolderParent] = useState<LibraryItemId | null>(null);
@@ -273,20 +275,24 @@ export function LibraryPanel({ collapsed = false, onCollapseChange }: LibraryPan
       }
 
       for (const file of files) {
-        if (file.name.toLowerCase().endsWith('.sgf')) {
+        const lowerName = file.name.toLowerCase();
+        if (IMAGE_EXTENSIONS.some(ext => lowerName.endsWith(ext))) {
+          setRecognitionFile(file);
+          return; // Handle one image at a time
+        } else if (lowerName.endsWith('.sgf')) {
           const content = await file.text();
           try {
             await createFile(file.name, content, targetFolderId);
           } catch {
             // Ignore invalid files
           }
-        } else if (file.name.toLowerCase().endsWith('.zip')) {
+        } else if (lowerName.endsWith('.zip')) {
           const buffer = await file.arrayBuffer();
           await importZip(buffer);
         }
       }
     },
-    [createFile, importZip, selectedId, items]
+    [createFile, importZip, selectedId, items] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -332,20 +338,28 @@ export function LibraryPanel({ collapsed = false, onCollapseChange }: LibraryPan
     fileInputRef.current?.click();
   }, []);
 
+  const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.bmp'];
+
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files) return;
 
       for (const file of Array.from(files)) {
-        if (file.name.toLowerCase().endsWith('.sgf')) {
+        const lowerName = file.name.toLowerCase();
+        if (IMAGE_EXTENSIONS.some(ext => lowerName.endsWith(ext))) {
+          // Only handle the first image (recognition dialog is single-file)
+          setRecognitionFile(file);
+          e.target.value = '';
+          return;
+        } else if (lowerName.endsWith('.sgf')) {
           const content = await file.text();
           try {
             await createFile(file.name, content, null);
           } catch {
             // Ignore invalid files
           }
-        } else if (file.name.toLowerCase().endsWith('.zip')) {
+        } else if (lowerName.endsWith('.zip')) {
           const buffer = await file.arrayBuffer();
           await importZip(buffer);
         }
@@ -354,7 +368,19 @@ export function LibraryPanel({ collapsed = false, onCollapseChange }: LibraryPan
       // Reset input
       e.target.value = '';
     },
-    [createFile, importZip]
+    [createFile, importZip] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleLibraryRecognitionImport = useCallback(
+    async (sgf: string, filename: string) => {
+      setRecognitionFile(null);
+      try {
+        await createFile(filename, sgf, null);
+      } catch {
+        // Ignore
+      }
+    },
+    [createFile]
   );
 
   // Handle new folder
@@ -807,7 +833,7 @@ export function LibraryPanel({ collapsed = false, onCollapseChange }: LibraryPan
       <input
         ref={fileInputRef}
         type="file"
-        accept=".sgf,.zip"
+        accept=".sgf,.zip,.jpg,.jpeg,.png,.webp,.bmp"
         multiple
         style={{ display: 'none' }}
         onChange={handleFileChange}
@@ -1079,6 +1105,15 @@ export function LibraryPanel({ collapsed = false, onCollapseChange }: LibraryPan
               </div>
             </div>
           </div>,
+          document.body
+        )}
+      {recognitionFile &&
+        createPortal(
+          <BoardRecognitionDialog
+            file={recognitionFile}
+            onImport={handleLibraryRecognitionImport}
+            onClose={() => setRecognitionFile(null)}
+          />,
           document.body
         )}
     </div>
