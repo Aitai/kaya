@@ -435,9 +435,15 @@ export class OnnxEngine extends Engine {
 
       // WebNN optimization: override all dynamic dims so ORT's WebNN EP can assign
       // the full graph to a single MLGraph partition (100% GPU coverage vs ~8% without).
+      // Use configured batch size for batched inference throughput.
       if (effectiveProviders.includes('webnn')) {
         const bs = config.boardSize ?? 19;
-        (sessionOptions as any).freeDimensionOverrides = { batch_size: 1, height: bs, width: bs };
+        const webnnBatch = config.staticBatchSize ?? 1;
+        (sessionOptions as any).freeDimensionOverrides = {
+          batch_size: webnnBatch,
+          height: bs,
+          width: bs,
+        };
       }
 
       const createStart = performance.now();

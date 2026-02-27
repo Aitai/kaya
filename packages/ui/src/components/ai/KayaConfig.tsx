@@ -505,8 +505,8 @@ export const KayaConfig: React.FC = () => {
             </select>
           </div>
 
-          {/* WebGPU Batch Size - only visible when WebGPU is selected */}
-          {aiSettings.backend === 'webgpu' && (
+          {/* Batch Size - visible when WebGPU or WebNN is selected */}
+          {(aiSettings.backend === 'webgpu' || aiSettings.backend === 'webnn') && (
             <div className="setting-item setting-item-full">
               <div className="setting-info">
                 <label htmlFor="webgpu-batch-slider" className="setting-label">
@@ -519,7 +519,7 @@ export const KayaConfig: React.FC = () => {
                 id="webgpu-batch-slider"
                 type="range"
                 min="1"
-                max="8"
+                max="16"
                 step="1"
                 value={aiSettings.webgpuBatchSize}
                 onChange={e => setAISettings({ webgpuBatchSize: parseInt(e.target.value) })}

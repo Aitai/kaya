@@ -205,8 +205,12 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           if (isWebNN && !alreadyWebNNConverted && !isTauri) {
             try {
-              console.log('[AIEngine] Auto-converting model for WebNN (static batch=1)...');
-              const result = await convertModelForWebNN(buffer, { batchSize: 1, boardSize });
+              const webnnBatch = aiSettings.webgpuBatchSize || WEBGPU_BATCH_SIZE;
+              console.log(`[AIEngine] Auto-converting model for WebNN (batch=${webnnBatch})...`);
+              const result = await convertModelForWebNN(buffer, {
+                batchSize: webnnBatch,
+                boardSize,
+              });
               if (result.wasConverted) {
                 buffer = result.buffer;
                 isWebNNAutoConverted = true;
@@ -261,9 +265,9 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           } else if (isAutoConverted) {
             staticBatchSize = aiSettings.webgpuBatchSize || WEBGPU_BATCH_SIZE;
           } else if (isWebNNAutoConverted || alreadyWebNNConverted || isWebNN) {
-            // WebNN always uses batch=1 — freeDimensionOverrides also enforces this at
-            // session creation, so we must always limit inference to batch=1.
-            staticBatchSize = 1;
+            // WebNN uses the same batch size as WebGPU for batched inference.
+            // Benchmarks show batch=4 gives ~4x per-move throughput improvement.
+            staticBatchSize = aiSettings.webgpuBatchSize || WEBGPU_BATCH_SIZE;
           } else if (modelName.includes('.webgpu.')) {
             // Legacy pre-converted models default to batch=1
             staticBatchSize = 1;
