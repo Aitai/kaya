@@ -75,6 +75,9 @@ export interface CreateEngineOptions {
   /** Static batch size of the model (1 for static-b1 models) */
   staticBatchSize?: number;
 
+  /** Board size for WebNN freeDimensionOverrides (default: 19) */
+  boardSize?: number;
+
   /** Progress callback for native engine model upload (Tauri only) */
   onProgress?: (progress: { stage: string; progress: number; message: string }) => void;
 }
@@ -159,6 +162,7 @@ export async function createEngine(
       debug: options.debug,
       enableGraphCapture: options.enableGraphCapture,
       staticBatchSize: options.staticBatchSize,
+      boardSize: options.boardSize,
     };
 
     const engine = new WorkerEngine(worker, config);

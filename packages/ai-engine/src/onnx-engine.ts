@@ -57,6 +57,12 @@ export interface OnnxEngineConfig extends BaseEngineConfig {
    * Auto-detected from model metadata when possible.
    */
   staticBatchSize?: number;
+
+  /**
+   * Board size to use for WebNN freeDimensionOverrides (default: 19).
+   * Must match the actual board being analyzed. Engine is re-created when this changes.
+   */
+  boardSize?: number;
 }
 
 export class OnnxEngine extends Engine {
@@ -427,6 +433,13 @@ export class OnnxEngine extends Engine {
         console.log('[OnnxEngine] Graph capture enabled for WebGPU');
       }
 
+      // WebNN optimization: override all dynamic dims so ORT's WebNN EP can assign
+      // the full graph to a single MLGraph partition (100% GPU coverage vs ~8% without).
+      if (effectiveProviders.includes('webnn')) {
+        const bs = config.boardSize ?? 19;
+        (sessionOptions as any).freeDimensionOverrides = { batch_size: 1, height: bs, width: bs };
+      }
+
       const createStart = performance.now();
       let usedProviderNames = [...effectiveProviders];
 
@@ -528,13 +541,20 @@ export class OnnxEngine extends Engine {
       if (detectedFp16) {
         this.inputDataType = 'float16';
 
-        // Warn if using FP16 on CPU/WASM - it's not well supported
+        // Warn if using FP16 on CPU/WASM or WebNN - neither handles it well
         const isWasmOnly = usedProviderNames.every(p => p === 'wasm' || p === 'cpu');
+        const isWebNN = usedProviderNames.includes('webnn');
         if (isWasmOnly) {
           console.warn(
             '[OnnxEngine] FP16 model detected on CPU/WASM backend. ' +
               'FP16 is not fully supported on CPU - you may experience errors. ' +
               'Consider using an FP32 model or WebGPU backend for better compatibility.'
+          );
+        } else if (isWebNN) {
+          console.warn(
+            '[OnnxEngine] FP16 model detected with WebNN backend. ' +
+              "WebNN's LiteRT backend has limited FP16 op support — some nodes will " +
+              'fall back to WASM. Use an FP32 model for better WebNN GPU coverage.'
           );
         }
       } else {
@@ -762,6 +782,14 @@ export class OnnxEngine extends Engine {
         usingGpuBuffers = false;
         results = await this.session!.run({ bin_input: binTensor, global_input: globalTensor });
       } else {
+        // ORT WebNN bug: "Tensor not found" at partition boundaries in mixed WebNN+WASM graphs.
+        // This typically occurs with FP16 models where LiteRT has limited op support.
+        if (errorMsg.includes('Tensor not found') && this.usedProviders.includes('webnn')) {
+          throw new Error(
+            'WebNN inference failed (Tensor not found). ' +
+              'Try switching to an FP32 model or the WebGPU backend.'
+          );
+        }
         throw error;
       }
     }

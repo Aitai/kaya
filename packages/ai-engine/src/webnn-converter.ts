@@ -1,17 +1,19 @@
 /**
- * WebGPU Model Converter
+ * WebNN Model Converter
  *
- * Automatically converts ONNX models for optimal WebGPU execution:
- * 1. Makes batch dimension static (required for graph capture)
- * 2. Decomposes unsupported ops (Softplus, LogSoftmax) into GPU-supported equivalents
+ * Converts ONNX models for WebNN execution by:
+ * 1. Making the batch dimension static — WebNN's MLGraph (like WebGPU graph capture)
+ *    requires static shapes to compile. Without this, ORT's WebNN EP can only claim
+ *    ~66/1600 nodes (those with no dynamic dims), causing crashes during MLGraph.build().
+ * 2. Decomposes Softplus/LogSoftmax into WebNN-supported primitives.
  *
- * This runs entirely in the browser using protobufjs (already bundled with onnxruntime-web).
- * No Python or external tools required.
+ * Uses the same protobufjs approach as webgpu-converter.ts.
  */
 
 import protobuf from 'protobufjs';
 
-// Minimal ONNX protobuf schema (only types needed for model conversion)
+// Reuse the ONNX schema from webgpu-converter by importing the shared bits
+// (protobufjs schema is duplicated here to keep the file self-contained)
 const ONNX_SCHEMA = {
   nested: {
     onnx: {
@@ -41,11 +43,7 @@ const ONNX_SCHEMA = {
             input: { rule: 'repeated', type: 'ValueInfoProto', id: 11 },
             output: { rule: 'repeated', type: 'ValueInfoProto', id: 12 },
             valueInfo: { rule: 'repeated', type: 'ValueInfoProto', id: 13 },
-            quantizationAnnotation: {
-              rule: 'repeated',
-              type: 'TensorAnnotation',
-              id: 14,
-            },
+            quantizationAnnotation: { rule: 'repeated', type: 'TensorAnnotation', id: 14 },
           },
         },
         NodeProto: {
@@ -96,19 +94,11 @@ const ONNX_SCHEMA = {
             externalData: { rule: 'repeated', type: 'StringStringEntryProto', id: 13 },
             dataLocation: { type: 'int32', id: 14 },
             doubleData: { rule: 'repeated', type: 'double', id: 10, options: { packed: true } },
-            uint64Data: {
-              rule: 'repeated',
-              type: 'uint64',
-              id: 11,
-              options: { packed: true },
-            },
+            uint64Data: { rule: 'repeated', type: 'uint64', id: 11, options: { packed: true } },
           },
           nested: {
             Segment: {
-              fields: {
-                begin: { type: 'int64', id: 1 },
-                end: { type: 'int64', id: 2 },
-              },
+              fields: { begin: { type: 'int64', id: 1 }, end: { type: 'int64', id: 2 } },
             },
           },
         },
@@ -140,22 +130,14 @@ const ONNX_SCHEMA = {
                 shape: { type: 'TensorShapeProto', id: 2 },
               },
             },
-            Sequence: {
-              fields: {
-                elemType: { type: 'TypeProto', id: 1 },
-              },
-            },
+            Sequence: { fields: { elemType: { type: 'TypeProto', id: 1 } } },
             Map: {
               fields: {
                 keyType: { type: 'int32', id: 1 },
                 valueType: { type: 'TypeProto', id: 2 },
               },
             },
-            Optional: {
-              fields: {
-                elemType: { type: 'TypeProto', id: 1 },
-              },
-            },
+            Optional: { fields: { elemType: { type: 'TypeProto', id: 1 } } },
             SparseTensor: {
               fields: {
                 elemType: { type: 'int32', id: 1 },
@@ -165,9 +147,7 @@ const ONNX_SCHEMA = {
           },
         },
         TensorShapeProto: {
-          fields: {
-            dim: { rule: 'repeated', type: 'Dimension', id: 1 },
-          },
+          fields: { dim: { rule: 'repeated', type: 'Dimension', id: 1 } },
           nested: {
             Dimension: {
               oneofs: { value: { oneof: ['dimValue', 'dimParam'] } },
@@ -187,36 +167,22 @@ const ONNX_SCHEMA = {
           },
         },
         OperatorSetIdProto: {
-          fields: {
-            domain: { type: 'string', id: 1 },
-            version: { type: 'int64', id: 2 },
-          },
+          fields: { domain: { type: 'string', id: 1 }, version: { type: 'int64', id: 2 } },
         },
         StringStringEntryProto: {
-          fields: {
-            key: { type: 'string', id: 1 },
-            value: { type: 'string', id: 2 },
-          },
+          fields: { key: { type: 'string', id: 1 }, value: { type: 'string', id: 2 } },
         },
         TensorAnnotation: {
           fields: {
             tensorName: { type: 'string', id: 1 },
-            quantParameterTensorNames: {
-              rule: 'repeated',
-              type: 'StringStringEntryProto',
-              id: 2,
-            },
+            quantParameterTensorNames: { rule: 'repeated', type: 'StringStringEntryProto', id: 2 },
           },
         },
         TrainingInfoProto: {
           fields: {
             initialization: { type: 'GraphProto', id: 1 },
             algorithm: { type: 'GraphProto', id: 2 },
-            initializationBinding: {
-              rule: 'repeated',
-              type: 'StringStringEntryProto',
-              id: 3,
-            },
+            initializationBinding: { rule: 'repeated', type: 'StringStringEntryProto', id: 3 },
             updateBinding: { rule: 'repeated', type: 'StringStringEntryProto', id: 4 },
           },
         },
@@ -238,28 +204,17 @@ const ONNX_SCHEMA = {
   },
 };
 
-// ONNX TensorProto data types
+// ONNX data types
 const ONNX_FLOAT = 1;
 const ONNX_FLOAT16 = 10;
 
-// Lazily initialized protobuf root
 let _root: protobuf.Root | null = null;
 function getRoot(): protobuf.Root {
-  if (!_root) {
-    _root = protobuf.Root.fromJSON(ONNX_SCHEMA);
-  }
+  if (!_root) _root = protobuf.Root.fromJSON(ONNX_SCHEMA);
   return _root;
 }
 
-/**
- * Default batch size for WebGPU graph capture.
- * Larger batches amortize GPU↔CPU sync overhead (~80ms) over more positions.
- * batch=8: ~12ms/pos in batch analysis vs ~100ms/pos with batch=1.
- */
-export const WEBGPU_BATCH_SIZE = 8;
-
-/** Result of model conversion */
-export interface ConversionResult {
+export interface WebNNConversionResult {
   buffer: ArrayBuffer;
   wasConverted: boolean;
   changes: string[];
@@ -267,68 +222,41 @@ export interface ConversionResult {
 }
 
 /**
- * Check if an ONNX model needs WebGPU conversion.
- * Returns the list of issues found (empty = already optimized).
+ * Check if a model filename indicates it's already WebNN-optimized.
  */
-export function checkModelNeedsConversion(modelBuffer: ArrayBuffer): string[] {
-  const bytes = new Uint8Array(modelBuffer);
-  const issues: string[] = [];
-
-  // Quick binary scan for unsupported op names
-  const scanFor = (opName: string): boolean => {
-    const opBytes = new TextEncoder().encode(opName);
-    for (let i = 0; i < bytes.length - opBytes.length; i++) {
-      let match = true;
-      for (let j = 0; j < opBytes.length; j++) {
-        if (bytes[i + j] !== opBytes[j]) {
-          match = false;
-          break;
-        }
-      }
-      if (match) return true;
-    }
-    return false;
-  };
-
-  if (scanFor('Softplus')) issues.push('Has Softplus ops (unsupported on WebGPU)');
-  if (scanFor('LogSoftmax')) issues.push('Has LogSoftmax ops (unsupported on WebGPU)');
-
-  return issues;
+export function isWebNNOptimized(modelName: string): boolean {
+  return modelName.includes('.webnn.');
 }
 
 /**
- * Check if a model filename indicates it's already WebGPU-optimized.
+ * Convert an ONNX model for WebNN execution.
+ *
+ * WebNN's MLGraph compiler (like WebGPU graph capture) requires static shapes
+ * to compile op partitions. Without a static batch dim, ORT's WebNN EP can only
+ * claim a handful of nodes where shapes happen to be fully static, crashing or
+ * falling back entirely to WASM.
+ *
+ * Transformations applied:
+ * 1. Make batch, height, width dimensions static (batch=1, boardSize×boardSize).
+ *    freeDimensionOverrides is also set at session-creation time as a belt-and-suspenders
+ *    approach — together these give 100% GPU coverage (1 MLGraph partition).
+ * 2. Decompose Softplus → Relu + Log(1 + Exp(-Abs(x)))
+ * 3. Decompose LogSoftmax → Log(Softmax(x))
+ *
+ * Works with both FP32 and FP16 models.
  */
-export function isWebGPUOptimized(modelName: string): boolean {
-  return modelName.includes('.webgpu.');
-}
-
-/**
- * Convert an ONNX model for optimal WebGPU execution.
- *
- * Performs two transformations:
- * 1. Makes batch dimension static (default batch=8) for graph capture
- * 2. Decomposes Softplus/LogSoftmax into GPU-supported equivalents
- *
- * Works with both FP32 and FP16 models. No external tools needed.
- *
- * @param modelBuffer - Raw ONNX model bytes
- * @param options - Conversion options
- * @param options.batchSize - Static batch size (default: WEBGPU_BATCH_SIZE=8).
- *   Larger batches amortize GPU sync overhead for batch analysis.
- */
-export async function convertModelForWebGPU(
+export async function convertModelForWebNN(
   modelBuffer: ArrayBuffer,
-  options?: { batchSize?: number }
-): Promise<ConversionResult> {
-  const batchSize = options?.batchSize ?? WEBGPU_BATCH_SIZE;
+  options?: { batchSize?: number; boardSize?: number }
+): Promise<WebNNConversionResult> {
+  const batchSize = options?.batchSize ?? 1;
+  const boardSize = options?.boardSize ?? 19;
   const root = getRoot();
   const ModelProto = root.lookupType('onnx.ModelProto');
 
-  console.log('[WebGPU Converter] Parsing model...');
+  console.log('[WebNN Converter] Parsing model...');
   const startTime = performance.now();
 
-  // Decode the model
   const model = ModelProto.decode(new Uint8Array(modelBuffer)) as any;
   const graph = model.graph;
   if (!graph) throw new Error('Model has no graph');
@@ -342,18 +270,31 @@ export async function convertModelForWebGPU(
     if (elemType === ONNX_FLOAT16) isFp16 = true;
   }
 
-  // Step 1: Make batch dimension static
+  // Step 1: Make all dynamic spatial dims static.
+  // WebNN MLGraph.build() requires static shapes to assign nodes to GPU partitions.
+  // batch_size=1 (WebNN doesn't benefit from batching like WebGPU graph capture).
+  // height/width = boardSize (must match the actual board being analyzed).
+  const STATIC_DIMS: Record<string, number> = {
+    batch_size: batchSize,
+    height: boardSize,
+    width: boardSize,
+  };
   const makeStatic = (valueInfos: any[], label: string) => {
     if (!valueInfos) return;
     for (const vi of valueInfos) {
       const dims = vi.type?.tensorType?.shape?.dim;
       if (!dims || dims.length === 0) continue;
-      const firstDim = dims[0];
-      if (firstDim.dimParam || !firstDim.dimValue || Number(firstDim.dimValue) <= 0) {
-        const oldVal = firstDim.dimParam || String(firstDim.dimValue || '?');
-        firstDim.dimValue = batchSize;
-        delete firstDim.dimParam;
-        changes.push(`${label} ${vi.name}: batch ${oldVal} → ${batchSize}`);
+      for (const dim of dims) {
+        const name = dim.dimParam;
+        if (name && STATIC_DIMS[name] !== undefined) {
+          dim.dimValue = STATIC_DIMS[name];
+          delete dim.dimParam;
+          changes.push(`${label} ${vi.name}: ${name} → ${STATIC_DIMS[name]}`);
+        } else if (!dim.dimParam && (!dim.dimValue || Number(dim.dimValue) <= 0)) {
+          dim.dimValue = 1;
+          delete dim.dimParam;
+          changes.push(`${label} ${vi.name}: unknown → 1`);
+        }
       }
     }
   };
@@ -362,24 +303,21 @@ export async function convertModelForWebGPU(
   makeStatic(graph.output, 'output');
   makeStatic(graph.valueInfo, 'value_info');
 
-  // Step 2: Replace unsupported ops
+  // Step 2: Decompose ops unsupported by WebNN
   const newNodes: any[] = [];
   const newValueInfos: any[] = [];
   let softplusCount = 0;
   let logsoftmaxCount = 0;
 
-  // Create constant "1.0" initializer for Softplus decomposition
-  const oneName = '__webgpu_const_one';
+  // Constant "1.0" initializer for Softplus decomposition
+  const oneName = '__webnn_const_one';
   const oneBytes = new Uint8Array(isFp16 ? 2 : 4);
   if (isFp16) {
-    // FP16 encoding of 1.0 = 0x3C00
     oneBytes[0] = 0x00;
-    oneBytes[1] = 0x3c;
+    oneBytes[1] = 0x3c; // FP16 1.0
   } else {
-    // FP32 encoding of 1.0
     new DataView(oneBytes.buffer).setFloat32(0, 1.0, true);
   }
-
   let needsOneConst = false;
 
   for (const node of graph.node) {
@@ -387,7 +325,7 @@ export async function convertModelForWebGPU(
       // Softplus(x) = Relu(x) + Log(1 + Exp(-Abs(x)))
       const x = node.input[0];
       const y = node.output[0];
-      const p = `__sp_${softplusCount}`;
+      const p = `__wnsp_${softplusCount}`;
 
       newNodes.push(
         { input: [x], output: [`${p}_abs`], opType: 'Abs' },
@@ -399,7 +337,6 @@ export async function convertModelForWebGPU(
         { input: [`${p}_relu`, `${p}_log`], output: [y], opType: 'Add' }
       );
 
-      // Add value_info for intermediates (copy shape from input if available)
       const srcVi = [...(graph.valueInfo || []), ...(graph.input || [])].find(
         (vi: any) => vi.name === x
       );
@@ -412,10 +349,7 @@ export async function convertModelForWebGPU(
           `${p}_log`,
           `${p}_relu`,
         ]) {
-          newValueInfos.push({
-            name,
-            type: JSON.parse(JSON.stringify(srcVi.type)),
-          });
+          newValueInfos.push({ name, type: JSON.parse(JSON.stringify(srcVi.type)) });
         }
       }
 
@@ -425,9 +359,7 @@ export async function convertModelForWebGPU(
       // LogSoftmax(x) = Log(Softmax(x))
       const x = node.input[0];
       const y = node.output[0];
-      const p = `__ls_${logsoftmaxCount}`;
-
-      // Preserve axis attribute
+      const p = `__wnls_${logsoftmaxCount}`;
       const attrs = node.attribute?.filter((a: any) => a.name === 'axis') || [];
 
       newNodes.push(
@@ -439,10 +371,7 @@ export async function convertModelForWebGPU(
         (vi: any) => vi.name === x
       );
       if (srcVi?.type) {
-        newValueInfos.push({
-          name: `${p}_sm`,
-          type: JSON.parse(JSON.stringify(srcVi.type)),
-        });
+        newValueInfos.push({ name: `${p}_sm`, type: JSON.parse(JSON.stringify(srcVi.type)) });
       }
 
       logsoftmaxCount++;
@@ -451,14 +380,9 @@ export async function convertModelForWebGPU(
     }
   }
 
-  if (softplusCount > 0) {
-    changes.push(`Replaced ${softplusCount} Softplus ops`);
-  }
-  if (logsoftmaxCount > 0) {
-    changes.push(`Replaced ${logsoftmaxCount} LogSoftmax ops`);
-  }
+  if (softplusCount > 0) changes.push(`Replaced ${softplusCount} Softplus ops`);
+  if (logsoftmaxCount > 0) changes.push(`Replaced ${logsoftmaxCount} LogSoftmax ops`);
 
-  // Add constant initializer if needed
   if (needsOneConst) {
     if (!graph.initializer) graph.initializer = [];
     graph.initializer.push({
@@ -469,21 +393,19 @@ export async function convertModelForWebGPU(
     });
   }
 
-  // Update graph
   graph.node = newNodes;
   if (newValueInfos.length > 0) {
     if (!graph.valueInfo) graph.valueInfo = [];
     graph.valueInfo.push(...newValueInfos);
   }
 
-  // Encode back
   const encoded = ModelProto.encode(model).finish();
   const elapsed = performance.now() - startTime;
 
   const origMB = (modelBuffer.byteLength / 1024 / 1024).toFixed(1);
   const newMB = (encoded.byteLength / 1024 / 1024).toFixed(1);
   console.log(
-    `[WebGPU Converter] Done in ${elapsed.toFixed(0)}ms: ${origMB}MB → ${newMB}MB, ` +
+    `[WebNN Converter] Done in ${elapsed.toFixed(0)}ms: ${origMB}MB → ${newMB}MB, ` +
       `${changes.length} changes (${graph.node.length} ops)`
   );
 
@@ -495,20 +417,5 @@ export async function convertModelForWebGPU(
     wasConverted: changes.length > 0,
     changes,
     batchSize,
-  };
-}
-
-/**
- * Create ORT session options optimized for WebGPU execution.
- */
-export function getWebGPUSessionOptions(
-  enableGraphCapture: boolean = true
-): Record<string, unknown> {
-  return {
-    executionProviders: ['webgpu'],
-    graphOptimizationLevel: 'all',
-    enableGraphCapture,
-    preferredOutputLocation: 'gpu-buffer',
-    executionMode: 'sequential',
   };
 }
