@@ -234,7 +234,7 @@ function loadAISettings(): AISettings {
         webgpuBatchSize:
           typeof parsed.webgpuBatchSize === 'number' &&
           parsed.webgpuBatchSize >= 1 &&
-          parsed.webgpuBatchSize <= 8
+          parsed.webgpuBatchSize <= 16
             ? Math.round(parsed.webgpuBatchSize)
             : DEFAULT_AI_SETTINGS.webgpuBatchSize,
       };
