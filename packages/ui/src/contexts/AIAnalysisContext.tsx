@@ -246,6 +246,9 @@ export const AIAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // When numVisits changes, only invalidate the current position's cached result
   // so it re-analyzes with the new visit count. Keep the rest of the graph intact.
+  // Note: This is intentional — clearing the full cache would force a potentially long
+  // re-analysis of all positions. The tradeoff is that users may see mixed analysis
+  // quality across the game tree until positions are revisited.
   useEffect(() => {
     const currentNumVisits = aiSettings.numVisits;
     if (prevNumVisitsRef.current === undefined) {
