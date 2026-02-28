@@ -24,6 +24,18 @@ pub struct BatchInput {
 /// State for chunked model upload
 static MODEL_UPLOAD_PATH: Mutex<Option<PathBuf>> = Mutex::new(None);
 
+/// Validate that a model_id contains no path traversal characters
+fn sanitize_model_id(model_id: &str) -> Result<(), String> {
+    if model_id.contains('/')
+        || model_id.contains('\\')
+        || model_id.contains("..")
+        || model_id.is_empty()
+    {
+        return Err("Invalid model ID: must not contain path separators or '..'".to_string());
+    }
+    Ok(())
+}
+
 /// Get the temp file path for model upload
 fn get_model_temp_path() -> PathBuf {
     std::env::temp_dir().join(format!("kaya-model-{}.onnx", std::process::id()))
@@ -102,7 +114,8 @@ fn save_uploaded_model(model_id: Option<String>, app_handle: &tauri::AppHandle) 
         upload_path.take().ok_or("No upload in progress")?
     };
     
-    let final_path = if let Some(id) = model_id {
+    let final_path = if let Some(ref id) = model_id {
+        sanitize_model_id(id)?;
         let app_data = app_handle.path().app_data_dir()
             .map_err(|e| format!("Failed to get app data dir: {}", e))?;
         let models_dir = app_data.join("models");
@@ -129,6 +142,7 @@ fn save_uploaded_model(model_id: Option<String>, app_handle: &tauri::AppHandle) 
 /// Check if a model is cached and return its path
 #[tauri::command]
 pub async fn onnx_get_cached_model(model_id: String, app_handle: tauri::AppHandle) -> Result<Option<String>, String> {
+    sanitize_model_id(&model_id)?;
     let app_data = app_handle.path().app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?;
     let cached_path = app_data.join("models").join(format!("{}.onnx", model_id));
@@ -143,6 +157,7 @@ pub async fn onnx_get_cached_model(model_id: String, app_handle: tauri::AppHandl
 /// Delete a cached model from the app data directory
 #[tauri::command]
 pub async fn onnx_delete_cached_model(model_id: String, app_handle: tauri::AppHandle) -> Result<bool, String> {
+    sanitize_model_id(&model_id)?;
     let app_data = app_handle.path().app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?;
     let cached_path = app_data.join("models").join(format!("{}.onnx", model_id));
@@ -291,8 +306,15 @@ pub fn pytorch_is_available() -> bool {
 pub async fn pytorch_initialize(model_path: String) -> Result<serde_json::Value, String> {
     #[cfg(target_os = "linux")]
     {
+        // Validate model_path resolves to an actual file and isn't a traversal attack
+        let abs_path = std::fs::canonicalize(&model_path)
+            .map_err(|e| format!("Invalid model path: {}", e))?;
+        if !abs_path.exists() {
+            return Err("Model file does not exist".to_string());
+        }
+        let path_str = abs_path.to_string_lossy().to_string();
         tokio::task::spawn_blocking(move || {
-            let info = crate::pytorch_engine::initialize_engine(&model_path)?;
+            let info = crate::pytorch_engine::initialize_engine(&path_str)?;
             serde_json::to_value(info).map_err(|e| e.to_string())
         })
         .await
