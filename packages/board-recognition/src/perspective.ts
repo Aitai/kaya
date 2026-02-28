@@ -65,6 +65,7 @@ export function computeHomography(
 /** Apply homography H to point (x, y) → (x', y') */
 export function applyHomography(H: number[], x: number, y: number): [number, number] {
   const w = H[6] * x + H[7] * y + H[8];
+  if (Math.abs(w) < 1e-10) return [x, y];
   return [(H[0] * x + H[1] * y + H[2]) / w, (H[3] * x + H[4] * y + H[5]) / w];
 }
 
