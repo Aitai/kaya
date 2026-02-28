@@ -136,6 +136,7 @@ export const BoardRecognitionDialog: React.FC<Props> = ({ file, onImport, onClos
   const scaleRef = useRef(1); // canvas pixel scale (rawImage → canvas px), used in paintCanvas
   const imgRef = useRef<HTMLImageElement | null>(null);
   const rawDimsRef = useRef({ width: 1, height: 1 });
+  const objectURLRef = useRef<string | null>(null);
   const cornersRef = useRef<BoardCorners | null>(null);
   const dragOffsetRef = useRef<[number, number]>([0, 0]);
   const workerRef = useRef<BoardRecognitionWorker | null>(null);
@@ -176,6 +177,7 @@ export const BoardRecognitionDialog: React.FC<Props> = ({ file, onImport, onClos
         }
         setRawImage(raw);
         rawDimsRef.current = { width: raw.width, height: raw.height };
+        objectURLRef.current = url;
         setObjectURL(url);
       })
       .catch(() => {
@@ -183,7 +185,7 @@ export const BoardRecognitionDialog: React.FC<Props> = ({ file, onImport, onClos
       });
     return () => {
       cancelled = true;
-      if (objectURL) URL.revokeObjectURL(objectURL);
+      if (objectURLRef.current) URL.revokeObjectURL(objectURLRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file, t]);
