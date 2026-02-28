@@ -681,10 +681,18 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     try {
       let moveStr: string;
 
+      // Snapshot the current position before any async work
+      const nodeBefore = currentNode;
+
       // If analysis is currently running, wait for it rather than starting a second MCTS run.
       // isAnalyzingRef is always up-to-date even if the closure captured a stale value.
       if (isAnalyzingRef.current) {
         await waitForCurrentAnalysis();
+      }
+
+      // If the user navigated away while we were waiting, don't use a stale result
+      if (currentNode !== nodeBefore) {
+        return;
       }
 
       // Use the already-computed analysis result if available — avoids redundant MCTS
@@ -726,6 +734,7 @@ export const GameBoard: React.FC<GameBoardProps> = memo(({ onScoreData }) => {
     isModelLoaded,
     analysisResult,
     currentBoard,
+    currentNode,
     currentPlayer,
     gameInfo.komi,
     aiSettings.numVisits,
