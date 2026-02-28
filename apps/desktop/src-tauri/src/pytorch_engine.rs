@@ -357,9 +357,6 @@ pub fn is_initialized() -> bool {
 pub fn dispose_engine() -> Result<(), String> {
     let mut global = ENGINE.lock().map_err(|e| e.to_string())?;
     if let Some(mut engine) = global.take() {
-        // Send dispose command
-        let _ = engine.send_command(&serde_json::json!({"cmd": "dispose"}));
-        // Kill the process
         let _ = engine.process.kill();
         let _ = engine.process.wait();
     }
