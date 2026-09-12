@@ -347,7 +347,11 @@
     "restart": "재시작",
     "later": "나중에",
     "updateFailed": "업데이트 실패",
-    "updateFailedMessage": "업데이트 설치에 실패했습니다. 나중에 다시 시도하거나 최신 버전을 수동으로 다운로드하세요:"
+    "updateFailedMessage": "업데이트를 설치하지 못했습니다. 나중에 다시 시도하거나 수동으로 내려받으세요.",
+    "openDownloads": "다운로드 페이지 열기",
+    "cannotInstallTitle": "현재 위치에서 업데이트할 수 없음",
+    "cannotInstallTranslocated": "macOS가 임시 읽기 전용 복사본에서 Kaya를 실행하고 있어 자신을 교체할 수 없습니다. Kaya를 응용 프로그램 폴더로 옮기고 다시 연 다음 업데이트하세요.",
+    "cannotInstallReadOnly": "Kaya가 {{path}}에서 자신을 교체할 수 없습니다. 해당 위치는 읽기 전용입니다. Kaya를 응용 프로그램 폴더로 옮기고 다시 연 다음 업데이트하세요."
   },
   "editToolbar": {
     "stones": "돌",

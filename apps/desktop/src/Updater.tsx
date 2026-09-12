@@ -4,6 +4,7 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import { ask, message } from '@tauri-apps/plugin-dialog';
 import { listen } from '@tauri-apps/api/event';
 import { useTranslation } from '@kaya/ui';
+import { checkInstallLocation, errorText, offerManualDownload } from './updateInstall';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -73,13 +74,13 @@ export function Updater() {
       } catch (error) {
         console.error(error);
         if (!silent) {
-          await message(
-            `${t('updater.checkFailed')}\n${error}\n\n${t('updater.manualDownload')} https://github.com/kaya-go/kaya/releases`,
-            {
-              title: 'Error',
-              kind: 'error',
-            }
-          );
+          await offerManualDownload({
+            title: t('updater.checkFailed'),
+            message: errorText(error),
+            hint: t('updater.manualDownload'),
+            okLabel: t('updater.openDownloads'),
+            cancelLabel: t('updater.dismiss'),
+          });
         }
       }
     },
@@ -106,6 +107,28 @@ export function Updater() {
 
   const handleUpdate = async () => {
     if (!update) return;
+
+    // The plugin downloads the whole payload before it finds out it cannot
+    // replace the bundle. Ask first, and say what to do about it.
+    if (!devModeTriggered) {
+      const location = await checkInstallLocation();
+      if (!location.canInstall) {
+        await offerManualDownload({
+          title: t('updater.cannotInstallTitle'),
+          message: t(
+            location.reason === 'translocated'
+              ? 'updater.cannotInstallTranslocated'
+              : 'updater.cannotInstallReadOnly',
+            { path: location.path }
+          ),
+          hint: t('updater.manualDownload'),
+          okLabel: t('updater.openDownloads'),
+          cancelLabel: t('updater.dismiss'),
+        });
+        return;
+      }
+    }
+
     setStatus('installing');
     try {
       await update.downloadAndInstall();
@@ -142,13 +165,13 @@ export function Updater() {
       setUpdate(null);
     } catch (err) {
       console.error('Failed to install update:', err);
-      await message(
-        `${t('updater.updateFailedMessage')}\n\nhttps://github.com/kaya-go/kaya/releases`,
-        {
-          title: t('updater.updateFailed'),
-          kind: 'error',
-        }
-      );
+      await offerManualDownload({
+        title: t('updater.updateFailed'),
+        message: `${t('updater.updateFailedMessage')}\n\n${errorText(err)}`,
+        hint: t('updater.manualDownload'),
+        okLabel: t('updater.openDownloads'),
+        cancelLabel: t('updater.dismiss'),
+      });
       setStatus('available'); // Re-enable buttons
     }
   };

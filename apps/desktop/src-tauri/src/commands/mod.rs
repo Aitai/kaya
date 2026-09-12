@@ -2,12 +2,14 @@
 
 mod download;
 mod pytorch;
+mod updater;
 mod upload;
 
 // Re-export submodule commands. For commands with #[cfg] variants,
 // we re-export the module itself so Tauri can find the proc-macro symbols.
 pub use download::*;
 pub use pytorch::*;
+pub use updater::*;
 pub use upload::*;
 
 use crate::onnx_engine::{self, AnalysisOptions, AnalysisResult, ExecutionProviderInfo, ExecutionProviderPreference};

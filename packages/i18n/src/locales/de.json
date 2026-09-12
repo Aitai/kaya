@@ -347,7 +347,11 @@
     "restart": "Neu starten",
     "later": "Später",
     "updateFailed": "Update fehlgeschlagen",
-    "updateFailedMessage": "Update-Installation fehlgeschlagen. Bitte später erneut versuchen oder die neueste Version manuell herunterladen:"
+    "updateFailedMessage": "Das Update konnte nicht installiert werden. Versuchen Sie es später erneut oder laden Sie es manuell herunter.",
+    "openDownloads": "Download-Seite öffnen",
+    "cannotInstallTitle": "Update an Ort und Stelle nicht möglich",
+    "cannotInstallTranslocated": "macOS führt Kaya aus einer temporären, schreibgeschützten Kopie aus und kann sich daher nicht selbst ersetzen. Verschieben Sie Kaya in den Ordner „Programme“, öffnen Sie es erneut und aktualisieren Sie dann.",
+    "cannotInstallReadOnly": "Kaya kann sich unter {{path}} nicht selbst ersetzen – dieser Ort ist schreibgeschützt. Verschieben Sie Kaya in den Ordner „Programme“, öffnen Sie es erneut und aktualisieren Sie dann."
   },
   "editToolbar": {
     "stones": "Steine",

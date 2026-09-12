@@ -347,7 +347,11 @@
     "restart": "Restart",
     "later": "Later",
     "updateFailed": "Update Failed",
-    "updateFailedMessage": "Failed to install the update. Please try again later or download the latest version manually from:"
+    "updateFailedMessage": "The update could not be installed. You can try again later, or download it manually.",
+    "openDownloads": "Open downloads page",
+    "cannotInstallTitle": "Can't Update In Place",
+    "cannotInstallTranslocated": "macOS is running Kaya from a temporary read-only copy, so it cannot replace itself. Move Kaya to your Applications folder, reopen it, then update.",
+    "cannotInstallReadOnly": "Kaya cannot replace itself at {{path}} — that location is read-only. Move Kaya to your Applications folder, reopen it, then update."
   },
   "editToolbar": {
     "stones": "Stones",
@@ -730,7 +734,7 @@
     "photo": "Photo",
     "preview": "Recognized Board",
     "dragHint": "Drag the corners to match the board edges exactly",
-    "analyzing": "Analyzing\u2026",
+    "analyzing": "Analyzing…",
     "chooseSizeFirst": "Select a board size to begin",
     "importSGF": "Import as SGF",
     "addToBoard": "Add to Board",
@@ -744,7 +748,7 @@
     "showDelta": "Show differences",
     "sizeMismatch": "Board sizes differ: detected {{detected}}×{{detected}}, current is {{current}}",
     "rotateImage": "Rotate 90°",
-    "cornersManual": "Auto-detection failed \u2013 adjust corners manually",
+    "cornersManual": "Auto-detection failed – adjust corners manually",
     "loadError": "Failed to load image",
     "analysisError": "Analysis failed",
     "stepCorners": "Align corners",

@@ -347,7 +347,11 @@
     "restart": "Reiniciar",
     "later": "Más tarde",
     "updateFailed": "Error en la actualización",
-    "updateFailedMessage": "Error al instalar la actualización. Por favor, inténtalo de nuevo más tarde o descarga la última versión manualmente:"
+    "updateFailedMessage": "No se pudo instalar la actualización. Inténtalo de nuevo más tarde o descárgala manualmente.",
+    "openDownloads": "Abrir página de descargas",
+    "cannotInstallTitle": "No se puede actualizar en el sitio",
+    "cannotInstallTranslocated": "macOS está ejecutando Kaya desde una copia temporal de solo lectura, por lo que no puede reemplazarse a sí misma. Mueve Kaya a la carpeta Aplicaciones, ábrela de nuevo y actualiza.",
+    "cannotInstallReadOnly": "Kaya no puede reemplazarse en {{path}}: esa ubicación es de solo lectura. Mueve Kaya a la carpeta Aplicaciones, ábrela de nuevo y actualiza."
   },
   "editToolbar": {
     "stones": "Piedras",

@@ -347,7 +347,11 @@
     "restart": "再起動",
     "later": "後で",
     "updateFailed": "アップデート失敗",
-    "updateFailedMessage": "アップデートのインストールに失敗しました。後で再試行するか、手動で最新版をダウンロードしてください："
+    "updateFailedMessage": "アップデートをインストールできませんでした。後で再試行するか、手動でダウンロードしてください。",
+    "openDownloads": "ダウンロードページを開く",
+    "cannotInstallTitle": "この場所では更新できません",
+    "cannotInstallTranslocated": "macOS は一時的な読み取り専用コピーから Kaya を実行しているため、自身を置き換えられません。Kaya を「アプリケーション」フォルダに移動し、開き直してから更新してください。",
+    "cannotInstallReadOnly": "Kaya は {{path}} で自身を置き換えられません。この場所は読み取り専用です。Kaya を「アプリケーション」フォルダに移動し、開き直してから更新してください。"
   },
   "editToolbar": {
     "stones": "石",

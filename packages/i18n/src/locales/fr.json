@@ -347,7 +347,11 @@
     "restart": "Redémarrer",
     "later": "Plus tard",
     "updateFailed": "Échec de la mise à jour",
-    "updateFailedMessage": "Échec de l'installation. Téléchargez manuellement depuis :"
+    "updateFailedMessage": "L'installation de la mise à jour a échoué. Réessayez plus tard ou téléchargez-la manuellement.",
+    "openDownloads": "Ouvrir la page de téléchargement",
+    "cannotInstallTitle": "Mise à jour sur place impossible",
+    "cannotInstallTranslocated": "macOS exécute Kaya depuis une copie temporaire en lecture seule : l'application ne peut pas se remplacer elle-même. Déplacez Kaya dans le dossier Applications, rouvrez-la, puis mettez à jour.",
+    "cannotInstallReadOnly": "Kaya ne peut pas se remplacer à l'emplacement {{path}} : celui-ci est en lecture seule. Déplacez Kaya dans le dossier Applications, rouvrez-la, puis mettez à jour."
   },
   "editToolbar": {
     "stones": "Pierres",

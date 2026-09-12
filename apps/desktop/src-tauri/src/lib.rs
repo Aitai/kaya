@@ -54,6 +54,7 @@ pub fn run() {
             commands::pytorch_benchmark,
             commands::pytorch_dispose,
             commands::download_file,
+            commands::update_preflight,
             audio::audio_init,
             audio::audio_play_sound,
             audio::audio_check,

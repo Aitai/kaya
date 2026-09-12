@@ -221,6 +221,14 @@ Then delete the draft release on GitHub and re-run the workflow.
 **Build fails on one platform** — check that platform's job log. Common
 causes: Rust compilation, WASM build, missing system deps on Ubuntu.
 
+**In-app update fails on macOS** — the updater replaces the bundle with two
+renames, so it needs a writable _parent_ directory. Running Kaya straight from
+the mounted `.dmg`, or from a Gatekeeper-translocated copy under
+`/private/var/folders/.../AppTranslocation/`, makes that impossible. The app
+checks for both before downloading and says which one it hit; the fix is to
+move Kaya to `/Applications` and reopen it. Background:
+[`specs/2026-09-12-macos-updater-failure-path.md`](../specs/2026-09-12-macos-updater-failure-path.md).
+
 ## Don'ts
 
 - ❌ Don't create or push tags by hand.

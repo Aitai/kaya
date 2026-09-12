@@ -54,3 +54,4 @@ link forward to the replacement. Don't delete history.
 | 2026-09-12 | [CoreML on by default on macOS: 4.2x, measured](2026-09-12-coreml-on-by-default-macos.md)                   | shipped    |
 | 2026-09-12 | [Precision follows the backend, and the trade-off is size](2026-09-12-precision-follows-the-backend.md)     | shipped    |
 | 2026-09-12 | [A release needs a sentence, not only a list of commits](2026-09-12-release-summary.md)                     | shipped    |
+| 2026-09-12 | [The macOS in-app update failure path](2026-09-12-macos-updater-failure-path.md)                            | shipped    |

@@ -347,7 +347,11 @@
     "restart": "重启",
     "later": "稍后",
     "updateFailed": "更新失败",
-    "updateFailedMessage": "安装更新失败。请稍后重试或从以下地址手动下载最新版本："
+    "updateFailedMessage": "更新安装失败。您可以稍后重试，或手动下载。",
+    "openDownloads": "打开下载页面",
+    "cannotInstallTitle": "无法就地更新",
+    "cannotInstallTranslocated": "macOS 正从临时的只读副本运行 Kaya，因此它无法替换自身。请将 Kaya 移动到“应用程序”文件夹，重新打开后再更新。",
+    "cannotInstallReadOnly": "Kaya 无法在 {{path}} 替换自身——该位置是只读的。请将 Kaya 移动到“应用程序”文件夹，重新打开后再更新。"
   },
   "editToolbar": {
     "stones": "棋子",
