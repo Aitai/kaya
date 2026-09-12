@@ -2,6 +2,87 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.8] - 2026-09-12
+
+AI analysis now picks the fastest backend and precision for your machine on its own — CoreML on macOS, GPU on Windows — so the model variants become a download-size choice rather than a quality one. Alongside it, a round of reliability fixes across SGF round-trips, the game library, gamepad input and the Linux packages.
+
+### <!-- 0 -->🚀 Features
+
+- *(ai)* Precision follows the backend, and the trade-off is size ([#180](https://github.com/kaya-go/kaya/issues/180)) by @hadim
+
+- *(release)* Open the notes with a summary sentence ([c28ef06](https://github.com/kaya-go/kaya/commit/c28ef06954d263aea9ca4a7aa6aaf13c17dfea1c)) by @hadim
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ui)* Keep caret position while renaming library items ([#146](https://github.com/kaya-go/kaya/issues/146)) by @xifeiwu
+
+- *(i18n)* Complete locale coverage and replace hardcoded strings ([#150](https://github.com/kaya-go/kaya/issues/150)) by @hadim
+
+- *(ui)* Repair stale context values and save-on-refresh ([#148](https://github.com/kaya-go/kaya/issues/148)) by @hadim
+
+- *(library)* Stop losing files to naming and write races ([#151](https://github.com/kaya-go/kaya/issues/151)) by @hadim
+
+- *(gametree)* Keep drafts from leaking into the tree they came from ([#162](https://github.com/kaya-go/kaya/issues/162)) by @hadim
+
+- *(ai-engine)* Honour cancellation and stop double-caching batches ([#163](https://github.com/kaya-go/kaya/issues/163)) by @hadim
+
+- *(sgf)* Stop losing moves, nodes and comments on a round trip ([#164](https://github.com/kaya-go/kaya/issues/164)) by @hadim
+
+- *(ui)* Repair stale race guard, effect churn and overflow re-measure ([#165](https://github.com/kaya-go/kaya/issues/165)) by @hadim
+
+- *(library)* Stop concurrent creates from colliding ([#169](https://github.com/kaya-go/kaya/issues/169)) by @hadim
+
+- *(ui)* Give gamecontroller.js events a single owner ([#171](https://github.com/kaya-go/kaya/issues/171)) by @hadim
+
+- *(ai)* Use the GPU on Windows, and find downloaded models after a restart ([#173](https://github.com/kaya-go/kaya/issues/173)) by @hadim
+
+- *(ci)* Make the linux bundles provably installable and runnable ([#174](https://github.com/kaya-go/kaya/issues/174)) by @hadim
+
+- *(ai)* Enable coreml on macos, measured at 4.2x the cpu ep ([#178](https://github.com/kaya-go/kaya/issues/178)) by @hadim
+
+### <!-- 2 -->🚜 Refactor
+
+- *(ui)* Make the library tree row renderer stable ([#147](https://github.com/kaya-go/kaya/issues/147)) by @hadim
+
+- *(web)* Extract AppContent state into a hook ([#167](https://github.com/kaya-go/kaya/issues/167)) by @hadim
+
+### <!-- 3 -->📚 Documentation
+
+- Record the lint step and how far rectangular boards go ([#170](https://github.com/kaya-go/kaya/issues/170)) by @hadim
+
+### <!-- 6 -->🧪 Testing
+
+- *(game-library)* Cover indexeddb storage ([#166](https://github.com/kaya-go/kaya/issues/166)) by @hadim
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- *(ci)* Bump actions/checkout from 6 to 7 ([#126](https://github.com/kaya-go/kaya/issues/126)) by @dependabot[bot]
+
+- *(ci)* Bump actions/cache from 5 to 6 ([#125](https://github.com/kaya-go/kaya/issues/125)) by @dependabot[bot]
+
+- *(ci)* Bump actions/setup-java from 5 to 5.6.0 ([#130](https://github.com/kaya-go/kaya/issues/130)) by @dependabot[bot]
+
+- *(ci)* Bump actions/stale from 10 to 11 ([#131](https://github.com/kaya-go/kaya/issues/131)) by @dependabot[bot]
+
+- *(ci)* Bump mozilla-actions/sccache-action from 0.0.10 to 0.0.11 ([#132](https://github.com/kaya-go/kaya/issues/132)) by @dependabot[bot]
+
+- *(ci)* Bump actions/setup-node from 6 to 7 ([#134](https://github.com/kaya-go/kaya/issues/134)) by @dependabot[bot]
+
+- *(ci)* Bump actions/setup-java from 5.6.0 to 6.0.0 ([#144](https://github.com/kaya-go/kaya/issues/144)) by @dependabot[bot]
+
+- Remove dead code and split oversized css ([#149](https://github.com/kaya-go/kaya/issues/149)) by @hadim
+
+- Add oxlint with the react hooks rules ([#168](https://github.com/kaya-go/kaya/issues/168)) by @hadim
+
+- *(ci)* Bump actions/setup-java from 6.0.0 to 6.0.1 ([#176](https://github.com/kaya-go/kaya/issues/176)) by @dependabot[bot]
+
+### 🙏 Contributors
+
+- @hadim
+- @dependabot[bot]
+- @xifeiwu *(first contribution)* 🎉
+- @github-actions[bot]
+
 ## [0.4.7] - 2026-06-09
 
 ### <!-- 0 -->🚀 Features
@@ -16,11 +97,15 @@ All notable changes to this project will be documented in this file.
 
 - *(web)* Request persistent storage to avoid model/settings eviction ([#119](https://github.com/kaya-go/kaya/issues/119)) by @hadim
 
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.4.7 ([f3b1c4d](https://github.com/kaya-go/kaya/commit/f3b1c4d547978f618ba8ea3ea004776c4564202f)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
+- @github-actions[bot]
 - @hadim
 - @JasonWues *(first contribution)* 🎉
-- @github-actions[bot]
 - @dependabot[bot]
 
 ## [0.4.6] - 2026-05-24
