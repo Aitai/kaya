@@ -10,9 +10,15 @@ When a macOS update can't install itself — Kaya running from the .dmg, or from
 
 - *(desktop)* Surface why a macos update failed, and check up front ([152dd52](https://github.com/kaya-go/kaya/commit/152dd523be98541c831202934d60ff4ea1808399)) by @hadim
 
+- *(build)* Stop shipping packages when an asset download fails ([7dd8653](https://github.com/kaya-go/kaya/commit/7dd8653023fbbc4b83c285f5de986e7a01b98e50)) by @hadim
+
+- *(ci)* Stop every job pulling the moku model from hugging face ([47892bf](https://github.com/kaya-go/kaya/commit/47892bf3316bb6a4d2ca822ae7f509bd44c73f9c)) by @hadim
+
 ### <!-- 7 -->⚙️ Miscellaneous Tasks
 
 - *(release)* Write the 0.4.9 summary ([7fc5854](https://github.com/kaya-go/kaya/commit/7fc5854fddc5e66a32ca1ce0b24f600d5a283cc5)) by @hadim
+
+- Release v0.4.9 ([5439c1b](https://github.com/kaya-go/kaya/commit/5439c1bc626d1bb57dfe7b842f589cdca5b5ff2d)) by @github-actions[bot]
 
 ### 🙏 Contributors
 
