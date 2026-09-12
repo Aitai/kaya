@@ -58,6 +58,19 @@ about what is inside.
   or a saved error page looks like success to the bundler.
 - `main().catch` sets `process.exitCode = 1`.
 
+Turning the warning into an error immediately failed the next release — with
+four attempts of 429 in the web job — which said the retry was not the whole
+answer. Two changes took the pressure off instead of papering over it:
+
+- **The model is a desktop asset.** The desktop app bundles it so board
+  recognition works offline; the web app fetches it from Hugging Face at
+  runtime ([`moku-detector.ts`](../packages/board-recognition/src/moku-detector.ts)).
+  Web and Android jobs were downloading 77 MB to throw it away. `copy-assets`
+  now takes `--with-model`, passed only on the desktop paths.
+- **The download is cached in CI.** Four desktop jobs pulling 77 MB
+  unauthenticated on every run is what earned the 429 in the first place;
+  `actions/cache` on `apps/desktop/public/models` fetches it once.
+
 v0.4.9's tag and draft were deleted and the release re-cut from the fix.
 
 ## Learnings

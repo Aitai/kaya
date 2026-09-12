@@ -198,10 +198,19 @@ jobs:
       # Bun's rsbuild crashes with SIGILL in this container too, so mirror
       # the AppImage workflow: pre-build packages with Bun (works fine),
       # then use Node.js/npx for rsbuild.
+      # 77 MB from Hugging Face, pulled by every build job on every run. That
+      # unauthenticated burst is what got the v0.4.9 release rate-limited (429)
+      # mid-build; cached, it is fetched once and reused.
+      - name: Cache Moku detection model
+        uses: actions/cache@v6
+        with:
+          path: apps/desktop/public/models
+          key: moku-model-v3
+
       - name: Pre-build frontend
         run: |
           bun run generate-version-info
-          bun run copy-assets
+          bun run copy-assets --with-model
           bun run build:packages
           cd apps/desktop && npx rsbuild build
 

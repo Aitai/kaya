@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "bun run --cwd ../.. generate-version-info && bun run --cwd ../.. copy-assets && bun run --cwd ../.. build:packages && rsbuild build",
+    "build": "bun run --cwd ../.. generate-version-info && bun run --cwd ../.. copy-assets --with-model && bun run --cwd ../.. build:packages && rsbuild build",
     "preview": "rsbuild preview",
     "type-check": "tsc --build --force",
     "lint": "eslint src --ext ts,tsx",

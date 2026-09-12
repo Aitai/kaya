@@ -126,6 +126,15 @@ jobs:
         if: inputs.set-version != ''
         run: bun run set-version ${{ inputs.set-version }}
 
+      # 77 MB from Hugging Face, pulled by every build job on every run. That
+      # unauthenticated burst is what got the v0.4.9 release rate-limited (429)
+      # mid-build; cached, it is fetched once and reused.
+      - name: Cache Moku detection model
+        uses: actions/cache@v6
+        with:
+          path: apps/desktop/public/models
+          key: moku-model-v3
+
       - name: Build desktop app
         run: bun run tauri:build -- --bundles nsis
         env:

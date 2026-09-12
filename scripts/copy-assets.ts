@@ -90,8 +90,8 @@ function assetFailure(message: string): void {
 }
 
 /** Hugging Face rate-limits often enough that a single attempt is not a plan. */
-async function fetchWithRetry(url: string, attempts = 4): Promise<Response | null> {
-  let delayMs = 2000;
+async function fetchWithRetry(url: string, attempts = 6): Promise<Response | null> {
+  let delayMs = 3000;
 
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
@@ -104,7 +104,7 @@ async function fetchWithRetry(url: string, attempts = 4): Promise<Response | nul
 
     if (attempt < attempts) {
       await new Promise(resolve => setTimeout(resolve, delayMs));
-      delayMs *= 3;
+      delayMs *= 2.5;
     }
   }
 
@@ -198,8 +198,14 @@ async function main() {
   // 4. Copy manifest and icons to apps/web/public
   await copySpecificFiles(publicDir, webPublicDir, ['manifest.json', 'og-image.png', 'icon-*.png']);
 
-  // 5. Download Moku detection model for Desktop app (bundled for offline use)
-  await downloadMokuModel();
+  // 5. The desktop app bundles the Moku detection model so board recognition
+  // works offline. The web app fetches it from Hugging Face at runtime, so web
+  // builds neither need it nor should spend a 77 MB download on it.
+  if (process.argv.includes('--with-model')) {
+    await downloadMokuModel();
+  } else {
+    console.log('⏭️  Skipping Moku model (pass --with-model for desktop builds)');
+  }
 
   console.log('✅ Assets copied (sounds)');
 }
