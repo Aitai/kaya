@@ -1,3 +1,4 @@
 {
+  "0.4.9": "When a macOS update can't install itself — Kaya running from the .dmg, or from a Gatekeeper-translocated copy — the app now detects it before downloading anything and says what to do about it, instead of failing at the very end with a generic message. When an install does fail, the dialog carries the actual error and a button that opens the downloads page.",
   "0.4.8": "AI analysis now picks the fastest backend and precision for your machine on its own — CoreML on macOS, GPU on Windows — so the model variants become a download-size choice rather than a quality one. Alongside it, a round of reliability fixes across SGF round-trips, the game library, gamepad input and the Linux packages."
 }
