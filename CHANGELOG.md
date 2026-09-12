@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.9] - 2026-09-12
+
+When a macOS update can't install itself — Kaya running from the .dmg, or from a Gatekeeper-translocated copy — the app now detects it before downloading anything and says what to do about it, instead of failing at the very end with a generic message. When an install does fail, the dialog carries the actual error and a button that opens the downloads page.
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(desktop)* Surface why a macos update failed, and check up front ([152dd52](https://github.com/kaya-go/kaya/commit/152dd523be98541c831202934d60ff4ea1808399)) by @hadim
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- *(release)* Write the 0.4.9 summary ([7fc5854](https://github.com/kaya-go/kaya/commit/7fc5854fddc5e66a32ca1ce0b24f600d5a283cc5)) by @hadim
+
+### 🙏 Contributors
+
+- @hadim
+- @github-actions[bot]
+
 ## [0.4.8] - 2026-09-12
 
 AI analysis now picks the fastest backend and precision for your machine on its own — CoreML on macOS, GPU on Windows — so the model variants become a download-size choice rather than a quality one. Alongside it, a round of reliability fixes across SGF round-trips, the game library, gamepad input and the Linux packages.
@@ -76,12 +93,14 @@ AI analysis now picks the fastest backend and precision for your machine on its 
 
 - *(ci)* Bump actions/setup-java from 6.0.0 to 6.0.1 ([#176](https://github.com/kaya-go/kaya/issues/176)) by @dependabot[bot]
 
+- Release v0.4.8 ([17b7f89](https://github.com/kaya-go/kaya/commit/17b7f89c8521397b93015b871a8ce5e9cd7b8b91)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
+- @github-actions[bot]
 - @hadim
 - @dependabot[bot]
 - @xifeiwu *(first contribution)* 🎉
-- @github-actions[bot]
 
 ## [0.4.7] - 2026-06-09
 
