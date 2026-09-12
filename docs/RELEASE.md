@@ -16,9 +16,71 @@ Two web deployments + native installers per release:
 Both web deployments use `keep_files: true` so they don't overwrite each
 other on Pages.
 
-Desktop builds: `.deb` + `.AppImage` (Ubuntu), `.dmg` (macOS Universal),
-`.exe` (Windows NSIS). All signed for the auto-updater — see
+Desktop builds: `.AppImage` (Arch container), `.deb` + `.rpm` (Ubuntu 24.04
+container), `.dmg` + `.app.tar.gz` (macOS, aarch64), `.exe` (Windows NSIS).
+All signed for the auto-updater — see
 [`specs/2025-12-13-tauri-updater-setup.md`](../specs/2025-12-13-tauri-updater-setup.md).
+
+## Linux packaging
+
+The `.deb`/`.rpm` and the `.AppImage` cover different distros on purpose.
+
+| Bundle      | Built on       | Runs on                                           |
+| ----------- | -------------- | ------------------------------------------------- |
+| `.deb`      | `ubuntu:24.04` | glibc ≥ 2.39: Ubuntu 24.04+, Debian 13+, Mint 22+ |
+| `.rpm`      | `ubuntu:24.04` | glibc ≥ 2.39: Fedora 40+, openSUSE Leap 16+       |
+| `.AppImage` | `archlinux`    | anything — it bundles glibc and the loader        |
+
+The glibc floor is not a choice: `ort`'s prebuilt ONNX Runtime references
+C23 libc symbols (`__isoc23_strtoull` and friends) added in glibc 2.38, so
+the build container cannot go older than Ubuntu 24.04. Lowering it would
+mean building ONNX Runtime from source.
+
+What matters is that the floor is **declared** rather than discovered at
+runtime. `bundle.linux.{deb,rpm}.depends` in
+[`tauri.conf.json`](../apps/desktop/src-tauri/tauri.conf.json) carries a hard
+`libc6 (>= 2.39)` / `libc.so.6(GLIBC_2.39)(64bit)` dependency, so `apt` and
+`dnf` refuse the install on an older distro instead of installing an app
+that dies at startup with `version 'GLIBC_2.39' not found`. Users below the
+floor get the AppImage.
+
+### The AppImage is the one most people download
+
+It is also the one that has to work on distros nobody builds on, and it
+manages that by shipping **its own glibc** (2.44 at the time of writing), the
+dynamic loader, the NSS modules, gconv, the `dri`/`gbm` drivers and WebKit's
+helper processes. The host's glibc never enters into it. The runtime is
+`uruntime` + DwarFS, statically linked, so there is no `libfuse.so.2`
+dependency either — the usual reason an AppImage refuses to start elsewhere.
+
+So the AppImage is a real answer for users below the package floor, not a
+consolation prize. It is verified as such: see the gates below.
+
+### CI gates
+
+None of this reproduces on macOS, so four gates run on every nightly and
+block every release:
+
+| Gate                         | What it proves                                                                                                  |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `check-glibc-floor.sh`       | The declared floor still matches the binary's `.gnu.version_r`                                                  |
+| `check-appimage-closure.py`  | Every `DT_NEEDED` in the AppDir resolves inside the bundle                                                      |
+| `_verify-linux-packages.yml` | The `.deb`/`.rpm` install on Ubuntu 24.04, Debian 13, Fedora — and are **refused** on Debian 12 and AlmaLinux 9 |
+| `_verify-linux-appimage.yml` | The AppImage actually launches, webview included, on Ubuntu 22.04, Debian 12, AlmaLinux 9 and Fedora            |
+
+The "must refuse" rows matter as much as the rest: they test that the
+declaration does its job, which is the part that was missing before.
+
+If you raise the floor, change both `depends` entries and the download
+table in `release.yml` — the floor check enforces the first, not the second.
+
+### Gotcha: container jobs need git
+
+`.gitattributes` marks `.github`, `docs` and `scripts` as `export-ignore`.
+Without `git` installed, `actions/checkout` falls back to the GitHub REST
+API tarball, which honours that — so a container job gets a green checkout
+with those directories silently missing. Install `git` in any container job
+that needs them.
 
 ## Cutting a release
 
@@ -27,7 +89,9 @@ Desktop builds: `.deb` + `.AppImage` (Ubuntu), `.dmg` (macOS Universal),
 2. The workflow:
    - Verifies (format, type-check, tests). Fast-fails if anything
      doesn't pass.
-   - Builds in parallel for Ubuntu, macOS, Windows.
+   - Builds in parallel for Linux (AppImage and .deb/.rpm), macOS, Windows.
+   - Installs the .deb/.rpm on real distro images and fails the release if
+     they don't install and resolve there.
    - Creates and pushes the `v0.4.5` tag.
    - Generates the changelog from conventional commits since the last
      tag, updates `CHANGELOG.md`.

@@ -1,0 +1,102 @@
+name: Verify Linux AppImage
+
+# Runs the AppImage on distros we never build on.
+#
+# The AppImage is the bundle most Linux users download, and the only one that
+# claims to work everywhere: quick-sharun ships glibc, the loader, WebKit's
+# helper processes and every shared library inside it, so the host's own
+# libraries stop mattering. That claim was never tested — the build job produced
+# a file and CI called it a day.
+#
+# The matrix is deliberately weighted towards *old* distros, because those are
+# exactly the users the .deb/.rpm cannot serve and who are told to use this
+# instead. Ubuntu 22.04 (glibc 2.35), Debian 12 (2.36) and AlmaLinux 9 (2.34)
+# are all far below the build container's glibc; if the bundle is genuinely
+# self-contained they run anyway.
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: 'Artifact holding the .AppImage to verify'
+        type: string
+        required: true
+
+jobs:
+  smoke:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu 22.04 (glibc 2.35)
+            image: ubuntu:22.04
+            family: debian
+          - name: Debian 12 (glibc 2.36)
+            image: debian:12
+            family: debian
+          - name: AlmaLinux 9 (glibc 2.34)
+            image: almalinux:9
+            family: rhel
+          - name: Fedora latest
+            image: fedora:latest
+            family: rhel
+    steps:
+      # Xvfb and procps are the whole host-side requirement for the app — if the
+      # bundle needed anything else from the distro, it would not be
+      # self-contained. ca-certificates only quiets the bundle's CA-lookup hook,
+      # which warns on a bare container the way no real desktop would.
+      #
+      # git is for the checkout, not the app: without it, actions/checkout falls
+      # back to the REST API tarball, and this repo's .gitattributes marks
+      # `.github` and `scripts` as export-ignore — so the fallback silently
+      # produces a checkout with no scripts in it.
+      - name: Install a virtual display
+        shell: sh
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          set -eu
+          # Distro mirrors 404 on stale repodata for a while after a point release
+          # (AlmaLinux 9.8 did exactly that during this work). Retry rather than
+          # let somebody else's CDN decide whether our bundles get verified.
+          retry() {
+            n=0
+            until [ "$n" -ge 3 ]; do
+              "$@" && return 0
+              n=$((n + 1))
+              echo "retry $n/3: $*"
+              command -v dnf >/dev/null 2>&1 && dnf clean all >/dev/null 2>&1 || true
+              sleep 15
+            done
+            return 1
+          }
+          # xauth is what xvfb-run actually needs to start a server; it rides in on
+          # Recommends, which --no-install-recommends drops, so Debian 12 failed
+          # with "xauth command not found" while the Ubuntu images happened to
+          # have it. Name it explicitly rather than depend on that.
+          if [ "${{ matrix.family }}" = "debian" ]; then
+            retry apt-get update -qq
+            retry apt-get install -y --no-install-recommends \
+              xvfb xauth procps git ca-certificates
+          else
+            retry dnf install -y \
+              xorg-x11-server-Xvfb xorg-x11-xauth procps-ng git ca-certificates
+          fi
+
+      - uses: actions/checkout@v7
+
+      - name: Download AppImage
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: bundle
+
+      - name: Launch it
+        shell: bash
+        run: |
+          APPIMAGE=$(find bundle -name '*.AppImage' -type f | head -1)
+          .github/scripts/smoke-run-appimage.sh "$APPIMAGE"
