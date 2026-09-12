@@ -1,0 +1,3 @@
+{
+  "0.4.8": "AI analysis now picks the fastest backend and precision for your machine on its own — CoreML on macOS, GPU on Windows — so the model variants become a download-size choice rather than a quality one. Alongside it, a round of reliability fixes across SGF round-trips, the game library, gamepad input and the Linux packages."
+}

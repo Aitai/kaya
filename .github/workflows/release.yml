@@ -10,6 +10,10 @@ on:
         description: 'Version to release (e.g., 0.1.0) - without v prefix'
         required: true
         type: string
+      summary:
+        description: 'Release summary - one or two sentences opening the notes (optional, overrides release-summaries.json)'
+        required: false
+        type: string
 
 env:
   BUN_VERSION: '1.3.2'
@@ -264,6 +268,15 @@ jobs:
           KAYA_VERSION: ${{ github.event.inputs.version }}
         run: bun run set-version "$KAYA_VERSION"
 
+      # Summaries live in release-summaries.json, not in CHANGELOG.md, because
+      # the changelog is regenerated in full on every release. A summary
+      # prepared ahead of time in that file is used when this input is empty.
+      - name: Record release summary
+        env:
+          KAYA_VERSION: ${{ github.event.inputs.version }}
+          KAYA_SUMMARY: ${{ github.event.inputs.summary }}
+        run: bun run release-summary set "$KAYA_VERSION" "$KAYA_SUMMARY"
+
       - name: Generate changelog from commits
         id: changelog
         env:
@@ -275,6 +288,10 @@ jobs:
 
           # Generate release notes for this version only
           bun run git-cliff --tag "v${KAYA_VERSION}" --unreleased --strip header -o CHANGELOG-NEW.md
+
+          # Re-insert the per-version summaries the generator knows nothing about
+          bun run release-summary apply CHANGELOG.md "$KAYA_VERSION"
+          bun run release-summary apply CHANGELOG-NEW.md "$KAYA_VERSION"
 
           # Read the generated changelog for GitHub release
           CHANGELOG=$(cat CHANGELOG-NEW.md)

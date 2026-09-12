@@ -85,7 +85,8 @@ that needs them.
 ## Cutting a release
 
 1. **Actions → Release → Run workflow.** Enter version like `0.4.5`
-   (no `v` prefix).
+   (no `v` prefix), and optionally a one or two sentence **summary** —
+   see [Release summary](#release-summary) below.
 2. The workflow:
    - Verifies (format, type-check, tests). Fast-fails if anything
      doesn't pass.
@@ -94,12 +95,46 @@ that needs them.
      they don't install and resolve there.
    - Creates and pushes the `v0.4.5` tag.
    - Generates the changelog from conventional commits since the last
-     tag, updates `CHANGELOG.md`.
+     tag, injects the release summary, updates `CHANGELOG.md`.
    - Creates a **draft** GitHub release with all installers and the
      `latest.json` updater manifest attached.
 3. **Releases → find the draft → review → Publish.**
 
 That's it. Total time: ~20–30 min.
+
+## Release summary
+
+A generated list of commits says what changed, not what the release is
+about. The summary is the one or two sentences that open the notes — in
+`CHANGELOG.md`, in the GitHub release body, and in the updater prompt
+users see in the app (`latest.json` notes).
+
+Two ways to set it, whichever suits:
+
+- **At dispatch** — fill the optional `summary` field when you run the
+  Release workflow. This is the usual path.
+- **Ahead of time** — add the entry to
+  [`release-summaries.json`](../release-summaries.json) in a PR, keyed by
+  version. The dispatch field overrides it when both are set; leave the
+  field empty to use what's in the file.
+
+```json
+{
+  "0.4.8": "AI analysis now picks the fastest backend for your machine on its own."
+}
+```
+
+**Why a separate file and not just CHANGELOG.md.** The release workflow
+regenerates `CHANGELOG.md` in full from the commit history every time, so
+a sentence typed into that file would be erased by the next release.
+Summaries live in `release-summaries.json` and
+[`scripts/release-summary.ts`](../scripts/release-summary.ts) re-injects
+every one of them under its version heading after each generation. Past
+releases keep their summaries forever; releases without one look exactly
+as they did before.
+
+Keep it to one or two sentences, in the same voice as the rest of the
+notes — what a user gets, not which files moved.
 
 ## Conventional commits
 
@@ -132,8 +167,9 @@ The release workflow uses `git-cliff` (configured in
 # unreleased commits since the last tag
 bun run git-cliff --unreleased --strip header
 
-# what the next release would publish
+# what the next release would publish, summary included
 bun run git-cliff --tag v0.4.5 --unreleased --strip header -o CHANGELOG-NEW.md
+bun run release-summary apply CHANGELOG-NEW.md 0.4.5
 ```
 
 ## Pre-releases
