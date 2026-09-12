@@ -14,6 +14,18 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [features]
 default = []
 
+# Opt-in CoreML on macOS. Off by default: enabling it turns a CPU session into
+# a CoreML model compilation on first load, and that cost on Apple silicon is
+# unmeasured — the failure mode is a minutes-long freeze, not an error the
+# warm-up catches (specs/2026-09-12-ep-cargo-features.md). Measure first load
+# (cold and warm `ep_cache/coreml`) and throughput against CPU on an M-series
+# machine with `cargo run --features coreml`, then flip the default if it wins.
+#
+# macOS only: on Linux or Windows this adds `coreml` to the feature set that
+# `resolve_dist()` matches, no distribution there carries it, and the build
+# fails at link time (`cargo check` still passes — see the spec).
+coreml = ["ort/coreml"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -36,42 +48,56 @@ half = "2.7"
 # Audio playback — bypasses WebKitGTK/GStreamer entirely (which is broken in AppImage)
 # Uses ALSA/PulseAudio on Linux, CoreAudio on macOS, WASAPI on Windows
 # Not needed on Android (audio is handled via WebView)
+#
+# reqwest and the updater/window-state plugins are desktop-only too: Android
+# would drag in OpenSSL/ring, and HTTP there goes through the WebView instead.
 [target.'cfg(not(target_os = "android"))'.dependencies]
 rodio = { version = "0.22", default-features = false, features = ["playback", "lewton"] }
+reqwest = { version = "0.13", features = ["stream"] }
+tauri-plugin-http = "2"
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2.4.1"
 
-# Linux desktop: static linking (same as macOS/Windows) for zero-dependency
-# deployment. The prebuilt Linux binary is CPU-only, and ORT_DYLIB_PATH is
-# ignored unless ort is built with `load-dynamic`, so the GPU path on Linux is
-# the PyTorch sidecar (see specs/2026-02-28-pytorch-sidecar-rocm.md).
+# ONNX Runtime. An EP feature is what makes that provider's register() do
+# anything — without it ort returns RegisterError::MissingFeature and the
+# session silently runs on CPU (#145, specs/2026-09-12-ep-cargo-features.md).
+#
+# Since rc.13 those same features ALSO select which prebuilt binary
+# `download-binaries` fetches: `resolve_dist()` matches the requested set
+# against a table of published distributions, and a set nothing satisfies
+# fails at LINK time (not at `cargo check` time, which is all CI runs). So the
+# features are declared per target rather than once for all desktops, and each
+# set is one a published distribution actually carries.
+# See specs/2026-09-12-ort-rc13-migration.md.
+
+# Linux: the plain CPU distribution. No Linux build ships MIGraphX, the CUDA one
+# is a multi-GB download that expects a CUDA runtime on the user's machine, and
+# ORT_DYLIB_PATH is ignored unless ort is built with `load-dynamic`. The GPU
+# path on Linux is the PyTorch sidecar (specs/2026-02-28-pytorch-sidecar-rocm.md).
 [target.'cfg(target_os = "linux")'.dependencies]
-ort = { version = "2.0.0-rc.12", features = ["download-binaries", "half"] }
-reqwest = { version = "0.13", features = ["stream"] }
-tauri-plugin-http = "2"
-tauri-plugin-process = "2"
-tauri-plugin-updater = "2"
-tauri-plugin-window-state = "2.4.1"
+ort = { version = "2.0.0-rc.13", features = ["download-binaries", "half"] }
 
-# Non-Linux desktop (macOS, Windows): static linking with download-binaries.
-# `directml` is what makes DirectML::register() do anything — without it ort
-# returns RegisterError::MissingFeature and every session silently runs on CPU
-# (#145). In rc.12 the EP features are pure API gating: `resolve_dist()` only
-# looks at training/webgpu/cuda/tensorrt/nvrtx/rocm, so this does NOT change
-# which prebuilt binary is downloaded, and the pyke Windows build already ships
-# DirectML.dll + links the DX12 libraries. `coreml` is deliberately left off,
-# see specs/2026-09-12-ep-cargo-features.md.
-[target.'cfg(all(not(target_os = "android"), not(target_os = "linux")))'.dependencies]
-ort = { version = "2.0.0-rc.12", features = ["download-binaries", "half", "directml"] }
-reqwest = { version = "0.13", features = ["stream"] }
-tauri-plugin-http = "2"
-tauri-plugin-process = "2"
-tauri-plugin-updater = "2"
-tauri-plugin-window-state = "2.4.1"
+# macOS: `coreml` is deliberately NOT enabled by default — see the [features]
+# section below. Leaving it off does not change the download: with an empty
+# feature set `resolve_dist()` still resolves the `coreml` distribution, the
+# only one published for aarch64-apple-darwin.
+[target.'cfg(target_os = "macos")'.dependencies]
+ort = { version = "2.0.0-rc.13", features = ["download-binaries", "half"] }
 
-# Android: dynamic loading at runtime (we bundle libonnxruntime.so in the APK)
+# Windows: the x86_64-pc-windows-msvc distribution ships DirectML.dll and the
+# build script links the DX12 libraries, so `directml` only unlocks the
+# registration call.
+[target.'cfg(target_os = "windows")'.dependencies]
+ort = { version = "2.0.0-rc.13", features = ["download-binaries", "half", "directml"] }
+
+# Android: dynamic loading at runtime (we bundle libonnxruntime.so in the APK).
+# default-features = false disables download-binaries, which doesn't work for
+# Android — nothing is fetched, so `nnapi` here is pure API gating.
+# api-24 matches the ONNX Runtime 1.24.3 AAR pulled by
+# scripts/download-onnxruntime-android.sh.
 [target.'cfg(target_os = "android")'.dependencies]
-# default-features = false to disable download-binaries which doesn't work for Android
-# api-24 is required so ort-sys generates full API bindings (VitisAI EP etc.)
-ort = { version = "2.0.0-rc.12", default-features = false, features = ["load-dynamic", "ndarray", "half", "api-24"] }
+ort = { version = "2.0.0-rc.13", default-features = false, features = ["load-dynamic", "ndarray", "half", "api-24", "nnapi"] }
 # Note: reqwest is NOT included for Android to avoid OpenSSL/ring compilation issues
 # HTTP requests on Android should be done via the frontend/WebView
 

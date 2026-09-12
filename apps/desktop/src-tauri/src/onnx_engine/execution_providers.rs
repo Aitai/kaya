@@ -1,14 +1,14 @@
 //! Execution provider configuration and ONNX Runtime initialization
 
-use ort::ep::{CUDA, DirectML, ExecutionProviderDispatch};
-#[cfg(target_os = "macos")]
+use ort::ep::ExecutionProviderDispatch;
+#[cfg(all(target_os = "macos", feature = "coreml"))]
 use ort::ep::CoreML;
-#[cfg(target_os = "macos")]
+#[cfg(all(target_os = "macos", feature = "coreml"))]
 use ort::ep::coreml::{ComputeUnits, ModelFormat, SpecializationStrategy};
+#[cfg(target_os = "windows")]
+use ort::ep::DirectML;
 #[cfg(target_os = "android")]
 use ort::ep::NNAPI;
-#[cfg(target_os = "linux")]
-use ort::ep::MIGraphX;
 use ort::session::Session;
 use ort::session::builder::SessionBuilder;
 use serde::{Deserialize, Serialize};
@@ -17,17 +17,21 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Execution provider preference for ONNX Runtime
+///
+/// CUDA and MIGraphX are absent, and that is forced rather than chosen: under
+/// rc.13 their types live behind the `cuda` / `migraphx` cargo features, and
+/// enabling either is not an option — `cuda` swaps the download for the
+/// multi-GB CUDA distribution, and no published Linux distribution carries
+/// MIGraphX at all. Keeping them in the candidate chain just to log the
+/// attempt (as rc.12 did) is no longer expressible.
+/// See specs/2026-09-12-ort-rc13-migration.md.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum ExecutionProviderPreference {
     /// Automatically select the best available provider (GPU first, then CPU)
     #[default]
     Auto,
-    /// Force CUDA (NVIDIA GPU)
-    Cuda,
-    /// Force MIGraphX (AMD GPU via ROCm)
-    MiGraphX,
-    /// Force CoreML (Apple Silicon/Neural Engine)
+    /// Force CoreML (Apple Silicon/Neural Engine); requires the `coreml` feature
     CoreMl,
     /// Force DirectML (Windows GPU)
     DirectMl,
@@ -68,8 +72,6 @@ pub fn set_execution_provider_preference(pref: ExecutionProviderPreference) {
 pub fn preference_to_name(pref: ExecutionProviderPreference) -> String {
     match pref {
         ExecutionProviderPreference::Auto => "auto".to_string(),
-        ExecutionProviderPreference::Cuda => "cuda".to_string(),
-        ExecutionProviderPreference::MiGraphX => "migraphx".to_string(),
         ExecutionProviderPreference::CoreMl => "coreml".to_string(),
         ExecutionProviderPreference::DirectMl => "directml".to_string(),
         ExecutionProviderPreference::Nnapi => "nnapi".to_string(),
@@ -171,16 +173,18 @@ pub fn ensure_ort_initialized() -> Result<(), String> {
 /// - Model caching: avoids recompiling CoreML model on every session load
 /// - ComputeUnits::All: lets CoreML pick CPU / GPU / Neural Engine per op
 ///
-/// NOTE: this EP is only reachable when the `coreml` cargo feature is on —
-/// without it `CoreML::register()` returns `RegisterError::MissingFeature`
-/// and the session silently runs on CPU. The feature is currently OFF, which
-/// is why macOS reports `cpu`; the 2026-05 "CoreML rejects all 2214 nodes"
-/// finding was that missing registration, not op coverage. See
-/// `specs/2026-09-12-ep-cargo-features.md` before turning it on.
+/// NOTE: this whole path is compiled out unless the `coreml` cargo feature is
+/// on, and it is OFF by default — which is why macOS reports `cpu`. Under
+/// rc.13 `ort::ep::CoreML` itself lives behind `ort/coreml`, so the feature is
+/// no longer just a registration switch: without it the type does not exist.
+/// The 2026-05 "CoreML rejects all 2214 nodes" finding was the missing
+/// registration, not op coverage. Measure before flipping the default — see
+/// `specs/2026-09-12-ep-cargo-features.md` and the `coreml` feature in
+/// `Cargo.toml`.
 /// `static_input_shapes` is deliberately left at its default (false) — the
 /// previous code set it to `true`, which made things strictly worse for
 /// other models without unblocking KataGo.
-#[cfg(target_os = "macos")]
+#[cfg(all(target_os = "macos", feature = "coreml"))]
 fn build_coreml_provider(cache_dir: Option<&str>) -> ExecutionProviderDispatch {
     let mut ep = CoreML::default()
         .with_model_format(ModelFormat::MLProgram)
@@ -195,22 +199,6 @@ fn build_coreml_provider(cache_dir: Option<&str>) -> ExecutionProviderDispatch {
         }
     }
 
-    ep.build()
-}
-
-/// Build the MIGraphX execution provider (Linux/AMD only), reusing a compiled
-/// model from the cache directory when one is already there.
-#[cfg(target_os = "linux")]
-fn build_migraphx_provider(cache_dir: Option<&str>) -> ExecutionProviderDispatch {
-    let mut ep = MIGraphX::default().with_fp16(true);
-    if let Some(dir) = cache_dir {
-        let path = format!("{}/migraphx_compiled.mxr", dir);
-        if std::path::Path::new(&path).exists() {
-            ep = ep.with_load_model(&path);
-        } else {
-            ep = ep.with_save_model(&path);
-        }
-    }
     ep.build()
 }
 
@@ -256,55 +244,37 @@ fn candidate_providers(
             {
                 vec![("nnapi", NNAPI::default().build())]
             }
-            #[cfg(target_os = "macos")]
+            #[cfg(all(target_os = "macos", feature = "coreml"))]
             {
                 vec![("coreml", build_coreml_provider(_model_cache_dir))]
+            }
+            #[cfg(all(target_os = "macos", not(feature = "coreml")))]
+            {
+                vec![]
             }
             #[cfg(target_os = "windows")]
             {
                 // DirectML is the only GPU provider compiled into the ONNX
-                // Runtime build we ship on Windows; CUDA needs the (multi-GB)
-                // CUDA distribution, so it is tried but expected to fail.
-                vec![
-                    ("directml", DirectML::default().build()),
-                    ("cuda", CUDA::default().build()),
-                ]
+                // Runtime build we ship on Windows.
+                vec![("directml", DirectML::default().build())]
             }
-            #[cfg(target_os = "linux")]
+            // Linux (and anything else): the distribution we ship is the plain
+            // CPU build, and neither MIGraphX nor CUDA can be compiled in
+            // without changing which binary we download.
+            #[cfg(not(any(target_os = "android", target_os = "macos", target_os = "windows")))]
             {
-                vec![
-                    ("migraphx", build_migraphx_provider(_model_cache_dir)),
-                    ("cuda", CUDA::default().build()),
-                ]
-            }
-            #[cfg(not(any(
-                target_os = "android",
-                target_os = "macos",
-                target_os = "windows",
-                target_os = "linux"
-            )))]
-            {
-                vec![]
-            }
-        }
-        ExecutionProviderPreference::Cuda => {
-            vec![("cuda", CUDA::default().build())]
-        }
-        ExecutionProviderPreference::MiGraphX => {
-            #[cfg(target_os = "linux")]
-            {
-                vec![("migraphx", build_migraphx_provider(_model_cache_dir))]
-            }
-            #[cfg(not(target_os = "linux"))]
-            {
-                eprintln!("[OnnxEngine] MIGraphX is only available on Linux with an AMD GPU");
                 vec![]
             }
         }
         ExecutionProviderPreference::CoreMl => {
-            #[cfg(target_os = "macos")]
+            #[cfg(all(target_os = "macos", feature = "coreml"))]
             {
                 vec![("coreml", build_coreml_provider(_model_cache_dir))]
+            }
+            #[cfg(all(target_os = "macos", not(feature = "coreml")))]
+            {
+                eprintln!("[OnnxEngine] CoreML needs the `coreml` cargo feature; this build has it off");
+                vec![]
             }
             #[cfg(not(target_os = "macos"))]
             {
@@ -313,7 +283,15 @@ fn candidate_providers(
             }
         }
         ExecutionProviderPreference::DirectMl => {
-            vec![("directml", DirectML::default().build())]
+            #[cfg(target_os = "windows")]
+            {
+                vec![("directml", DirectML::default().build())]
+            }
+            #[cfg(not(target_os = "windows"))]
+            {
+                eprintln!("[OnnxEngine] DirectML is only available on Windows");
+                vec![]
+            }
         }
         ExecutionProviderPreference::Nnapi => {
             #[cfg(target_os = "android")]
@@ -367,8 +345,6 @@ fn new_session_builder() -> Result<SessionBuilder, String> {
 /// Get information about the current execution provider by name
 pub fn provider_info_from_name(name: &str) -> (bool, &'static str) {
     match name {
-        "cuda" => (true, "NVIDIA CUDA GPU acceleration"),
-        "migraphx" => (true, "AMD MIGraphX GPU acceleration (ROCm)"),
         "coreml" => (true, "Apple CoreML (Metal/Neural Engine)"),
         "directml" => (true, "Windows DirectML GPU acceleration"),
         "nnapi" => (true, "Android NNAPI (Neural Networks API)"),
@@ -381,10 +357,16 @@ pub fn provider_info_from_name(name: &str) -> (bool, &'static str) {
 pub fn get_available_providers() -> Vec<ExecutionProviderInfo> {
     let mut providers = vec![];
     
-    // Auto is always available
+    // Auto is always available. is_gpu reflects whether this build actually has
+    // a GPU provider to fall back from — on Linux, and on macOS without the
+    // `coreml` feature, "auto" resolves to CPU.
     providers.push(ExecutionProviderInfo {
         name: "auto".to_string(),
-        is_gpu: true,
+        is_gpu: cfg!(any(
+            all(target_os = "macos", feature = "coreml"),
+            target_os = "windows",
+            target_os = "android"
+        )),
         is_fp16: false,
         description: "Auto-select best available (recommended)".to_string(),
     });
@@ -398,7 +380,7 @@ pub fn get_available_providers() -> Vec<ExecutionProviderInfo> {
         description: "Android NNAPI (Neural Networks API)".to_string(),
     });
     
-    #[cfg(target_os = "macos")]
+    #[cfg(all(target_os = "macos", feature = "coreml"))]
     providers.push(ExecutionProviderInfo {
         name: "coreml".to_string(),
         is_gpu: true,
@@ -407,36 +389,16 @@ pub fn get_available_providers() -> Vec<ExecutionProviderInfo> {
     });
     
     #[cfg(target_os = "windows")]
-    {
-        providers.push(ExecutionProviderInfo {
-            name: "directml".to_string(),
-            is_gpu: true,
-            is_fp16: false,
-            description: "DirectML (Windows GPU)".to_string(),
-        });
-        providers.push(ExecutionProviderInfo {
-            name: "cuda".to_string(),
-            is_gpu: true,
-            is_fp16: false,
-            description: "NVIDIA CUDA (not in this build — needs a CUDA ONNX Runtime)".to_string(),
-        });
-    }
+    providers.push(ExecutionProviderInfo {
+        name: "directml".to_string(),
+        is_gpu: true,
+        is_fp16: false,
+        description: "DirectML (Windows GPU)".to_string(),
+    });
     
-    #[cfg(target_os = "linux")]
-    {
-        providers.push(ExecutionProviderInfo {
-            name: "migraphx".to_string(),
-            is_gpu: true,
-            is_fp16: false,
-            description: "AMD MIGraphX (not in this build — use the PyTorch sidecar)".to_string(),
-        });
-        providers.push(ExecutionProviderInfo {
-            name: "cuda".to_string(),
-            is_gpu: true,
-            is_fp16: false,
-            description: "NVIDIA CUDA (not in this build — use the PyTorch sidecar)".to_string(),
-        });
-    }
+    // Linux has no GPU entry, and neither does macOS without the `coreml`
+    // feature: listing a provider this build cannot register is the lie #145
+    // was about.
     
     // CPU is always available
     providers.push(ExecutionProviderInfo {
