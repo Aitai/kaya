@@ -75,16 +75,59 @@ async function copySpecificFiles(srcDir: string, destDir: string, files: string[
   }
 }
 
+/**
+ * A build that quietly drops an asset is worse than one that stops: the
+ * v0.4.9 `.deb` shipped 74 MB lighter with board recognition broken, because
+ * a single 429 from Hugging Face was logged and ignored. In CI that has to
+ * fail the build; locally a warning keeps an offline checkout usable.
+ */
+function assetFailure(message: string): void {
+  if (process.env.CI) {
+    throw new Error(message);
+  }
+  console.warn(`⚠️  ${message}`);
+  console.warn('⚠️  Continuing (not CI) — board recognition will not work in this build');
+}
+
+/** Hugging Face rate-limits often enough that a single attempt is not a plan. */
+async function fetchWithRetry(url: string, attempts = 4): Promise<Response | null> {
+  let delayMs = 2000;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) return response;
+      console.warn(`⚠️  Attempt ${attempt}/${attempts}: ${response.status} ${response.statusText}`);
+    } catch (error) {
+      console.warn(`⚠️  Attempt ${attempt}/${attempts}: ${error}`);
+    }
+
+    if (attempt < attempts) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      delayMs *= 3;
+    }
+  }
+
+  return null;
+}
+
+// The model is ~77 MB; anything much smaller is a truncated download or an
+// error page saved to disk, both of which look like success to the bundler.
+const MIN_MOKU_MODEL_BYTES = 50 * 1024 * 1024;
+
 async function downloadMokuModel() {
   const modelUrl = 'https://huggingface.co/kaya-go/moku-v3/resolve/main/model.onnx';
   const destDir = path.join(rootDir, 'apps', 'desktop', 'public', 'models');
   const destFile = path.join(destDir, 'moku-v3.onnx');
 
-  // Skip if already downloaded
+  // Skip if already downloaded, unless what is there is too small to be it
   try {
-    await fs.access(destFile);
-    console.log('✅ Moku model already exists, skipping download');
-    return;
+    const { size } = await fs.stat(destFile);
+    if (size >= MIN_MOKU_MODEL_BYTES) {
+      console.log('✅ Moku model already exists, skipping download');
+      return;
+    }
+    console.warn(`⚠️  Moku model on disk is only ${size} bytes, downloading it again`);
   } catch {
     // File doesn't exist, proceed with download
   }
@@ -92,13 +135,18 @@ async function downloadMokuModel() {
   console.log('⬇️  Downloading Moku detection model (~80 MB)...');
   await fs.mkdir(destDir, { recursive: true });
 
-  const response = await fetch(modelUrl);
-  if (!response.ok) {
-    console.warn(`⚠️  Failed to download Moku model: ${response.status} ${response.statusText}`);
+  const response = await fetchWithRetry(modelUrl);
+  if (!response) {
+    assetFailure(`Failed to download the Moku detection model from ${modelUrl}`);
     return;
   }
 
   const buffer = await response.arrayBuffer();
+  if (buffer.byteLength < MIN_MOKU_MODEL_BYTES) {
+    assetFailure(`Moku model download returned only ${buffer.byteLength} bytes`);
+    return;
+  }
+
   await fs.writeFile(destFile, Buffer.from(buffer));
   const sizeMB = (buffer.byteLength / 1024 / 1024).toFixed(1);
   console.log(`✅ Moku model downloaded: ${sizeMB} MB`);
@@ -156,4 +204,8 @@ async function main() {
   console.log('✅ Assets copied (sounds)');
 }
 
-main().catch(console.error);
+main().catch(error => {
+  console.error(error);
+  // Without this the process still exits 0 and the build carries on.
+  process.exitCode = 1;
+});
