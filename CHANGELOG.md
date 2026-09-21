@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.10] - 2026-09-21
+
+A round of fixes to the everyday paths: the game library's right-click menu now closes whenever you'd expect it to, links in SGF comments and release notes open in your browser instead of navigating the app away, and saving to the library names the file that was actually written. The analysis chart's move axis is back to whole numbers.
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ui)* Dismiss library context menu reliably, batch tree moves ([#181](https://github.com/kaya-go/kaya/issues/181)) by @xifeiwu
+
+- *(ui)* Open comment markdown links in a new tab ([#182](https://github.com/kaya-go/kaya/issues/182)) by @xifeiwu
+
+- *(ci)* Unbreak android check and open all markdown links externally ([#183](https://github.com/kaya-go/kaya/issues/183)) by @hadim
+
+- *(ui)* Keep analysis chart move ticks as integers ([#185](https://github.com/kaya-go/kaya/issues/185)) by @xifeiwu
+
+- *(ui)* Use stored library name in save toast ([#184](https://github.com/kaya-go/kaya/issues/184)) by @xifeiwu
+
+### <!-- 3 -->📚 Documentation
+
+- *(ui)* State the real tick-count bound in generateMoveNumberTicks ([#186](https://github.com/kaya-go/kaya/issues/186)) by @hadim
+
+### 🙏 Contributors
+
+- @hadim
+- @xifeiwu
+- @github-actions[bot]
+
 ## [0.4.9] - 2026-09-12
 
 When a macOS update can't install itself — Kaya running from the .dmg, or from a Gatekeeper-translocated copy — the app now detects it before downloading anything and says what to do about it, instead of failing at the very end with a generic message. When an install does fail, the dialog carries the actual error and a button that opens the downloads page.
@@ -20,10 +46,12 @@ When a macOS update can't install itself — Kaya running from the .dmg, or from
 
 - Release v0.4.9 ([5439c1b](https://github.com/kaya-go/kaya/commit/5439c1bc626d1bb57dfe7b842f589cdca5b5ff2d)) by @github-actions[bot]
 
+- Release v0.4.9 ([1749484](https://github.com/kaya-go/kaya/commit/17494844e1016cf884871a0bff7a3a3aff83def4)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
-- @hadim
 - @github-actions[bot]
+- @hadim
 
 ## [0.4.8] - 2026-09-12
 
