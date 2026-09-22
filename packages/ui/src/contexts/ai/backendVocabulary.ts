@@ -11,16 +11,10 @@
  *    localStorage and fed back into `resolveBackendChain`, so it only holds
  *    values `loadAISettings` is willing to restore.
  *
- * `AIEngineContext` used to bridge them with a cast, writing the runtime label
- * straight into the setting. A WebGPU session with graph capture therefore
- * persisted `'webgpu-gc'`, which is not a member of the settings union; it then
- * matched no case in `initOneBackend`'s switch, fell through to the
- * `executionProviders = ['wasm']` defaults, and quietly loaded a WASM-only
- * session on every later initialization. See
- * specs/2026-09-22-webgpu-gc-backend-label.md.
- *
  * Everything that crosses the boundary goes through this module so the two
  * vocabularies are free to drift without one silently becoming the other.
+ * See specs/2026-09-22-webgpu-gc-backend-label.md for the bug that came from
+ * bridging them with a cast.
  */
 
 import type { BackendId } from '@kaya/ai-engine';
@@ -46,7 +40,6 @@ export const RUNTIME_WEBGPU_GC = 'webgpu-gc';
 export function runtimeBackendToSetting(runtime: string): SettingsBackend {
   switch (runtime) {
     case RUNTIME_WEBGPU_GC:
-      return 'webgpu';
     case 'webgpu':
       return 'webgpu';
     case 'webnn':

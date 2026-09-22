@@ -110,6 +110,6 @@ one, so that line is not evidence of which backend is running.
 
 ## Links
 
-- [Backend vocabulary boundary](../../packages/ui/src/contexts/ai/backendVocabulary.ts)
+- [Backend vocabulary boundary](../packages/ui/src/contexts/ai/backendVocabulary.ts)
 - [WebGPU op decomposition + graph capture](2026-02-28-webgpu-op-decomposition.md) — where `webgpu-gc` came from
 - [Precision follows the backend](2026-09-12-precision-follows-the-backend.md)

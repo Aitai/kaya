@@ -137,13 +137,9 @@ async function initOneBackend(backend: BackendId, cfg: EngineChainConfig): Promi
       executionProviders = ['wasm'];
       break;
     default:
-      // `BackendId` is a closed set and every member is handled above, so this
-      // only fires when a value from the other vocabulary leaked into the chain
-      // (the `'webgpu-gc'` runtime label once did — see backendVocabulary.ts).
-      // Fail loudly instead of keeping the `['wasm']` defaults that are
-      // initialized above: a silent WASM session is what hid that bug for
-      // months, and a failed step here is logged and falls through to the next
-      // backend, which is the honest version of the same outcome.
+      // Only reachable when a value from another vocabulary leaks into the
+      // chain (see backendVocabulary.ts). Fail loudly rather than keep the
+      // `['wasm']` defaults above: the chain logs this step and moves on.
       throw new Error(
         `Unsupported backend '${backend}' — not a member of the BackendId vocabulary`
       );

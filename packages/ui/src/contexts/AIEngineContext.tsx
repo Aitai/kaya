@@ -269,10 +269,8 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           // If we ended up on a different backend than the user explicitly
           // requested, persist the actual backend so we don't keep retrying.
-          // The runtime describes itself in a different vocabulary than settings
-          // accept, so translate before writing (`webgpu-gc` → `webgpu`); an
-          // unknown label becomes `auto`. Writing the raw label used to strand
-          // people on WASM — see backendVocabulary.ts.
+          // Runtime labels are not settings values (`webgpu-gc` → `webgpu`) —
+          // translate before comparing or writing; see backendVocabulary.ts.
           const activeSetting = runtimeBackendToSetting(result.activeBackend);
           if (
             aiSettings.backend &&
