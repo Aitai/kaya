@@ -56,3 +56,4 @@ link forward to the replacement. Don't delete history.
 | 2026-09-12 | [A release needs a sentence, not only a list of commits](2026-09-12-release-summary.md)                     | shipped    |
 | 2026-09-12 | [The macOS in-app update failure path](2026-09-12-macos-updater-failure-path.md)                            | shipped    |
 | 2026-09-12 | [A 429 shipped a .deb with a feature missing](2026-09-12-silent-asset-download-failure.md)                  | shipped    |
+| 2026-09-22 | [Stop writing the runtime backend label into the setting](2026-09-22-webgpu-gc-backend-label.md)            | shipped    |
