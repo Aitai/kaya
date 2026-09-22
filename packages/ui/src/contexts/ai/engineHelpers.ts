@@ -2,6 +2,7 @@ import type { AutoPick, BackendId } from '@kaya/ai-engine';
 import type { ModelQuantization } from '../../hooks/game/ai-analysis-types';
 import type { AISettings } from '../../types/game';
 import type { EngineStatus } from './engineStatus';
+import { settingToChainBackend } from './backendVocabulary';
 
 /** User-friendly backend display names for toasts. */
 export function backendDisplayName(backend: string): string {
@@ -36,19 +37,15 @@ export { QUANT_DISPLAY_NAMES as QUANT_LABELS } from '../../hooks/game/ai-analysi
  *  - explicit setting → start from that backend, fall through the rest
  */
 export function resolveBackendChain(settings: AISettings, autoPick: AutoPick): BackendId[] {
-  const explicit = settings.backend;
-  if (!explicit || explicit === 'auto') {
+  // The settings vocabulary is not the chain vocabulary — `settingToChainBackend`
+  // is the only place that translation happens, and it returns null (rather
+  // than passing the value through) for anything it cannot translate.
+  const preferred = settingToChainBackend(settings.backend);
+  if (!preferred) {
     return autoPick.backendChain;
   }
-  // Map old backend ids to BackendId; 'native' → 'native-gpu'
-  const mapped: BackendId =
-    explicit === 'native'
-      ? 'native-gpu'
-      : explicit === 'webnn' || explicit === 'webgl'
-        ? 'wasm'
-        : (explicit as BackendId);
-  // Start from explicit, then fall through the auto chain (de-duped).
-  return [mapped, ...autoPick.backendChain.filter(b => b !== mapped)];
+  // Start from the explicit backend, then fall through the auto chain (de-duped).
+  return [preferred, ...autoPick.backendChain.filter(b => b !== preferred)];
 }
 
 /** Quantization label inferred from a model name (best effort). */

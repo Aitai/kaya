@@ -27,7 +27,6 @@ import { useGameTree } from './GameTreeContext';
 import { useToast } from '../components/ui/Toast';
 import { parseModelId } from '../hooks/game/useAIAnalysis';
 import type { ModelQuantization } from '../hooks/game/ai-analysis-types';
-import type { AISettings } from '../types/game';
 import {
   getTauriCachedModelPath,
   loadModelBuffer,
@@ -36,6 +35,7 @@ import {
   resolveWasmPath,
 } from './ai/engineLoader';
 import { tryEngineChain, type ChainStepEvent } from './ai/engineChain';
+import { runtimeBackendToSetting } from './ai/backendVocabulary';
 import { idleStatus, isReady, type EngineStatus } from './ai/engineStatus';
 import {
   QUANT_LABELS,
@@ -269,10 +269,13 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           // If we ended up on a different backend than the user explicitly
           // requested, persist the actual backend so we don't keep retrying.
+          // Runtime labels are not settings values (`webgpu-gc` → `webgpu`) —
+          // translate before comparing or writing; see backendVocabulary.ts.
+          const activeSetting = runtimeBackendToSetting(result.activeBackend);
           if (
             aiSettings.backend &&
             aiSettings.backend !== 'auto' &&
-            aiSettings.backend !== result.activeBackend
+            aiSettings.backend !== activeSetting
           ) {
             const wantedGpu = aiSettings.backend === 'native';
             const fellToCpu = result.activeBackend === 'native-cpu';
@@ -289,7 +292,7 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             } else {
               showToast(`AI running on ${backendDisplayName(result.activeBackend)}`, 'info');
             }
-            setAISettings({ backend: result.activeBackend as AISettings['backend'] });
+            setAISettings({ backend: activeSetting });
           }
 
           // Precision sanity check.

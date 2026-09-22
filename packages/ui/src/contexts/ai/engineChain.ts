@@ -136,6 +136,13 @@ async function initOneBackend(backend: BackendId, cfg: EngineChainConfig): Promi
       }
       executionProviders = ['wasm'];
       break;
+    default:
+      // Only reachable when a value from another vocabulary leaks into the
+      // chain (see backendVocabulary.ts). Fail loudly rather than keep the
+      // `['wasm']` defaults above: the chain logs this step and moves on.
+      throw new Error(
+        `Unsupported backend '${backend}' — not a member of the BackendId vocabulary`
+      );
   }
 
   // ?gc=0 disables graph capture for debugging.

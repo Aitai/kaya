@@ -129,6 +129,17 @@ Fallback chain — if a fast path fails, downgrade transparently:
   runtime try/catch catches thrown ones.
 - Desktop: GPU → CPU.
 
+Backends speak two vocabularies and they are not interchangeable: the
+**runtime** label (`Engine.getRuntimeInfo().backend`, e.g. `webgpu-gc` for
+WebGPU with graph capture) is descriptive, while the **settings** value
+(`AISettings['backend']`, persisted to `localStorage`) is prescriptive. Every
+crossing goes through
+[`backendVocabulary.ts`](../packages/ui/src/contexts/ai/backendVocabulary.ts):
+graph capture collapses onto `webgpu`, an unknown runtime label becomes `auto`,
+and a chain entry outside `BackendId` makes `initOneBackend` throw instead of
+quietly building a WASM session — see
+[`specs/2026-09-22-webgpu-gc-backend-label.md`](../specs/2026-09-22-webgpu-gc-backend-label.md).
+
 The engine is disposed when the AI feature is turned off, freeing model
 memory.
 
