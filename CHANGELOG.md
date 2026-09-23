@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.12] - 2026-09-23
+
+The desktop updater now shows download progress and finishes with a Restart button in its own dialog, instead of spinning on “Installing update…” after an install that had in fact succeeded. Updating from 0.4.11 still runs the old updater one last time: if it stays on “Installing…”, quit and reopen Kaya — the update is already installed.
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(desktop)* Finish the macos update flow and show download progress ([#193](https://github.com/kaya-go/kaya/issues/193)) by @hadim
+
+### 🙏 Contributors
+
+- @hadim
+- @github-actions[bot]
+
 ## [0.4.11] - 2026-09-23
 
 Game Info now reads and writes every SGF game-info field — event, round, teams, time and overtime, source, the game comment and the rest — on phones and tablets as well as the desktop, and a game whose file sets no komi now gets the same 7.5 in the panel, the analysis and the score. Picking WebGPU by hand no longer slips back to the slower WASM backend after the first load.
@@ -22,12 +35,16 @@ Game Info now reads and writes every SGF game-info field — event, round, teams
 
 - *(ui)* Use one default komi when the sgf has no km ([#192](https://github.com/kaya-go/kaya/issues/192)) by @hadim
 
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.4.11 ([84a362b](https://github.com/kaya-go/kaya/commit/84a362b549c17307dad905952d16ab2e694557a8)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
+- @github-actions[bot]
 - @hadim
 - @xifeiwu
 - @Aitai
-- @github-actions[bot]
 
 ## [0.4.10] - 2026-09-21
 
