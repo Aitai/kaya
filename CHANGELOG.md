@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.11] - 2026-09-23
+
+Game Info now reads and writes every SGF game-info field — event, round, teams, time and overtime, source, the game comment and the rest — on phones and tablets as well as the desktop, and a game whose file sets no komi now gets the same 7.5 in the panel, the analysis and the score. Picking WebGPU by hand no longer slips back to the slower WASM backend after the first load.
+
+### <!-- 0 -->🚀 Features
+
+- *(ui)* Round-trip the full SGF game-info sidebar ([#189](https://github.com/kaya-go/kaya/issues/189)) by @xifeiwu
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- *(ci)* Drop the dead macos signature link from release notes ([#187](https://github.com/kaya-go/kaya/issues/187)) by @hadim
+
+- *(ui)* Keep the runtime backend label out of the saved setting ([#188](https://github.com/kaya-go/kaya/issues/188)) by @Aitai
+
+- *(ci)* Welcome only first-time contributors on pull requests ([#190](https://github.com/kaya-go/kaya/issues/190)) by @hadim
+
+- *(ui)* Let the mobile layout edit every game-info field ([#191](https://github.com/kaya-go/kaya/issues/191)) by @hadim
+
+- *(ui)* Use one default komi when the sgf has no km ([#192](https://github.com/kaya-go/kaya/issues/192)) by @hadim
+
+### 🙏 Contributors
+
+- @hadim
+- @xifeiwu
+- @Aitai
+- @github-actions[bot]
+
 ## [0.4.10] - 2026-09-21
 
 A round of fixes to the everyday paths: the game library's right-click menu now closes whenever you'd expect it to, links in SGF comments and release notes open in your browser instead of navigating the app away, and saving to the library names the file that was actually written. The analysis chart's move axis is back to whole numbers.
@@ -22,11 +49,15 @@ A round of fixes to the everyday paths: the game library's right-click menu now 
 
 - *(ui)* State the real tick-count bound in generateMoveNumberTicks ([#186](https://github.com/kaya-go/kaya/issues/186)) by @hadim
 
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Release v0.4.10 ([8d77fd9](https://github.com/kaya-go/kaya/commit/8d77fd948c601ff368192f925fb8343272f617ab)) by @github-actions[bot]
+
 ### 🙏 Contributors
 
+- @github-actions[bot]
 - @hadim
 - @xifeiwu
-- @github-actions[bot]
 
 ## [0.4.9] - 2026-09-12
 
