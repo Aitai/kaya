@@ -65,6 +65,14 @@ that bypass it. Densely packed toolbars need particular attention; the
 mobile action bar is icons-only with horizontal scroll on overflow rather
 than crowding the row.
 
+The one deliberate exception is the game tree graph. Its stones are 24 px
+because the layout worker spaces nodes on that grid (42 px along the main
+axis, 38 px across), so a 44 px hit area would overlap neighbouring nodes
+and make taps ambiguous. Graph nodes are therefore excluded from the
+global `[role='button']` sizing rule in `theme.css`, and
+`.react-flow__node-stone` is pinned to 24 px. Pinch-zoom is the
+small-target affordance there.
+
 ## Mobile-specific components
 
 - [`MobileTabBar`](../packages/ui/src/components/layout/MobileTabBar.tsx) —
