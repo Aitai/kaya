@@ -40,13 +40,12 @@ Detection:
 
 ## Touch interactions
 
-| Gesture               | Action                                                     |
-| --------------------- | ---------------------------------------------------------- |
-| Tap on intersection   | Place stone (current — direct tap)                         |
-| Swipe left on board   | Next move                                                  |
-| Swipe right on board  | Previous move                                              |
-| Multi-touch           | Suppressed during pinch — no accidental plays              |
-| System back (Android) | Closes the topmost dialog or menu; exits when none is open |
+| Gesture              | Action                                        |
+| -------------------- | --------------------------------------------- |
+| Tap on intersection  | Place stone (current — direct tap)            |
+| Swipe left on board  | Next move                                     |
+| Swipe right on board | Previous move                                 |
+| Multi-touch          | Suppressed during pinch — no accidental plays |
 
 Implemented in
 [`packages/shudan/src/Goban.tsx`](../packages/shudan/src/Goban.tsx)
@@ -57,6 +56,10 @@ The decided-but-not-yet-shipped UX is **tap-confirm**: tap shows a ghost
 stone and a small ✓; the stone commits on the second tap. Picked over
 direct tap (misclicks are unrecoverable in normal play) and hold-to-place
 (conflicts with future drag/pan).
+
+The system back gesture (Android, and browser back on the web) closes the
+topmost dialog or menu, and exits when none is open. Implemented in
+[`packages/ui/src/hooks/useCloseOnBack.ts`](../packages/ui/src/hooks/useCloseOnBack.ts).
 
 ## Touch targets
 
@@ -69,10 +72,13 @@ than crowding the row.
 The one deliberate exception is the game tree graph. Its stones are 24 px
 because the layout worker spaces nodes on that grid (42 px along the main
 axis, 38 px across), so a 44 px hit area would overlap neighbouring nodes
-and make taps ambiguous. Graph nodes are therefore excluded from the
-global `[role='button']` sizing rule in `theme.css`, and
-`.react-flow__node-stone` is pinned to 24 px. Pinch-zoom is the
-small-target affordance there.
+and make taps ambiguous. React Flow marks every node `role="button"`, so
+the global touch-target rule in `theme.css` matches them;
+`GameTreeGraph.css` pins `.react-flow__node-stone` to 24 px with a more
+specific selector that wins over it. Pinch-zoom is the small-target
+affordance there. Keep the global rule's selectors at their current
+specificity: component rules such as `.toggle-switch` size themselves by
+beating it.
 
 ## Mobile-specific components
 

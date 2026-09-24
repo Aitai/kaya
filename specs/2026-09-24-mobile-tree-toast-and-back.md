@@ -4,11 +4,11 @@ status: shipped
 scope: mobile
 ---
 
-# Mobile: tree stone alignment, toast placement, back-gesture dismissal
+# Mobile: tree edges, toasts, back gesture, AI status pill
 
 ## Context
 
-Three problems showed up when using Kaya on a phone (web over LAN and the
+Four problems showed up when using Kaya on a phone (web over LAN and the
 Android build), all reported from the same session:
 
 1. The game tree's connection lines looked broken — short white stubs hanging
@@ -36,9 +36,13 @@ still spaced nodes on 24 px: handles ended up ~15 px right of the stone centre
 and consecutive handles only ~2 px apart, so the bezier edges collapsed into
 stubs.
 
-Two changes: exclude `.react-flow__node` from both blanket rules (root cause),
-and pin `.react-flow__node-stone` to 24 px in `GameTreeGraph.css` so the
-invariant the layout depends on is stated rather than implied.
+The fix pins `.react-flow__node-stone` to 24 px in `GameTreeGraph.css`, with a
+selector (`.gametree-graph-container .react-flow__node-stone`) specific enough
+to beat the global rule, so the invariant the layout depends on is stated rather
+than implied. Excluding `.react-flow__node` from the global rule with `:not()`
+was tried first and dropped: `:not(.x)` counts as a class, so the global rule
+started beating single-class component rules and resized toggle switches
+(51×31 → 51×40 on tablets) and the tree and analysis toolbar buttons.
 
 Accepted trade-off: graph nodes stay 24 px, below the 44 px touch-target
 guideline. A 44 px hit area cannot fit — nodes are 42 px apart on the main axis
@@ -55,7 +59,8 @@ overlay is translucent, which reads as "blocked". The toast also used a 250 px
 The desktop 3-pane breakpoint (`> 1024 px`) is where there is room for a
 top-right toast next to a 600 px modal, so below it the container now anchors to
 the bottom, clear of the mobile tab bar, and toasts stretch to the available
-width.
+width and slide up instead of in from the right. The overrides sit after the
+base `.toast` rule: same specificity, so order decides.
 
 ### 3. Back gesture dismisses overlays
 
@@ -74,6 +79,11 @@ library, unsaved changes, scan options, camera, board recognition, library
 dialogs), the mobile menu, the analysis legend/help and the shortcut dialogs.
 
 This also works in the browser, where back used to leave the page.
+
+Considered: `app.onBackButtonPress` from `@tauri-apps/api`. Registering it
+replaces Tauri's default handling outright, so the app would also have to exit
+itself when nothing is open; it is Android-only, and it leaves browser back
+unfixed. The history sentinel covers both with one mechanism.
 
 ### 4. The status pill can no longer push the close button off screen
 
@@ -96,10 +106,11 @@ the row is constrained so it can never push the close button: the title block
 gets `min-width: 0` + `overflow: hidden`, the pill shrinks and is hard-cut
 (`text-overflow: clip`, no ellipsis dots), the close button is `flex-shrink: 0`
 and paints above (`z-index: 1`) in case the two meet, and the pill's padding is
-tighter. The pill then clears itself 3 s after the engine settles
-(`ready`/`error`); while `probing`, `loading-model` or `initializing` it stays,
-because hiding a running download or a failed initialisation mid-flight would be
-worse than leaving it up.
+tighter. Where the sheet spans the viewport (≤ 640 px) a `ready` label then
+clears itself after 3 s; wider, it stays, because it is the only place that
+shows which backend is running. `error` and work in progress (`probing`,
+`loading-model`, `initializing`) always stay, and the clipped text rides along
+as a `title`.
 
 Shorten the strings as well. Constraining the row only buys so much: the 41-char
 sentence needed 270 px and left 68 % of itself visible at 390 px (83 % at
@@ -107,7 +118,10 @@ sentence needed 270 px and left 68 % of itself visible at 390 px (83 % at
 (`AutoPickReason`) instead of English prose, and `AIStatusPill` renders it as
 `aiConfig.backendReason.<reason>` — so the label is translated rather than
 hardcoded, and no language inherits a sentence that only fits in English:
-`No GPU — WASM`, `GPU — WebGPU`, `Native GPU`, `PyTorch sidecar`, …
+`No GPU — WASM`, `GPU — WebGPU`, `Native GPU`, `PyTorch sidecar`, … The reason
+explains auto's _preferred_ backend, so the status carries it only when auto
+chose and that backend came up (`readyReason`); after a fallback or a manual
+choice the pill shows the backend name.
 
 The measured widths of all seven labels in all eight languages:
 
@@ -128,7 +142,9 @@ lacks a translation or a locale carries an unknown one.
 
 - A global `[role='button']` sizing rule is a landmine. Any component that marks
   a non-button as a button inherits it; here that silently desynchronised a
-  layout algorithm from the DOM it was drawing into.
+  layout algorithm from the DOM it was drawing into. Exempt the component with a
+  more specific selector on its side, not by raising the global rule's
+  specificity, which every component rule then has to beat.
 - The bug looked mobile-specific but was not: vertical is the _default_ tree
   layout, and phones start with empty `localStorage`. Desktop only looked fine
   because the layout had been switched to horizontal there. Reproducing at
@@ -185,8 +201,10 @@ lacks a translation or a locale carries an unknown one.
 
 ## Links
 
-- `packages/ui/src/styles/theme.css` (touch-target exception)
 - `packages/ui/src/components/gametree/GameTreeGraph.css` (pinned node size)
 - `packages/ui/src/components/ui/Toast.css` (bottom placement)
-- `packages/ui/src/hooks/useCloseOnBack.ts`
+- `packages/ui/src/hooks/useCloseOnBack.ts`, `e2e/back-gesture.e2e.ts`
+- `packages/ui/src/components/ai/AIStatusPill.tsx`, `KayaConfig.css` (header row)
+- `packages/ai-engine/src/auto-config.ts` (`AutoPickReason`),
+  `packages/ui/tests/backendReason.i18n.test.ts`
 - `docs/RESPONSIVE.md`
