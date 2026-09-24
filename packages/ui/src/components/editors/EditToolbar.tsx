@@ -27,6 +27,8 @@ import {
   LuUndo2,
   LuRedo2,
   LuScissors,
+  LuListX,
+  LuUnlink,
 } from 'react-icons/lu';
 import { useGameTreeBoard, useGameTreeEdit, useGameTreeActions } from '../../contexts/selectors';
 import './EditToolbar.css';
@@ -44,6 +46,8 @@ export const EditToolbar: React.FC = () => {
     copyBranch,
     pasteBranch,
     deleteBranch,
+    cutNode,
+    deleteContinuation,
     removeMarker,
     clearAllMarkersAndLabels,
     clearSetupStones,
@@ -189,10 +193,22 @@ export const EditToolbar: React.FC = () => {
         },
         { id: 'copy', icon: <LuCopy size={18} />, label: t('editToolbar.copy'), disabled: false },
         {
+          id: 'cut',
+          icon: <LuScissors size={18} />,
+          label: t('editToolbar.cutBranch'),
+          disabled: false,
+        },
+        {
           id: 'paste',
           icon: <LuClipboardPaste size={18} />,
           label: t('editToolbar.paste'),
           disabled: !copiedBranch,
+        },
+        {
+          id: 'delete-continuation',
+          icon: <LuUnlink size={18} />,
+          label: t('editToolbar.deleteContinuation'),
+          disabled: !currentNode?.children?.length,
         },
         {
           id: 'delete',
@@ -202,7 +218,7 @@ export const EditToolbar: React.FC = () => {
         },
         {
           id: 'delete-others',
-          icon: <LuScissors size={18} />,
+          icon: <LuListX size={18} />,
           label: t('editToolbar.deleteOtherBranches'),
           disabled: false,
         },
@@ -247,8 +263,14 @@ export const EditToolbar: React.FC = () => {
       case 'copy':
         copyBranch();
         break;
+      case 'cut':
+        cutNode();
+        break;
       case 'paste':
         pasteBranch();
+        break;
+      case 'delete-continuation':
+        deleteContinuation();
         break;
       case 'delete':
         deleteBranch();

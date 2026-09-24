@@ -383,6 +383,8 @@
     "copy": "복사",
     "pasteBranch": "붙여넣기",
     "paste": "붙여넣기",
+    "cutBranch": "변화 잘라내기",
+    "deleteContinuation": "이후 변화 삭제 (현재 위치 유지)",
     "deleteCurrentBranch": "현재 변화 삭제",
     "deleteOtherBranches": "다른 변화 삭제 (현재 수순만 유지)",
     "history": "기록",
@@ -463,7 +465,8 @@
     "switchToHorizontal": "가로 레이아웃으로 전환",
     "hideMinimap": "미니맵 숨기기",
     "showMinimap": "미니맵 보기",
-    "centerOnPosition": "현재 위치 중앙에"
+    "centerOnPosition": "현재 위치 중앙에",
+    "branchActions": "변화 작업"
   },
   "boardControls": {
     "captured": "잡힌 돌",

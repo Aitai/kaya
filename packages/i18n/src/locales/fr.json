@@ -383,6 +383,8 @@
     "copy": "Copier",
     "pasteBranch": "Coller",
     "paste": "Coller",
+    "cutBranch": "Couper la branche",
+    "deleteContinuation": "Supprimer la suite (conserver la position actuelle)",
     "deleteCurrentBranch": "Supprimer cette branche",
     "deleteOtherBranches": "Supprimer les autres branches",
     "history": "Historique",
@@ -463,7 +465,8 @@
     "switchToHorizontal": "Passer en disposition horizontale",
     "hideMinimap": "Masquer la minimap",
     "showMinimap": "Afficher la minimap",
-    "centerOnPosition": "Centrer sur la position actuelle"
+    "centerOnPosition": "Centrer sur la position actuelle",
+    "branchActions": "Actions sur les branches"
   },
   "boardControls": {
     "captured": "capturé(s)",

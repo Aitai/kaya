@@ -5,6 +5,11 @@
 import React from 'react';
 import { Handle, Position } from 'reactflow';
 import { useGameTreeCore } from '../../contexts/GameTreeContext';
+import {
+  GAMETREE_NODE_LONGPRESS_EVENT,
+  GAMETREE_NODE_LONGPRESS_MS,
+  type GameTreeNodeLongPressDetail,
+} from './gametree-graph-utils';
 
 function getHandleStyle(position: Position): React.CSSProperties {
   const base: React.CSSProperties = {
@@ -49,6 +54,71 @@ export const StoneNode = React.memo(({ data }: { data: any }) => {
   // Calculate isCurrent directly from context
   // This prevents rebuilding entire nodes array on every navigation
   const isCurrent = String(nodeId) === String(currentNodeId);
+
+  // Long-press (touch) opens the branch menu. Mouse users get right-click,
+  // which React Flow reports via onNodeContextMenu.
+  const longPressTimerRef = React.useRef<number | null>(null);
+  const longPressOriginRef = React.useRef<{ x: number; y: number } | null>(null);
+  // Set when the long press fires, consumed by the click that lands on lift.
+  const longPressFiredRef = React.useRef(false);
+
+  const cancelLongPress = React.useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    longPressOriginRef.current = null;
+  }, []);
+
+  React.useEffect(() => cancelLongPress, [cancelLongPress]);
+
+  const handlePointerDown = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      // Right-click is handled by React Flow; only touch/pen need this.
+      if (event.pointerType === 'mouse') return;
+
+      // A new gesture always starts clean, so a long press whose lift produced
+      // no click (Android shows a context menu instead) cannot swallow the next
+      // tap.
+      longPressFiredRef.current = false;
+
+      const { clientX, clientY } = event;
+      longPressOriginRef.current = { x: clientX, y: clientY };
+      longPressTimerRef.current = window.setTimeout(() => {
+        longPressTimerRef.current = null;
+        longPressFiredRef.current = true;
+        window.dispatchEvent(
+          new CustomEvent<GameTreeNodeLongPressDetail>(GAMETREE_NODE_LONGPRESS_EVENT, {
+            detail: { nodeId, clientX, clientY },
+          })
+        );
+      }, GAMETREE_NODE_LONGPRESS_MS);
+    },
+    [nodeId]
+  );
+
+  const handlePointerMove = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const origin = longPressOriginRef.current;
+      if (!origin) return;
+      // Moving means the user is panning the canvas, not long-pressing.
+      if (Math.hypot(event.clientX - origin.x, event.clientY - origin.y) > 8) {
+        cancelLongPress();
+      }
+    },
+    [cancelLongPress]
+  );
+
+  // A long press ends in a click when the finger lifts; letting it reach React
+  // Flow's onNodeClick would navigate and immediately close the menu we just
+  // opened. Stopping it here keeps the gesture scoped to this node and needs no
+  // timing heuristic (a hold of any length behaves the same).
+  const handleClick = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (!longPressFiredRef.current) return;
+    longPressFiredRef.current = false;
+    event.stopPropagation();
+    event.preventDefault();
+  }, []);
 
   const targetPosition = horizontal ? Position.Left : Position.Top;
   const sourcePosition = horizontal ? Position.Right : Position.Bottom;
@@ -97,6 +167,12 @@ export const StoneNode = React.memo(({ data }: { data: any }) => {
     <>
       <Handle type="target" position={targetPosition} style={targetHandleStyle} />
       <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={cancelLongPress}
+        onPointerCancel={cancelLongPress}
+        onPointerLeave={cancelLongPress}
+        onClick={handleClick}
         style={{
           width: 24,
           height: 24,

@@ -6,13 +6,32 @@
  * - Automatic layout with elkjs
  * - Built-in pan/zoom
  * - Custom node rendering (Go stones)
+ * - Right-click / long-press branch management menu
  */
 
-import React, { useImperativeHandle, forwardRef } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, forwardRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactFlow, { Background, Controls, MiniMap, ProOptions } from 'reactflow';
+import type { Node as FlowNode } from 'reactflow';
 import 'reactflow/dist/style.css';
+import {
+  LuArrowUpToLine,
+  LuCopy,
+  LuClipboardPaste,
+  LuScissors,
+  LuTrash2,
+  LuListX,
+  LuUnlink,
+} from 'react-icons/lu';
 import { StoneNode } from './StoneNode';
+import { GameTreeContextMenu, type GameTreeMenuItem } from './GameTreeContextMenu';
 import { useGameTreeLayout } from './useGameTreeLayout';
+import { useGameTree } from '../../contexts/GameTreeContext';
+import { useGameTreeEdit } from '../../contexts/selectors';
+import {
+  GAMETREE_NODE_LONGPRESS_EVENT,
+  type GameTreeNodeLongPressDetail,
+} from './gametree-graph-utils';
 import './GameTreeGraph.css';
 
 // Define nodeTypes outside component to prevent ReactFlow warning
@@ -28,8 +47,28 @@ export interface GameTreeGraphProps {
   showMinimap?: boolean;
 }
 
+interface MenuState {
+  nodeId: number | string;
+  x: number;
+  y: number;
+}
+
 export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
   ({ horizontal: controlledHorizontal, onLayoutChange, showMinimap = false }, ref) => {
+    const { t } = useTranslation();
+    const { gameTree, rootId, goToNode } = useGameTree();
+    const {
+      copiedBranch,
+      copyNode,
+      pasteNode,
+      cutNode,
+      makeMainVariation,
+      deleteNode,
+      deleteContinuation,
+      deleteOtherBranches,
+    } = useGameTreeEdit();
+    const [menu, setMenu] = useState<MenuState | null>(null);
+
     const {
       nodes,
       edges,
@@ -50,6 +89,110 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
       [centerOnCurrentNode]
     );
 
+    const openMenu = useCallback(
+      (nodeId: number | string, x: number, y: number) => {
+        // Branch actions operate on the current node, so select it first.
+        goToNode(nodeId);
+        setMenu({ nodeId, x, y });
+      },
+      [goToNode]
+    );
+
+    const closeMenu = useCallback(() => setMenu(null), []);
+
+    const handleNodeContextMenu = useCallback(
+      (event: React.MouseEvent, node: FlowNode) => {
+        event.preventDefault();
+        const nodeId = node.data?.nodeId;
+        if (nodeId === undefined) return;
+        openMenu(nodeId, event.clientX, event.clientY);
+      },
+      [openMenu]
+    );
+
+    // Touch devices never fire contextmenu (iOS Safari in particular), so the
+    // stone node dispatches a long-press event instead.
+    useEffect(() => {
+      const handleLongPress = (event: Event) => {
+        const detail = (event as CustomEvent<GameTreeNodeLongPressDetail>).detail;
+        if (!detail) return;
+        openMenu(detail.nodeId, detail.clientX, detail.clientY);
+      };
+
+      window.addEventListener(GAMETREE_NODE_LONGPRESS_EVENT, handleLongPress as EventListener);
+      return () =>
+        window.removeEventListener(GAMETREE_NODE_LONGPRESS_EVENT, handleLongPress as EventListener);
+    }, [openMenu]);
+
+    const handleNodeClick = useCallback(
+      (event: React.MouseEvent, node: FlowNode) => {
+        closeMenu();
+        onNodeClick(event, node);
+      },
+      [closeMenu, onNodeClick]
+    );
+
+    const menuItems: GameTreeMenuItem[] = [];
+    if (menu) {
+      const node = gameTree?.get(menu.nodeId) ?? null;
+      const isRoot = rootId !== null && String(menu.nodeId) === String(rootId);
+      const hasContinuation = (node?.children.length ?? 0) > 0;
+
+      menuItems.push(
+        {
+          id: 'make-main',
+          label: t('editToolbar.makeMainBranch'),
+          icon: <LuArrowUpToLine size={14} />,
+          disabled: isRoot,
+          onSelect: makeMainVariation,
+        },
+        {
+          id: 'copy',
+          label: t('editToolbar.copy'),
+          icon: <LuCopy size={14} />,
+          onSelect: copyNode,
+        },
+        {
+          id: 'cut',
+          label: t('editToolbar.cutBranch'),
+          icon: <LuScissors size={14} />,
+          disabled: isRoot,
+          onSelect: cutNode,
+        },
+        {
+          id: 'paste',
+          label: t('editToolbar.paste'),
+          icon: <LuClipboardPaste size={14} />,
+          disabled: !copiedBranch,
+          onSelect: pasteNode,
+        },
+        {
+          id: 'delete-continuation',
+          label: t('editToolbar.deleteContinuation'),
+          icon: <LuUnlink size={14} />,
+          disabled: !hasContinuation,
+          separatorBefore: true,
+          onSelect: deleteContinuation,
+        },
+        {
+          id: 'delete',
+          label: t('editToolbar.deleteCurrentBranch'),
+          icon: <LuTrash2 size={14} />,
+          disabled: isRoot,
+          danger: true,
+          onSelect: deleteNode,
+        },
+        {
+          id: 'delete-others',
+          label: t('editToolbar.deleteOtherBranches'),
+          icon: <LuListX size={14} />,
+          disabled: isRoot,
+          danger: true,
+          onSelect: deleteOtherBranches,
+        }
+      );
+    }
+
     return (
       <div
         ref={containerRef}
@@ -59,7 +202,9 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodeClick={onNodeClick}
+          onNodeClick={handleNodeClick}
+          onNodeContextMenu={handleNodeContextMenu}
+          onPaneClick={closeMenu}
           onMove={handleMove}
           onMoveEnd={handleMoveEnd}
           nodeTypes={nodeTypes}
@@ -114,6 +259,15 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
             />
           )}
         </ReactFlow>
+        {menu && (
+          <GameTreeContextMenu
+            x={menu.x}
+            y={menu.y}
+            ariaLabel={t('gameTree.branchActions')}
+            items={menuItems}
+            onClose={closeMenu}
+          />
+        )}
       </div>
     );
   }

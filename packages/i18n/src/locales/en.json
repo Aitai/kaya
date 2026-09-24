@@ -383,6 +383,8 @@
     "copy": "Copy",
     "pasteBranch": "Paste",
     "paste": "Paste",
+    "cutBranch": "Cut Branch",
+    "deleteContinuation": "Delete Continuation (keep current position)",
     "deleteCurrentBranch": "Delete Current Branch",
     "deleteOtherBranches": "Delete Other Branches (keep only current path)",
     "history": "History",
@@ -463,7 +465,8 @@
     "switchToHorizontal": "Switch to horizontal layout",
     "hideMinimap": "Hide minimap",
     "showMinimap": "Show minimap",
-    "centerOnPosition": "Center on current position"
+    "centerOnPosition": "Center on current position",
+    "branchActions": "Branch actions"
   },
   "boardControls": {
     "captured": "captured",
