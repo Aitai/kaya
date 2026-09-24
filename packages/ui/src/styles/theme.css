@@ -138,15 +138,10 @@ body {
 
 /* Ensure touch targets are large enough */
 @media (max-width: 767px) {
-  /* Mobile-specific adjustments.
-     React Flow node wrappers are excluded: they carry role="button" for
-     accessibility but are fixed-size tiles whose geometry the tree layout
-     algorithm depends on (it spaces nodes on a 24px grid). Enlarging them
-     here desynced the stones from their connection handles. Graph nodes are
-     zoomed with pinch instead. */
-  button:not(.react-flow__node),
+  /* Mobile-specific adjustments */
+  button,
   .btn,
-  [role='button']:not(.react-flow__node) {
+  [role='button'] {
     min-height: var(--touch-target-min);
     min-width: var(--touch-target-min);
   }
@@ -168,9 +163,9 @@ body {
 
 /* Tablet adjustments */
 @media (min-width: 768px) and (max-width: 1024px) {
-  button:not(.react-flow__node),
+  button,
   .btn,
-  [role='button']:not(.react-flow__node) {
+  [role='button'] {
     min-height: 40px;
     min-width: 40px;
   }
