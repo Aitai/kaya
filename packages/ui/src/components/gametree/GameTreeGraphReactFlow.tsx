@@ -23,11 +23,15 @@ import {
   LuListX,
   LuUnlink,
 } from 'react-icons/lu';
+import type { GameTree } from '@kaya/gametree';
 import { StoneNode } from './StoneNode';
 import { GameTreeContextMenu, type GameTreeMenuItem } from './GameTreeContextMenu';
 import { useGameTreeLayout } from './useGameTreeLayout';
+import { useUndoToast } from './useUndoToast';
 import { useGameTree } from '../../contexts/GameTreeContext';
 import { useGameTreeEdit } from '../../contexts/selectors';
+import { hasOtherBranches, isOnMainLine } from '../../hooks/game/branchOperations';
+import type { SGFProperty } from '../../types/game';
 import {
   GAMETREE_NODE_LONGPRESS_EVENT,
   type GameTreeNodeLongPressDetail,
@@ -51,12 +55,14 @@ interface MenuState {
   nodeId: number | string;
   x: number;
   y: number;
+  /** The tree the menu was opened on. Any edit or undo replaces it. */
+  tree: GameTree<SGFProperty> | null;
 }
 
 export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
   ({ horizontal: controlledHorizontal, onLayoutChange, showMinimap = false }, ref) => {
     const { t } = useTranslation();
-    const { gameTree, rootId, goToNode } = useGameTree();
+    const { gameTree, currentNodeId, goToNode } = useGameTree();
     const {
       copiedBranch,
       copyNode,
@@ -68,6 +74,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
       deleteOtherBranches,
     } = useGameTreeEdit();
     const [menu, setMenu] = useState<MenuState | null>(null);
+    const withUndoToast = useUndoToast();
 
     const {
       nodes,
@@ -93,12 +100,21 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
       (nodeId: number | string, x: number, y: number) => {
         // Branch actions operate on the current node, so select it first.
         goToNode(nodeId);
-        setMenu({ nodeId, x, y });
+        setMenu({ nodeId, x, y, tree: gameTree });
       },
-      [goToNode]
+      [goToNode, gameTree]
     );
 
     const closeMenu = useCallback(() => setMenu(null), []);
+
+    // Every action runs on the *current* node. If anything moves the cursor or
+    // replaces the tree while the menu is open (wheel navigation, Cmd/Ctrl+Z),
+    // the menu would act on a node it was not opened on, so it closes instead.
+    const menuIsCurrent =
+      menu !== null && menu.tree === gameTree && String(menu.nodeId) === String(currentNodeId);
+    useEffect(() => {
+      if (menu && !menuIsCurrent) setMenu(null);
+    }, [menu, menuIsCurrent]);
 
     const handleNodeContextMenu = useCallback(
       (event: React.MouseEvent, node: FlowNode) => {
@@ -133,9 +149,9 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
     );
 
     const menuItems: GameTreeMenuItem[] = [];
-    if (menu) {
-      const node = gameTree?.get(menu.nodeId) ?? null;
-      const isRoot = rootId !== null && String(menu.nodeId) === String(rootId);
+    if (menu && menuIsCurrent && gameTree) {
+      const node = gameTree.get(menu.nodeId);
+      const isRoot = node?.parentId == null;
       const hasContinuation = (node?.children.length ?? 0) > 0;
 
       menuItems.push(
@@ -143,13 +159,14 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           id: 'make-main',
           label: t('editToolbar.makeMainBranch'),
           icon: <LuArrowUpToLine size={14} />,
-          disabled: isRoot,
+          disabled: isOnMainLine(gameTree, menu.nodeId),
           onSelect: makeMainVariation,
         },
         {
           id: 'copy',
           label: t('editToolbar.copy'),
           icon: <LuCopy size={14} />,
+          disabled: isRoot,
           onSelect: copyNode,
         },
         {
@@ -157,7 +174,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           label: t('editToolbar.cutBranch'),
           icon: <LuScissors size={14} />,
           disabled: isRoot,
-          onSelect: cutNode,
+          onSelect: withUndoToast(cutNode, t('gameTree.branchCut')),
         },
         {
           id: 'paste',
@@ -172,7 +189,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           icon: <LuUnlink size={14} />,
           disabled: !hasContinuation,
           separatorBefore: true,
-          onSelect: deleteContinuation,
+          onSelect: withUndoToast(deleteContinuation, t('gameTree.continuationDeleted')),
         },
         {
           id: 'delete',
@@ -180,15 +197,15 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           icon: <LuTrash2 size={14} />,
           disabled: isRoot,
           danger: true,
-          onSelect: deleteNode,
+          onSelect: withUndoToast(deleteNode, t('gameTree.branchDeleted')),
         },
         {
           id: 'delete-others',
           label: t('editToolbar.deleteOtherBranches'),
           icon: <LuListX size={14} />,
-          disabled: isRoot,
+          disabled: !hasOtherBranches(gameTree, menu.nodeId),
           danger: true,
-          onSelect: deleteOtherBranches,
+          onSelect: withUndoToast(deleteOtherBranches, t('gameTree.otherBranchesDeleted')),
         }
       );
     }
@@ -205,6 +222,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
           onNodeClick={handleNodeClick}
           onNodeContextMenu={handleNodeContextMenu}
           onPaneClick={closeMenu}
+          onMoveStart={closeMenu}
           onMove={handleMove}
           onMoveEnd={handleMoveEnd}
           nodeTypes={nodeTypes}
@@ -259,7 +277,7 @@ export const GameTreeGraph = forwardRef<GameTreeGraphRef, GameTreeGraphProps>(
             />
           )}
         </ReactFlow>
-        {menu && (
+        {menu && menuIsCurrent && (
           <GameTreeContextMenu
             x={menu.x}
             y={menu.y}

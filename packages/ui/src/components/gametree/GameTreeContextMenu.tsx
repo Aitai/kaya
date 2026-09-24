@@ -86,9 +86,16 @@ export const GameTreeContextMenu: React.FC<GameTreeContextMenuProps> = ({
     [getEnabledItems]
   );
 
-  // Move focus into the menu on open, as users of context menus expect.
+  // Move focus into the menu on open, as users of context menus expect, and
+  // hand it back to where it was when the menu closes. The element may be gone
+  // by then (a deleted node), in which case focus stays where the browser put it.
   useEffect(() => {
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     focusItem(0);
+    return () => {
+      if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true });
+    };
   }, [focusItem]);
 
   const handleKeyDown = useCallback(
@@ -101,10 +108,13 @@ export const GameTreeContextMenu: React.FC<GameTreeContextMenuProps> = ({
         return;
       }
 
-      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+      if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+        return;
+      }
 
       // Home/End/arrows are also global board-navigation shortcuts; the menu is
-      // focused, so it must claim them.
+      // focused, so it must claim them. Left/Right do nothing in a vertical
+      // menu, but claiming them keeps them from moving the board behind it.
       event.preventDefault();
       event.stopPropagation();
 
@@ -173,7 +183,9 @@ export const GameTreeContextMenu: React.FC<GameTreeContextMenuProps> = ({
     >
       {items.map(item => (
         <React.Fragment key={item.id}>
-          {item.separatorBefore && <div className="gametree-context-menu-separator" />}
+          {item.separatorBefore && (
+            <div className="gametree-context-menu-separator" role="separator" />
+          )}
           <button
             type="button"
             role="menuitem"

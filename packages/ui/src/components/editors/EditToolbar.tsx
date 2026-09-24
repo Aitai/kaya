@@ -82,6 +82,10 @@ export const EditToolbar: React.FC = () => {
     return moveNumber % 2 === 0 ? 1 : -1;
   }, [currentNode, gameInfo.handicap, moveNumber]);
 
+  // The root holds the game-info properties (SZ, KM, …), which do not belong
+  // on a pasted child node, and it cannot be deleted, so it cannot be cut.
+  const isRoot = currentNode?.parentId == null;
+
   const toolGroups = [
     {
       label: t('editToolbar.stones'),
@@ -191,12 +195,12 @@ export const EditToolbar: React.FC = () => {
           label: t('editToolbar.makeMainBranch'),
           disabled: false,
         },
-        { id: 'copy', icon: <LuCopy size={18} />, label: t('editToolbar.copy'), disabled: false },
+        { id: 'copy', icon: <LuCopy size={18} />, label: t('editToolbar.copy'), disabled: isRoot },
         {
           id: 'cut',
           icon: <LuScissors size={18} />,
           label: t('editToolbar.cutBranch'),
-          disabled: false,
+          disabled: isRoot,
         },
         {
           id: 'paste',

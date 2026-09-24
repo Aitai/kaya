@@ -466,7 +466,11 @@
     "hideMinimap": "미니맵 숨기기",
     "showMinimap": "미니맵 보기",
     "centerOnPosition": "현재 위치 중앙에",
-    "branchActions": "변화 작업"
+    "branchActions": "변화 작업",
+    "branchDeleted": "변화가 삭제되었습니다",
+    "branchCut": "변화를 잘라냈습니다",
+    "continuationDeleted": "이후 변화가 삭제되었습니다",
+    "otherBranchesDeleted": "다른 변화가 삭제되었습니다"
   },
   "boardControls": {
     "captured": "잡힌 돌",

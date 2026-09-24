@@ -466,7 +466,11 @@
     "hideMinimap": "Ocultar minimapa",
     "showMinimap": "Mostrar minimapa",
     "centerOnPosition": "Centrar en posición",
-    "branchActions": "Acciones de variantes"
+    "branchActions": "Acciones de variantes",
+    "branchDeleted": "Variante eliminada",
+    "branchCut": "Variante cortada",
+    "continuationDeleted": "Continuación eliminada",
+    "otherBranchesDeleted": "Otras variantes eliminadas"
   },
   "boardControls": {
     "captured": "Capturadas",

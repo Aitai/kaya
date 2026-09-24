@@ -4,7 +4,7 @@ status: shipped
 scope: ui
 ---
 
-# Game tree branch management: main line, context menu, no splicing
+# Game tree branches: main line, context menu, no splicing
 
 ## Context
 
@@ -72,16 +72,32 @@ no click at all, which would leave such a guard armed for the next tap.
 Branch actions were extracted from `useGameModification` into
 `useBranchModification` in the same change — board/annotation editing stays in
 the former, tree reshaping moves to the latter, keeping both inside the
-file-size budget in CLAUDE.md.
+file-size budget in CLAUDE.md. The tree logic itself lives in the pure
+`branchOperations` module, unit-tested on trees parsed from SGF. Each operation
+returns `null` when it does not apply, and the hook then changes nothing: Make
+Main on a node already on the main line adds no undo entry and does not mark
+the game dirty.
 
 The menu uses `role="menu"`/`role="menuitem"`, moves focus to the first item
-on open, and supports ArrowUp/ArrowDown/Home/End (claimed with
-`stopPropagation`, since those are also global board-navigation shortcuts) plus
-Escape/Tab to dismiss. It has no keyboard _opener_ — keyboard users reach the
-same actions through the Edit toolbar, which stays keyboard-accessible.
+on open and back to the previously focused element on close, and supports
+ArrowUp/ArrowDown/Home/End (claimed with `stopPropagation`, since those are also
+global board-navigation shortcuts; ArrowLeft/ArrowRight are claimed for the same
+reason) plus Escape/Tab to dismiss. It has no keyboard _opener_ — keyboard
+users reach the same actions through the Edit toolbar, which stays
+keyboard-accessible.
 
 Right-clicking selects the node first (`goToNode`) because every branch action
-operates on the current node.
+operates on the current node. The menu therefore closes as soon as the current
+node or the tree is no longer the one it was opened on (wheel navigation, an
+undo) and when the canvas starts to pan or zoom: otherwise an action would land
+on a node the menu was not opened on. A second finger cancels a pending long
+press, so a pinch-zoom that starts on a stone does not open the menu.
+
+Delete, Cut, Delete Continuation and Delete Other Branches from the menu show a
+toast with an Undo button. Touch users have no Cmd/Ctrl+Z, and the Edit
+toolbar's History group is not on screen in the mobile Tree tab. The button
+calls the regular history undo, and only while the tree is still the one the
+action produced, so it never reverts a later edit instead.
 
 ### Rebind `view.toggleHeader`
 
@@ -98,6 +114,10 @@ on every press. Users who customised either shortcut keep their override.
   by `Header` — so they stop working when the header is hidden. Left as-is here
   (out of scope), but it is the same class of bug and worth fixing by lifting
   the hook out of the header.
+- Node ids start at 0 on the root, so `!node.parentId` treats every child of
+  the root as the root. The branch operations inherited that check, which made
+  Make Main, Delete and Cut silently do nothing on a variation that splits at
+  move 1. Compare parent ids with `== null`.
 - Long-press needs its own event rather than `contextmenu` polyfilling: Android
   Chrome fires `contextmenu` on long-press, iOS Safari does not.
 
@@ -105,4 +125,7 @@ on every press. Users who customised either shortcut keep their override.
 
 - `packages/ui/src/components/gametree/GameTreeContextMenu.tsx`
 - `packages/ui/src/components/gametree/GameTreeGraphReactFlow.tsx`
+- `packages/ui/src/hooks/game/branchOperations.ts` and
+  `packages/ui/tests/branchOperations.test.ts`
 - `packages/ui/src/hooks/game/useBranchModification.ts` (`deleteContinuation`)
+- `packages/ui/src/components/gametree/useUndoToast.ts`

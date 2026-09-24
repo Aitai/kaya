@@ -61,6 +61,8 @@ export const StoneNode = React.memo(({ data }: { data: any }) => {
   const longPressOriginRef = React.useRef<{ x: number; y: number } | null>(null);
   // Set when the long press fires, consumed by the click that lands on lift.
   const longPressFiredRef = React.useRef(false);
+  // Removes the window listener that watches for a second finger.
+  const stopPinchWatchRef = React.useRef<(() => void) | null>(null);
 
   const cancelLongPress = React.useCallback(() => {
     if (longPressTimerRef.current !== null) {
@@ -68,6 +70,8 @@ export const StoneNode = React.memo(({ data }: { data: any }) => {
       longPressTimerRef.current = null;
     }
     longPressOriginRef.current = null;
+    stopPinchWatchRef.current?.();
+    stopPinchWatchRef.current = null;
   }, []);
 
   React.useEffect(() => cancelLongPress, [cancelLongPress]);
@@ -77,13 +81,28 @@ export const StoneNode = React.memo(({ data }: { data: any }) => {
       // Right-click is handled by React Flow; only touch/pen need this.
       if (event.pointerType === 'mouse') return;
 
+      // Only the first finger can start a long press. A second one is a pinch:
+      // a slow pinch-zoom that starts on a stone must not open the menu.
+      cancelLongPress();
+      if (!event.isPrimary) return;
+
       // A new gesture always starts clean, so a long press whose lift produced
       // no click (Android shows a context menu instead) cannot swallow the next
       // tap.
       longPressFiredRef.current = false;
 
-      const { clientX, clientY } = event;
+      const { clientX, clientY, pointerId } = event;
       longPressOriginRef.current = { x: clientX, y: clientY };
+
+      // The second finger of a pinch usually lands on the canvas, not on this
+      // stone, so watch the whole window while the press is pending.
+      const onOtherPointerDown = (other: PointerEvent) => {
+        if (other.pointerId !== pointerId) cancelLongPress();
+      };
+      window.addEventListener('pointerdown', onOtherPointerDown, true);
+      stopPinchWatchRef.current = () =>
+        window.removeEventListener('pointerdown', onOtherPointerDown, true);
+
       longPressTimerRef.current = window.setTimeout(() => {
         longPressTimerRef.current = null;
         longPressFiredRef.current = true;
@@ -94,7 +113,7 @@ export const StoneNode = React.memo(({ data }: { data: any }) => {
         );
       }, GAMETREE_NODE_LONGPRESS_MS);
     },
-    [nodeId]
+    [nodeId, cancelLongPress]
   );
 
   const handlePointerMove = React.useCallback(

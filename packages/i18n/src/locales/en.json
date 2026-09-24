@@ -466,7 +466,11 @@
     "hideMinimap": "Hide minimap",
     "showMinimap": "Show minimap",
     "centerOnPosition": "Center on current position",
-    "branchActions": "Branch actions"
+    "branchActions": "Branch actions",
+    "branchDeleted": "Branch deleted",
+    "branchCut": "Branch cut",
+    "continuationDeleted": "Continuation deleted",
+    "otherBranchesDeleted": "Other branches deleted"
   },
   "boardControls": {
     "captured": "captured",

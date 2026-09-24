@@ -466,7 +466,11 @@
     "hideMinimap": "ミニマップを非表示",
     "showMinimap": "ミニマップを表示",
     "centerOnPosition": "現在位置を中央に",
-    "branchActions": "変化の操作"
+    "branchActions": "変化の操作",
+    "branchDeleted": "変化を削除しました",
+    "branchCut": "変化を切り取りました",
+    "continuationDeleted": "以降の変化を削除しました",
+    "otherBranchesDeleted": "他の変化を削除しました"
   },
   "boardControls": {
     "captured": "取った石",
