@@ -147,8 +147,16 @@
       "loadingModel": "Caricamento modello… {{progress}}",
       "loadingModelMessage": "{{message}}",
       "initializing": "Avvio {{backend}} ({{step}}/{{total}})",
-      "ready": "{{reasoning}}",
       "error": "Errore del motore IA: {{message}}"
+    },
+    "backendReason": {
+      "pytorchSidecar": "Sidecar PyTorch",
+      "nativeGpu": "GPU nativa",
+      "nativeCpu": "CPU nativa",
+      "webgpu": "GPU — WebGPU",
+      "webgpuNoF16": "WebGPU (senza f16)",
+      "wasmNativeUnavailable": "WASM (senza nativo)",
+      "wasmNoGpu": "Nessuna GPU — WASM"
     },
     "modelUploadedSuccess": "Modello caricato con successo",
     "modelUploadFailed": "Caricamento modello fallito",

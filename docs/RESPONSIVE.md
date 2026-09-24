@@ -57,6 +57,10 @@ stone and a small ✓; the stone commits on the second tap. Picked over
 direct tap (misclicks are unrecoverable in normal play) and hold-to-place
 (conflicts with future drag/pan).
 
+The system back gesture (Android, and browser back on the web) closes the
+topmost dialog or menu, and exits when none is open. Implemented in
+[`packages/ui/src/hooks/useCloseOnBack.ts`](../packages/ui/src/hooks/useCloseOnBack.ts).
+
 ## Touch targets
 
 All interactive elements are at least 44 × 44 px on mobile. Enforced via
@@ -64,6 +68,17 @@ the `--touch-target-min` custom property — don't hardcode pixel sizes
 that bypass it. Densely packed toolbars need particular attention; the
 mobile action bar is icons-only with horizontal scroll on overflow rather
 than crowding the row.
+
+The one deliberate exception is the game tree graph. Its stones are 24 px
+because the layout worker spaces nodes on that grid (42 px along the main
+axis, 38 px across), so a 44 px hit area would overlap neighbouring nodes
+and make taps ambiguous. React Flow marks every node `role="button"`, so
+the global touch-target rule in `theme.css` matches them;
+`GameTreeGraph.css` pins `.react-flow__node-stone` to 24 px with a more
+specific selector that wins over it. Pinch-zoom is the small-target
+affordance there. Keep the global rule's selectors at their current
+specificity: component rules such as `.toggle-switch` size themselves by
+beating it.
 
 ## Mobile-specific components
 
@@ -97,3 +112,8 @@ Anything new must work in all three modes. Practically:
 3. Verify touch targets stay above `var(--touch-target-min)` on mobile.
 4. Test in dev with the browser's responsive tools — phone, phone
    landscape, tablet, desktop.
+5. Anything with `white-space: nowrap` that sits in a flex row (status pills,
+   chips, badges) needs `min-width: 0` on itself and on every ancestor that must
+   shrink, otherwise it overflows the row rather than truncating and can push a
+   close button off screen. Give the row's last interactive item
+   `flex-shrink: 0`.

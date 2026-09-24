@@ -147,8 +147,16 @@
       "loadingModel": "Chargement du modèle… {{progress}}",
       "loadingModelMessage": "{{message}}",
       "initializing": "Démarrage de {{backend}} ({{step}}/{{total}})",
-      "ready": "{{reasoning}}",
       "error": "Erreur du moteur d'IA : {{message}}"
+    },
+    "backendReason": {
+      "pytorchSidecar": "Sidecar PyTorch",
+      "nativeGpu": "GPU natif",
+      "nativeCpu": "CPU natif",
+      "webgpu": "GPU — WebGPU",
+      "webgpuNoF16": "WebGPU (sans f16)",
+      "wasmNativeUnavailable": "WASM (sans natif)",
+      "wasmNoGpu": "Pas de GPU — WASM"
     },
     "modelUploadedSuccess": "Modèle importé avec succès",
     "modelUploadFailed": "Échec de l'import du modèle",

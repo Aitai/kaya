@@ -147,8 +147,16 @@
       "loadingModel": "モデルを読み込み中… {{progress}}",
       "loadingModelMessage": "{{message}}",
       "initializing": "{{backend}}を起動中 ({{step}}/{{total}})",
-      "ready": "{{reasoning}}",
       "error": "AIエンジンエラー：{{message}}"
+    },
+    "backendReason": {
+      "pytorchSidecar": "PyTorch サイドカー",
+      "nativeGpu": "ネイティブ GPU",
+      "nativeCpu": "ネイティブ CPU",
+      "webgpu": "GPU — WebGPU",
+      "webgpuNoF16": "WebGPU（f16 なし）",
+      "wasmNativeUnavailable": "WASM のみ",
+      "wasmNoGpu": "GPU なし — WASM"
     },
     "modelUploadedSuccess": "モデルのアップロード成功",
     "modelUploadFailed": "モデルのアップロード失敗",
