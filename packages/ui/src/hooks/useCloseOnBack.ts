@@ -103,7 +103,11 @@ function startListening(): void {
  */
 export function useCloseOnBack(isOpen: boolean, onClose: CloseHandler): void {
   const closeRef = useRef(onClose);
-  closeRef.current = onClose;
+  // Refreshed after each commit rather than during render; it is only read
+  // from a later popstate event.
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!isOpen || typeof window === 'undefined') return;
