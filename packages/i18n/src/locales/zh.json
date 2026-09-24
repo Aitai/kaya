@@ -147,8 +147,16 @@
       "loadingModel": "正在加载模型… {{progress}}",
       "loadingModelMessage": "{{message}}",
       "initializing": "正在启动 {{backend}} ({{step}}/{{total}})",
-      "ready": "{{reasoning}}",
       "error": "AI 引擎错误：{{message}}"
+    },
+    "backendReason": {
+      "pytorchSidecar": "PyTorch 侧车",
+      "nativeGpu": "原生 GPU",
+      "nativeCpu": "原生 CPU",
+      "webgpu": "GPU — WebGPU",
+      "webgpuNoF16": "WebGPU（无 f16）",
+      "wasmNativeUnavailable": "WASM（无原生）",
+      "wasmNoGpu": "无 GPU — WASM"
     },
     "modelUploadedSuccess": "模型上传成功",
     "modelUploadFailed": "模型上传失败",

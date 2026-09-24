@@ -147,8 +147,16 @@
       "loadingModel": "모델 로딩 중… {{progress}}",
       "loadingModelMessage": "{{message}}",
       "initializing": "{{backend}} 시작 중 ({{step}}/{{total}})",
-      "ready": "{{reasoning}}",
       "error": "AI 엔진 오류: {{message}}"
+    },
+    "backendReason": {
+      "pytorchSidecar": "PyTorch 사이드카",
+      "nativeGpu": "네이티브 GPU",
+      "nativeCpu": "네이티브 CPU",
+      "webgpu": "GPU — WebGPU",
+      "webgpuNoF16": "WebGPU (f16 없음)",
+      "wasmNativeUnavailable": "WASM (네이티브 없음)",
+      "wasmNoGpu": "GPU 없음 — WASM"
     },
     "modelUploadedSuccess": "모델 업로드 성공",
     "modelUploadFailed": "모델 업로드 실패",

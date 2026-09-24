@@ -56,10 +56,11 @@ export function quantFromModelName(name: string): ModelQuantization {
 }
 
 /**
- * Module reloads lose auto-pick reasoning, so rebuild a minimal ready
- * status. The provider re-derives full reasoning on its next initialize()
+ * Module reloads lose the auto-pick reason, so rebuild a minimal ready
+ * status. The provider re-derives the full status on its next initialize()
+ * and the pill falls back to the backend name meanwhile.
  * call, which happens on first settings change.
  */
 export function buildReadyStatus(): EngineStatus {
-  return { phase: 'ready', backend: 'unknown', quantization: 'fp32', reasoning: '' };
+  return { phase: 'ready', backend: 'unknown', quantization: 'fp32' };
 }

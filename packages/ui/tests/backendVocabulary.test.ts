@@ -38,7 +38,7 @@ const webAutoPick: AutoPick = {
   modelId: 'kata1-b28-latest',
   quantization: 'fp16',
   backendChain: ['webgpu', 'wasm'],
-  reasoning: 'test fixture',
+  reason: 'webgpu',
 };
 
 /** Every backend id `initOneBackend` has a case for. */

@@ -147,8 +147,16 @@
       "loadingModel": "Modell wird geladen… {{progress}}",
       "loadingModelMessage": "{{message}}",
       "initializing": "{{backend}} wird gestartet ({{step}}/{{total}})",
-      "ready": "{{reasoning}}",
       "error": "KI-Engine-Fehler: {{message}}"
+    },
+    "backendReason": {
+      "pytorchSidecar": "PyTorch-Sidecar",
+      "nativeGpu": "Native GPU",
+      "nativeCpu": "Native CPU",
+      "webgpu": "GPU — WebGPU",
+      "webgpuNoF16": "WebGPU (ohne f16)",
+      "wasmNativeUnavailable": "WASM (kein Native)",
+      "wasmNoGpu": "Keine GPU — WASM"
     },
     "modelUploadedSuccess": "Modell erfolgreich hochgeladen",
     "modelUploadFailed": "Modell-Upload fehlgeschlagen",

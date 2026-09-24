@@ -106,3 +106,8 @@ Anything new must work in all three modes. Practically:
 3. Verify touch targets stay above `var(--touch-target-min)` on mobile.
 4. Test in dev with the browser's responsive tools — phone, phone
    landscape, tablet, desktop.
+5. Anything with `white-space: nowrap` that sits in a flex row (status pills,
+   chips, badges) needs `min-width: 0` on itself and on every ancestor that must
+   shrink, otherwise it overflows the row rather than truncating and can push a
+   close button off screen. Give the row's last interactive item
+   `flex-shrink: 0`.
