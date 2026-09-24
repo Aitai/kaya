@@ -4,13 +4,25 @@
  *
  * Split out of `useGameModification` to keep that hook inside the file-size
  * budget in CLAUDE.md. Board/annotation editing lives there; anything that
- * reshapes the tree lives here.
+ * reshapes the tree lives here. The tree logic itself is in the pure
+ * `branchOperations` module (unit-tested); this hook only commits its results.
+ * When one of those operations does not apply, nothing is committed: no undo
+ * entry, no dirty flag.
  */
 
 import { useCallback, useState } from 'react';
 import { GameTree, type GameTreeNode } from '@kaya/gametree';
 import { type SGFProperty } from '../../types/game';
 import { boardCache } from '../../utils/gameCache';
+import {
+  copyBranch,
+  cutBranch,
+  deleteBranch,
+  deleteContinuation as deleteContinuationOf,
+  deleteOtherBranches as deleteOtherBranchesOf,
+  makeMainLine,
+  pasteBranch,
+} from './branchOperations';
 
 interface UseBranchModificationProps {
   gameTree: GameTree<SGFProperty> | null;
@@ -31,69 +43,50 @@ export function useBranchModification({
 
   const deleteNode = useCallback(() => {
     if (!gameTree || currentNodeId === null) return;
-    const currentNode = gameTree.get(currentNodeId);
-    if (!currentNode || !currentNode.parentId) return;
+    const edit = deleteBranch(gameTree, currentNodeId);
+    if (!edit) return;
 
-    const parentId = currentNode.parentId;
-    const newTree = gameTree.mutate(draft => {
-      draft.removeNode(currentNodeId);
-    });
-
-    setGameTree(newTree);
-    setCurrentNodeId(parentId);
+    setGameTree(edit.tree);
+    setCurrentNodeId(edit.currentNodeId);
     setIsDirty(true);
   }, [gameTree, currentNodeId, setGameTree, setCurrentNodeId, setIsDirty]);
 
   const copyNode = useCallback(() => {
     if (!gameTree || currentNodeId === null) return;
-    const currentNode = gameTree.get(currentNodeId);
-    if (!currentNode) return;
-    setCopiedBranch(currentNode);
+    const branch = copyBranch(gameTree, currentNodeId);
+    if (branch) setCopiedBranch(branch);
   }, [gameTree, currentNodeId]);
 
   const pasteNode = useCallback(() => {
     if (!gameTree || currentNodeId === null || !copiedBranch) return;
-
-    const newTree = gameTree.mutate(draft => {
-      const copyNodeRecursive = (
-        sourceNode: GameTreeNode<SGFProperty>,
-        parentId: number | string
-      ): void => {
-        draft.appendNode(parentId, sourceNode.data);
-        const parent = draft.get(parentId);
-        if (!parent || parent.children.length === 0) return;
-        const newNode = parent.children[parent.children.length - 1];
-        for (const child of sourceNode.children) {
-          copyNodeRecursive(child, newNode.id);
-        }
-      };
-      copyNodeRecursive(copiedBranch, currentNodeId);
-    });
+    const newTree = pasteBranch(gameTree, currentNodeId, copiedBranch);
+    if (!newTree) return;
 
     setGameTree(newTree);
     setIsDirty(true);
   }, [gameTree, currentNodeId, copiedBranch, setGameTree, setIsDirty]);
 
   const cutNode = useCallback(() => {
-    copyNode();
-    deleteNode();
-  }, [copyNode, deleteNode]);
+    if (!gameTree || currentNodeId === null) return;
+    const edit = cutBranch(gameTree, currentNodeId);
+    if (!edit) return;
+
+    setCopiedBranch(edit.branch);
+    setGameTree(edit.tree);
+    setCurrentNodeId(edit.currentNodeId);
+    setIsDirty(true);
+  }, [gameTree, currentNodeId, setGameTree, setCurrentNodeId, setIsDirty]);
 
   const flattenVariations = useCallback(() => {
     console.warn('flattenVariations not implemented');
   }, []);
 
+  /** No-op when the current node is already on the main line. */
   const makeMainVariation = useCallback(() => {
     if (!gameTree || currentNodeId === null) return;
-    const newTree = gameTree.mutate(draft => {
-      let currentId = currentNodeId;
-      while (currentId) {
-        const node = draft.get(currentId);
-        if (!node || !node.parentId) break;
-        draft.shiftNode(currentId, 'main');
-        currentId = node.parentId;
-      }
-    });
+    const newTree = makeMainLine(gameTree, currentNodeId);
+    if (!newTree) return;
+
     setGameTree(newTree);
     setIsDirty(true);
   }, [gameTree, currentNodeId, setGameTree, setIsDirty]);
@@ -116,55 +109,8 @@ export function useBranchModification({
    */
   const deleteOtherBranches = useCallback(() => {
     if (!gameTree || currentNodeId === null) return;
-
-    // Build the path from root to current node
-    const pathToCurrentNode = new Set<number | string>();
-    let nodeId: number | string | null = currentNodeId;
-
-    while (nodeId !== null) {
-      pathToCurrentNode.add(nodeId);
-      const node = gameTree.get(nodeId);
-      nodeId = node?.parentId ?? null;
-    }
-
-    // Also include all descendants of the current node (keep them)
-    const collectDescendants = (id: number | string): void => {
-      const node = gameTree.get(id);
-      if (!node) return;
-      for (const child of node.children) {
-        pathToCurrentNode.add(child.id);
-        collectDescendants(child.id);
-      }
-    };
-    collectDescendants(currentNodeId);
-
-    // Collect all nodes that need to be removed (siblings of nodes in the path)
-    const nodesToRemove: (number | string)[] = [];
-
-    // Walk the path and collect siblings that are not in the path
-    let walkId: number | string | null = currentNodeId;
-    while (walkId !== null) {
-      const node = gameTree.get(walkId);
-      if (!node || node.parentId === null) break;
-
-      const parent = gameTree.get(node.parentId);
-      if (parent) {
-        for (const sibling of parent.children) {
-          if (!pathToCurrentNode.has(sibling.id)) {
-            nodesToRemove.push(sibling.id);
-          }
-        }
-      }
-      walkId = node.parentId;
-    }
-
-    if (nodesToRemove.length === 0) return;
-
-    const newTree = gameTree.mutate(draft => {
-      for (const id of nodesToRemove) {
-        draft.removeNode(id);
-      }
-    });
+    const newTree = deleteOtherBranchesOf(gameTree, currentNodeId);
+    if (!newTree) return;
 
     setGameTree(newTree);
     setIsDirty(true);
@@ -182,16 +128,8 @@ export function useBranchModification({
    */
   const deleteContinuation = useCallback(() => {
     if (!gameTree || currentNodeId === null) return;
-
-    const node = gameTree.get(currentNodeId);
-    if (!node || node.children.length === 0) return;
-
-    const childIds = node.children.map(child => child.id);
-    const newTree = gameTree.mutate(draft => {
-      for (const id of childIds) {
-        draft.removeNode(id);
-      }
-    });
+    const newTree = deleteContinuationOf(gameTree, currentNodeId);
+    if (!newTree) return;
 
     setGameTree(newTree);
     setIsDirty(true);
