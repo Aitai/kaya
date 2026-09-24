@@ -134,8 +134,22 @@ lacks a translation or a locale carries an unknown one.
   because the layout had been switched to horizontal there. Reproducing at
   390×844 was enough to see it.
 - `StrictMode` double-invokes effects, so a history-based hook sees
-  push → cleanup → push. The sentinel flag plus the `selfPops` counter turn that
-  cycle into a no-op; without them the overlay closed itself on open.
+  push → cleanup → push. The first attempt handled that with a sentinel flag and
+  a `selfPops` counter, which was **not enough**: the cleanup's `history.back()`
+  is asynchronous, so under a remount it landed _after_ the new `pushState` and
+  the module ended up believing a sentinel was on the stack when the current
+  entry was actually the app's own. The next disposal then called
+  `history.back()` past the app and the page went blank, which
+  `e2e/library.e2e.ts` caught (folder creation never appeared because the tab
+  was gone). Two things fixed it for real: the removal is deferred by a tick and
+  cancelled when another overlay mounts, so a remount never pushes a second
+  entry; and every removal re-checks that the current entry is the sentinel
+  itself before walking back. Measured after the fix: opening the settings sheet
+  adds exactly one history entry.
+- "It is probably fine under StrictMode" is not a claim to write in a commit
+  message. The counter looked right, the reasoning was plausible, and the bug
+  only showed up in a suite that has nothing to do with the feature — library
+  rename, because a blank page makes every subsequent assertion fail.
 - The `popstate` listener is deliberately never removed. Removing it once the
   stack empties races the `history.back()` issued by a UI dismissal, leaking a
   `selfPops` credit that would then swallow the next genuine back press.
