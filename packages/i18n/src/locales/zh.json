@@ -150,7 +150,7 @@
       "error": "AI 引擎错误：{{message}}"
     },
     "backendReason": {
-      "pytorchSidecar": "PyTorch 侧车",
+      "pytorchSidecar": "PyTorch 辅助进程",
       "nativeGpu": "原生 GPU",
       "nativeCpu": "原生 CPU",
       "webgpu": "GPU — WebGPU",

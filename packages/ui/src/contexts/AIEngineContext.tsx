@@ -42,6 +42,7 @@ import {
   backendDisplayName,
   buildReadyStatus,
   quantFromModelName,
+  readyReason,
   resolveBackendChain,
 } from './ai/engineHelpers';
 import { showModelErrorRecoveryToast } from './ai/modelErrorRecovery';
@@ -325,7 +326,7 @@ export const AIEngineProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             phase: 'ready',
             backend: result.activeBackend,
             quantization: quant,
-            reason: autoPick.reason,
+            reason: readyReason(aiSettings.backend, autoPick, result.activeBackend),
           };
 
           return result.engine;

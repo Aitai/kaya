@@ -151,8 +151,8 @@
     },
     "backendReason": {
       "pytorchSidecar": "Sidecar PyTorch",
-      "nativeGpu": "GPU native",
-      "nativeCpu": "CPU native",
+      "nativeGpu": "GPU natif",
+      "nativeCpu": "CPU natif",
       "webgpu": "GPU — WebGPU",
       "webgpuNoF16": "WebGPU (sans f16)",
       "wasmNativeUnavailable": "WASM (sans natif)",

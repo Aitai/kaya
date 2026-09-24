@@ -80,8 +80,9 @@
 
 /* The status message sits on the same line, hugging the close button: tighter
    horizontal padding buys space for text, and `clip` means it ends abruptly
-   rather than trailing an ellipsis. It also clears itself after a few seconds
-   (see AIStatusPill), so a message that does reach the ✕ is short-lived. */
+   rather than trailing an ellipsis. On a narrow sheet a ready label also
+   clears itself after a few seconds (see AIStatusPill), so a message that does
+   reach the ✕ is short-lived. */
 .kaya-config-status-pill {
   flex-shrink: 1;
   min-width: 0;

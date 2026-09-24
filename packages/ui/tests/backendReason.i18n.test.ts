@@ -9,7 +9,9 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { AUTO_PICK_REASONS } from '@kaya/ai-engine';
+// From source, not the package entry: that resolves to the built `dist`, so the
+// test would need `build:packages` first and could check a stale list.
+import { AUTO_PICK_REASONS } from '../../ai-engine/src/auto-config';
 
 import en from '../../i18n/src/locales/en.json';
 import zh from '../../i18n/src/locales/zh.json';
