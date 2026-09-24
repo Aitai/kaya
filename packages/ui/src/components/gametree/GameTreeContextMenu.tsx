@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useCloseOnBack } from '../../hooks/useCloseOnBack';
 import './GameTreeContextMenu.css';
 
 const VIEWPORT_MARGIN = 8;
@@ -41,6 +42,10 @@ export const GameTreeContextMenu: React.FC<GameTreeContextMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x, y });
+
+  // Mounted only while open: the Android back gesture closes the menu
+  // instead of leaving the app.
+  useCloseOnBack(true, onClose);
 
   // Clamp into the viewport once the menu has been measured.
   useLayoutEffect(() => {
