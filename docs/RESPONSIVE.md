@@ -40,12 +40,13 @@ Detection:
 
 ## Touch interactions
 
-| Gesture              | Action                                        |
-| -------------------- | --------------------------------------------- |
-| Tap on intersection  | Place stone (current — direct tap)            |
-| Swipe left on board  | Next move                                     |
-| Swipe right on board | Previous move                                 |
-| Multi-touch          | Suppressed during pinch — no accidental plays |
+| Gesture               | Action                                                     |
+| --------------------- | ---------------------------------------------------------- |
+| Tap on intersection   | Place stone (current — direct tap)                         |
+| Swipe left on board   | Next move                                                  |
+| Swipe right on board  | Previous move                                              |
+| Multi-touch           | Suppressed during pinch — no accidental plays              |
+| System back (Android) | Closes the topmost dialog or menu; exits when none is open |
 
 Implemented in
 [`packages/shudan/src/Goban.tsx`](../packages/shudan/src/Goban.tsx)
